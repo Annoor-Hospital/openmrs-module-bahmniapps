@@ -39,12 +39,15 @@ describe('auditLogService', function () {
     });
 
     var translate = jasmine.createSpyObj('$translate', ['instant']);
+    var mockConfigurationService = jasmine.createSpyObj('configurationService', ['getConfigurations']);
+    mockConfigurationService.getConfigurations.and.returnValue(specUtil.simplePromise({enableAuditLog: true}));
 
     beforeEach(function () {
         module('bahmni.common.logging');
         module(function ($provide) {
             $provide.value('$http', mockHttp);
             $provide.value('$translate', translate);
+            $provide.value('configurationService', mockConfigurationService);
         });
 
         inject(['auditLogService', function (auditLogServiceInjected) {
@@ -84,19 +87,24 @@ describe('auditLogService', function () {
             expect(log3.dateCreated).toBe(DateUtil.getDateTimeInSpecifiedFormat(
                 DateUtil.parseLongDateToServerFormat(1490267211000), 'MMMM Do, YYYY [at] h:mm:ss A'));
 
+            expect(mockHttp.get).toHaveBeenCalled();
+            expect(mockHttp.get.calls.mostRecent().args[0]).toBe("/openmrs/ws/rest/v1/auditlog");
+            expect(mockHttp.get.calls.mostRecent().args[1].params).toEqual(params);
             done();
         });
-        expect(mockHttp.get).toHaveBeenCalled();
-        expect(mockHttp.get.calls.mostRecent().args[0]).toBe("/openmrs/ws/rest/v1/auditlog");
-        expect(mockHttp.get.calls.mostRecent().args[1].params).toEqual(params);
     });
 
     it("should post logs", function (done) {
-        var params = {patientUuid: "patient Uuid", message: 'message', eventType: "eventType"};
-        auditLogService.auditLog(params).then(function (response) {
+        var params = {
+            patientUuid: "patient Uuid",
+            message: 'RUN_REPORT_MESSAGE~{"reportName":"Visit report"}',
+            eventType: 'RUN_REPORT',
+            module: 'MODULE_LABEL_REPORTS_KEY'
+        };
+        auditLogService.log('patient Uuid', 'RUN_REPORT', {reportName: 'Visit report'}, 'MODULE_LABEL_REPORTS_KEY').then(function (response) {
+            expect(mockHttp.post).toHaveBeenCalled();
+            expect(mockHttp.post.calls.mostRecent().args[1]).toEqual(params);
             done();
         });
-        expect(mockHttp.post).toHaveBeenCalled();
-        expect(mockHttp.post.calls.mostRecent().args[1]).toEqual(params);
     });
 });
