@@ -6,7 +6,11 @@
                 <li ng-repeat="bahmniOrder in ::bahmniOrders">
                 <span class="tree-list-item" >
                     <span class="link" ng-if="!hasPacsImage(bahmniOrder)">
-                        Pending: {{::bahmniOrder.label}}
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        <a ng-click="deleteOrder(bahmniOrder)" target="_blank" >
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </a>
+                        {{::bahmniOrder.label}}
                     </span>
                     <a class="link" ng-if="hasPacsImage(bahmniOrder)" target="_blank" href="{{::bahmniOrder.pacsImageUrl}}">
                         {{::bahmniOrder.label}}

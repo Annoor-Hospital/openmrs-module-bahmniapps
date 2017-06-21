@@ -72,10 +72,10 @@ angular.module('bahmni.common.displaycontrol.pacs')
                             orders.push(study);
                         }
 
-                        if($scope.print) {
-                            var trimOrders = []
+                        if ($scope.print) {
+                            var trimOrders = [];
                             for (var i = 0; i < orders.length; i++) {
-                                if($scope.hasPacsImage(orders[i])) {
+                                if ($scope.hasPacsImage(orders[i])) {
                                     trimOrders.push(orders[i]);
                                 }
                             }
@@ -96,6 +96,10 @@ angular.module('bahmni.common.displaycontrol.pacs')
 
                 $scope.hasPacsImage = function (bahmniOrder) {
                     return ("pacsImageUrl" in bahmniOrder);
+                };
+
+                $scope.deleteOrder = function (bahmniOrder) {
+                    console.log("Would like to delete this order. Functionallity exists but I can't figure out how to use it.");
                 };
 
                 $scope.getUrl = function (orderNumber, studyUID) {
