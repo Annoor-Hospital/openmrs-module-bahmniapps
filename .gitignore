@@ -12,6 +12,8 @@ output
 .sass-cache
 ui/.css/
 .tmp
+ui/app.tar.gz
+ui/howtoput.txt
 ui/node_modules
 ui/app/components
 ui/dist
