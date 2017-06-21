@@ -1,9 +1,10 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.pacs')
-    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'spinner', 'messagingService', '$window', '$q',
-        function (orderService, orderTypeService, pacsService, spinner, messagingService, $window, $q) {
+    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'spinner', '$rootScope', 'messagingService', '$window', '$q',
+        function (orderService, orderTypeService, pacsService, spinner, $rootScope, messagingService, $window, $q) {
             var controller = function ($scope) {
+                $scope.print = $rootScope.isBeingPrinted || false;
                 $scope.orderTypeUuid = orderTypeService.getOrderTypeUuid($scope.orderType);
 
                 var includeAllObs = true;
@@ -69,6 +70,16 @@ angular.module('bahmni.common.displaycontrol.pacs')
                             }
                             study.pacsImageUrl = $scope.getUrl(0, study["0020000D"].Value[0]);
                             orders.push(study);
+                        }
+
+                        if($scope.print) {
+                            var trimOrders = []
+                            for (var i = 0; i < orders.length; i++) {
+                                if($scope.hasPacsImage(orders[i])) {
+                                    trimOrders.push(orders[i]);
+                                }
+                            }
+                            orders = trimOrders;
                         }
 
                         $scope.bahmniOrders = orders;
