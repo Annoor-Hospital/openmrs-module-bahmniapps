@@ -17,8 +17,7 @@ angular.module('bahmni.home', ['ui.router', 'httpErrorInterceptor', 'bahmni.comm
             $compileProvider.debugInfoEnabled(true);
         // @endif
             $stateProvider
-            .state('dashboard',
-                {
+                .state('dashboard', {
                     url: '/dashboard',
                     templateUrl: 'views/dashboard.html',
                     controller: 'DashboardController',
@@ -38,8 +37,7 @@ angular.module('bahmni.home', ['ui.router', 'httpErrorInterceptor', 'bahmni.comm
                     url: '/changePassword',
                     templateUrl: 'views/changePassword.html',
                     controller: 'ChangePasswordController'
-                }).state('login',
-                {
+                }).state('login', {
                     url: '/login?showLoginMessage',
                     templateUrl: 'views/login.html',
                     controller: 'LoginController',
@@ -55,26 +53,27 @@ angular.module('bahmni.home', ['ui.router', 'httpErrorInterceptor', 'bahmni.comm
                         }
                     }
                 })
-            .state('errorLog', {
-                url: '/errorLog',
-                controller: 'ErrorLogController',
-                templateUrl: 'views/errorLog.html',
-                data: {
-                    backLinks: [
-                        {label: "Home", state: "dashboard", accessKey: "h", icon: "fa-home"}
-                    ]
-                },
-                resolve: {
-                    offlineDb: function (offlineDbInitialization) {
-                        return offlineDbInitialization();
+                .state('errorLog', {
+                    url: '/errorLog',
+                    controller: 'ErrorLogController',
+                    templateUrl: 'views/errorLog.html',
+                    data: {
+                        backLinks: [
+                            {label: "Home", state: "dashboard", accessKey: "h", icon: "fa-home"}
+                        ]
+                    },
+                    resolve: {
+                        offlineDb: function (offlineDbInitialization) {
+                            return offlineDbInitialization();
+                        }
                     }
-                }
-            });
+                });
             $httpProvider.defaults.headers.common['Disable-WWW-Authenticate'] = true;
             $bahmniTranslateProvider.init({app: 'home', shouldMerge: true});
-        }]).run(['$rootScope', '$templateCache', function ($rootScope, $templateCache) {
+        }
+    ]).run(['$rootScope', '$templateCache', function ($rootScope, $templateCache) {
         // Disable caching view template partials
-            $rootScope.$on('$viewContentLoaded', function () {
-                $templateCache.removeAll();
-            });
-        }]);
+        $rootScope.$on('$viewContentLoaded', function () {
+            $templateCache.removeAll();
+        });
+    }]);
