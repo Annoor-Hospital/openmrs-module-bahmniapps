@@ -3,22 +3,22 @@
     <div>
         <section ng-hide="noOrdersMessage">
             <ul class="navigation-link-container clearfix">
-                <li ng-repeat="bahmniOrder in ::bahmniOrders">
+                <li ng-repeat="bahmniOrder in bahmniOrders">
                 <span class="tree-list-item" >
                     <span class="link" ng-if="!hasPacsImage(bahmniOrder)">
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
-                        <a ng-click="deleteOrder(bahmniOrder)" target="_blank" >
+                        <a ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
-                        {{::bahmniOrder.label}}
+                        {{bahmniOrder.label}}
                     </span>
-                    <a class="link" ng-if="hasPacsImage(bahmniOrder)" target="_blank" href="{{::bahmniOrder.pacsImageUrl}}">
-                        {{::bahmniOrder.label}}
+                    <a class="link" ng-if="hasPacsImage(bahmniOrder)" target="_blank" href="{{bahmniOrder.pacsImageUrl}}">
+                        {{bahmniOrder.label}}
                     </a>
                     <span class="fr order-sub-heading-container">
                         <span class="order-sub-heading">
-                            <span class="provider-name fl">{{::bahmniOrder.provider}} </span>
-                            <span class="provider-date fr">{{::bahmniOrder.orderDate | bahmniDateTime }}</span>
+                            <span class="provider-name fl">{{bahmniOrder.provider}} </span>
+                            <span class="provider-date fr">{{bahmniOrder.orderDate | bahmniDateTime }}</span>
                         </span>
                     </span>
                 </span>

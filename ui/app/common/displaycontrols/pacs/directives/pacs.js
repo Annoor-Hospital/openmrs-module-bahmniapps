@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.pacs')
-    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'spinner', '$rootScope', 'messagingService', '$window', '$q',
-        function (orderService, orderTypeService, pacsService, spinner, $rootScope, messagingService, $window, $q) {
+    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'encounterService', 'ngDialog', 'spinner', '$rootScope', 'messagingService', '$translate', '$window', '$q',
+        function (orderService, orderTypeService, pacsService, encounterService, ngDialog, spinner, $rootScope, messagingService, $translate, $window, $q) {
             var controller = function ($scope) {
                 $scope.print = $rootScope.isBeingPrinted || false;
                 $scope.orderTypeUuid = orderTypeService.getOrderTypeUuid($scope.orderType);
@@ -51,25 +51,27 @@ angular.module('bahmni.common.displaycontrol.pacs')
                         }
 
                         // get studies with no order
-                        for (var i = 0; i < studies.length; i++) {
-                            var study = studies[i];
-                            study.label = "X-Ray";
-                            if ("Value" in study["00321060"]) study.label = study["00321060"].Value[0];
-                            study.provider = "Unknown";
-                            if ("Value" in study["00080020"] && "Value" in study["00080030"]) {
-                                var dpart = study["00080020"].Value[0]; // yyyyMMdd
-                                var tpart = study["00080030"].Value[0]; // hhmmss.SSS
-                                study.orderDate = new Date(dpart.substring(0, 4), // year
-                                                           dpart.substring(4, 6), // month
-                                                           dpart.substring(6, 8), // day
-                                                           tpart.substring(0, 2), // hours
-                                                           tpart.substring(2, 4), // minutes
-                                                           tpart.substring(4, 6), // seconds
-                                                           tpart.substring(7, 10) // seconds
-                                                           );
+                        if ($scope.visitUuid == undefined) {
+                            for (var i = 0; i < studies.length; i++) {
+                                var study = studies[i];
+                                study.label = "X-Ray";
+                                if ("Value" in study["00321060"]) study.label = study["00321060"].Value[0];
+                                study.provider = "Unknown";
+                                if ("Value" in study["00080020"] && "Value" in study["00080030"]) {
+                                    var dpart = study["00080020"].Value[0]; // yyyyMMdd
+                                    var tpart = study["00080030"].Value[0]; // hhmmss.SSS
+                                    study.orderDate = new Date(dpart.substring(0, 4), // year
+                                                               dpart.substring(4, 6), // month
+                                                               dpart.substring(6, 8), // day
+                                                               tpart.substring(0, 2), // hours
+                                                               tpart.substring(2, 4), // minutes
+                                                               tpart.substring(4, 6), // seconds
+                                                               tpart.substring(7, 10) // seconds
+                                                               );
+                                }
+                                study.pacsImageUrl = $scope.getUrl(0, study["0020000D"].Value[0]);
+                                orders.push(study);
                             }
-                            study.pacsImageUrl = $scope.getUrl(0, study["0020000D"].Value[0]);
-                            orders.push(study);
                         }
 
                         if ($scope.print) {
@@ -98,8 +100,86 @@ angular.module('bahmni.common.displaycontrol.pacs')
                     return ("pacsImageUrl" in bahmniOrder);
                 };
 
-                $scope.deleteOrder = function (bahmniOrder) {
-                    console.log("Would like to delete this order. Functionallity exists but I can't figure out how to use it.");
+                $scope.deleteConfirm = function (order) {
+                    $scope.targetOrder = order;
+                    ngDialog.openConfirm({template: '/bahmni/common/displaycontrols/pacs/views/deleteConfirmation.html', scope: $scope});
+                };
+
+                $scope.closeDialogue = function () {
+                    ngDialog.close();
+                    delete $scope.targetOrder;
+                };
+
+                $scope.deleteOrder = function () {
+
+                    // Basic task is to retrieve the encounter to which this order belongs, delete the order, and re-save the encounter.
+                    // The trouble is that a bahmni order (which is what we have access to here) doesn't have the encounter UID data in it. This is frustrating.
+                    // encounterService.findByEncounterUuid($scope.observation.encounterUuid)
+
+                    // encounter needs orders, providers,
+                    var promise = encounterService.findByOrderUuid($scope.targetOrder.orderUuid);
+                    spinner.forPromise(promise).then(function (data) {
+                        var encounter = data.data;
+                        // find this particular order and mark it for deletion
+                        // need encounter.orders[i].uuid = $scope.targetOrder.orderUuid
+                        var i = encounter.orders.findIndex(function (order) {
+                            return order.uuid == $scope.targetOrder.orderUuid;
+                        });
+                        encounter.orders = [Bahmni.Clinical.Order.discontinue(encounter.orders[i])];
+                        encounter.observations = [];
+                        return encounterService.create(encounter);
+                    }).then(function (data) {
+                        $rootScope.hasVisitedConsultation = false;
+                        var i = $scope.bahmniOrders.indexOf($scope.targetOrder);
+                        $scope.bahmniOrders.splice(i, 1);
+                        ngDialog.close();
+                        messagingService.showMessage('info', $translate.instant("CLINICAL_TEMPLATE_REMOVED_SUCCESS_KEY", {label: "Order"}));
+                    });
+
+                    /*
+                    var promise = encounterService.create(encounter);
+                    spinner.forPromise(promise).then(function () {
+                        $rootScope.hasVisitedConsultation = false;
+                        $state.go($state.current, {}, {reload: true});
+                        ngDialog.close();
+                        messagingService.showMessage('info', $translate.instant("CLINICAL_TEMPLATE_REMOVED_SUCCESS_KEY", {label: "Order"}));
+                    });
+                    */
+                    /*
+                    encounterService.create
+
+                    var updateEditedObservation = function (observations) {
+                        return _.map(observations, function (obs) {
+                            if (obs.uuid == $scope.editableObservations[0].uuid) {
+                                return $scope.editableObservations[0];
+                            } else {
+                                obs.groupMembers = updateEditedObservation(obs.groupMembers);
+                                return obs;
+                            }
+                        });
+                    };
+
+                    var getEditedObservation = function (observations) {
+                        return _.find(observations, function (obs) {
+                            return obs.uuid == $scope.editableObservations[0].uuid || getEditedObservation(obs.groupMembers);
+                        });
+                    };
+
+                    if (shouldEditSpecificObservation()) {
+                        var allObservations = updateEditedObservation($scope.encounter.observations);
+                        $scope.encounter.observations = [getEditedObservation(allObservations)];
+                    }
+                    $scope.encounter.observations = new Bahmni.Common.Domain.ObservationFilter().filter($scope.encounter.observations);
+                    $scope.encounter.orders = addOrdersToEncounter();
+                    $scope.encounter.extensions = {};
+                    var createPromise = encounterService.create($scope.encounter);
+                    spinner.forPromise(createPromise).then(function () {
+                        $rootScope.hasVisitedConsultation = false;
+                        $state.go($state.current, {}, {reload: true});
+                        ngDialog.close();
+                        messagingService.showMessage('info', "{{'CLINICAL_SAVE_SUCCESS_MESSAGE_KEY' | translate}}");
+                    });
+                    */
                 };
 
                 $scope.getUrl = function (orderNumber, studyUID) {

@@ -362,6 +362,12 @@ category:  Layout - sections
           display: inline-block;
           padding: 8px 10px 7px;
           line-height: 1;
+          .order-delete{
+            color:#000;
+            &:hover{
+              color:#d00;
+            }
+          }
         }
         .order-sub-heading-container .order-sub-heading{
           padding-top: 7px;
