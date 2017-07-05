@@ -17,6 +17,9 @@
                                  <span>Time of Birth</span>
                                  <span ng-bind-html="::patient.birthtime | date:'hh:mm a'"></span>
                              </span>
+                             <span class="patient-local-name">
+                                 {{::patient.localName | titleCase}}
+                             </span>
                              <span class="patient-address">
                                  {{::addressLine}}
                              </span>
@@ -29,6 +32,10 @@
                     <td class="value">{{::patient.birthdate | bahmniDate}}
                         <span ng-if="::patient.birthdateEstimated" class="patient-estimated-text"> (est.)</span>
                     </td>
+                </tr>
+                <tr ng-repeat="identifier in patient.extraIdentifiers">
+                    <td class="name">{{::identifier.type}}</td>
+                    <td class="value">{{::identifier.value}}</td>
                 </tr>
                 <tr ng-repeat="attribute in config.patientAttributes" ng-if="::patient[attribute]"
                     ng-show="::config.patientAttributes.length" ng-class="attribute">
