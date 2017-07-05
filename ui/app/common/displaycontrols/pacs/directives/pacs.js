@@ -111,7 +111,6 @@ angular.module('bahmni.common.displaycontrol.pacs')
                 };
 
                 $scope.deleteOrder = function () {
-
                     // Basic task is to retrieve the encounter to which this order belongs, delete the order, and re-save the encounter.
                     // The trouble is that a bahmni order (which is what we have access to here) doesn't have the encounter UID data in it. This is frustrating.
                     // encounterService.findByEncounterUuid($scope.observation.encounterUuid)
