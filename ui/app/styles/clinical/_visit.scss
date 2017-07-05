@@ -638,6 +638,11 @@ a.visit:before {
           display: inline-block;
           margin-right: 5px;
         }
+        .patient-local-name {
+          display: block;
+          margin-top: 3px;
+          color: $mediumGray;
+        }
         .patient-address {
           display: block;
           margin-top: 3px;
