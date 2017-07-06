@@ -29,6 +29,14 @@ angular.module('bahmni.common.orders')
             return $http.get(Bahmni.Common.Constants.bahmniOrderUrl, {
                 params: params,
                 withCredentials: true
+            }).then(function (response) {
+                var orders = [];
+                for (var i = 0; i < response.data.length; i++) {
+                    var fo = new Bahmni.Common.Orders.PendingOrder();
+                    fo.mapBahmniOrder(response.data[i]);
+                    orders.push(fo);
+                }
+                return orders;
             });
         };
 

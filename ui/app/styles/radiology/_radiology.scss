@@ -1,0 +1,37 @@
+body{
+  font-size: 14px;
+  //@media (max-width : 768px){
+  //  font-size: 15px;
+  //}
+}
+
+body.ngdialog-open{
+  overflow: show;
+}
+
+.consultation-content{
+  margin-top: 45px;
+}
+
+.ngdialog.ngdialog-theme-default.ng-dialog-radiology-note .ngdialog-content{
+  width: 80%;
+  .field-value{
+    padding: 20px;
+    width:100%;
+  }
+  form .form-field textarea, .form .form-field textarea{
+    width:100%;
+    word-wrap: break-word;
+    resize: both;
+    height: 135px;
+  }
+  .obs-note-name{
+    width: 50%;
+    float: left;
+  }
+  .obs-note-number{
+    width:50%;
+    float: right;
+  }
+}
+

@@ -1,0 +1,13 @@
+<div class="form">
+  <h1>Radiologist Note</h1>
+  <div class="obs-note-name">Patient Name: <span>{{ngDialogData.bahmniOrder.patientName}}</span></div>
+  <div class="obs-note-number">Accession Number: <span>{{ngDialogData.bahmniOrder.accessionNumber}}</span></div>
+  <div class="form-field">
+    <div class="field-value">
+      <textarea id="obs-note" ng-model="ngDialogData.textarea"></textarea>
+    </div>
+    <div class="dialog-button-group">
+      <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="closeObsDialog()">Cancel</button>
+      <button id="obs-note-save" class="secondary-button ng-binding" ng-click="saveObsDialog(ngDialogData.bahmniOrder, ngDialogData.textarea)">Save</button>
+  </div>
+</div>
