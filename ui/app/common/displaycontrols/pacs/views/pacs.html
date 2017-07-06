@@ -5,14 +5,14 @@
             <ul class="navigation-link-container clearfix">
                 <li ng-repeat="bahmniOrder in bahmniOrders">
                 <span class="tree-list-item" >
-                    <span class="link" ng-if="!hasPacsImage(bahmniOrder)">
+                    <span class="link" ng-if="!hasStudyuid(bahmniOrder)">
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                         <a ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
                         {{bahmniOrder.label}}
                     </span>
-                    <a class="link" ng-if="hasPacsImage(bahmniOrder)" target="_blank" href="{{bahmniOrder.pacsImageUrl}}">
+                    <a class="link" ng-if="hasStudyuid(bahmniOrder)" target="_blank" href="{{bahmniOrder.imageUrl}}">
                         {{bahmniOrder.label}}
                     </a>
                     <span class="fr order-sub-heading-container">
