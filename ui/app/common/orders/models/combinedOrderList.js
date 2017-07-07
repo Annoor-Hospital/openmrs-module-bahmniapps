@@ -33,6 +33,7 @@ Bahmni.Common.Orders.CombinedOrderList = function (orders,studies) {
                 res.push(l1[i]);
             }
         }
+        while (j < l2.length) { res.push(l2[j]); j++; }
         return res;
     }
     var orderList = arrayCombine(orders, studies, orderSort, eqCallback);
