@@ -82,6 +82,18 @@ angular.module('bahmni.radiology')
                     $scope.timeoutPromise = $timeout($scope.updateOrders, $scope.refreshTimeout);
                 };
 
+                var getPatientUuid = function (patientid) {
+                    return $http.get(Bahmni.Common.Constants.sqlUrl, {
+                        method: "GET",
+                        params: {
+                            q: "radiology.sqlsearch.patientuuid",
+                            patientid: encodeURIComponent(patientid)
+                        },
+                        withCredentials: true
+                    });
+                };
+
+
                 $scope.openObsDialog = function (bahmniOrder) {
                     var errorNotRegistered = function () {
                         messagingService.showMessage('error', "Patient is not registered");
@@ -104,7 +116,7 @@ angular.module('bahmni.radiology')
                     if (bahmniOrder.patientUuid) {
                         openDialog(bahmniOrder);
                     } else if (bahmniOrder.patientid) {
-                        patientService.getPatientUuid(bahmniOrder.patientid).then(function (data) {
+                        getPatientUuid(bahmniOrder.patientid).then(function (data) {
                             if(data.data.length > 0) {
                                 bahmniOrder.patientUuid = data.data[0].uuid,
                                 openDialog(bahmniOrder);
