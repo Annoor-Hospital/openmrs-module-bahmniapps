@@ -170,7 +170,7 @@ angular.module('bahmni.radiology')
                 };
 
                 var delObs = function (bahmniOrder) {
-                    var promise = radiologyObsService.delObsFromOrder(bahmniOrder);
+                    var promise = $q.all([radiologyObsService.delObsFromOrder(bahmniOrder)]); // wrap to support spinner
                     spinner.forPromise(promise).then(function (obsEncounter) {
                         messagingService.showMessage("info", "Radiology Observation Deleted.");
                         ngDialog.close();

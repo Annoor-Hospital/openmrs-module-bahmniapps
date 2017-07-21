@@ -61,8 +61,6 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         this.studyuid = getDcmValue(study, "0020000D", "");
         // use part of study uid to get orderNumber!!! (hack)
         // this.orderNumber = getDcmValue(study, "00402016", "");
-        console.log(this.patientName);
-        console.log(this.studyuid);
         var onMatch = this.studyuid.match(/\.([0-9]+)\.[0-9]+$/);
         if(onMatch) {
             this.orderNumber = "ORD-" + onMatch[1];

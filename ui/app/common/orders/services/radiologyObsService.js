@@ -38,7 +38,7 @@ angular.module('bahmni.common.orders')
             for (var i = 0; i < encounters.length; i++) {
                 var order = orders.find(function (item) {
                     return item.studyuid == encounters[i].obsExt;
-                })
+                });
                 order.obsEncounter = encounters[i];
                 order.obsNote = encounters[i].obsNote;
                 order.studyuid = encounters[i].obsExt;
@@ -99,15 +99,20 @@ angular.module('bahmni.common.orders')
                 withCredentials: true,
                 headers: {"Accept": "application/json", "Content-Type": "application/json"}
             }).then(function (data){
-                bahmniOrder.obsEncounter = obsEncounter;
-                return Promise.resolve(bahmniOrder.obsEncounter);
+                // add the new uuids to the existing order
+                return getObsEncounter({patientuuid: bahmniOrder.patientUuid}).then( function (obs) {
+                    addObsEncounterToOrders(obs, [bahmniOrder]);
+                    return bahmniOrder;
+                });
             }, function (reason) {
                 return Promise.reject(reason);
             });
         }
 
         var delObsFromOrder = function (bahmniOrder) {
-            if (!bahmniOrder.obsEncounter.encounterUuid) return;
+            if (!(bahmniOrder.obsEncounter && bahmniOrder.obsEncounter.encounterUuid)) {
+                return Promise.reject('Observation note not found');
+            }
             var urlObs = [bahmniOrder.obsEncounter.obsNoteUuid, bahmniOrder.obsEncounter.obsExtUuid].map(function (uuid) {
                 return '/openmrs/ws/rest/v1/obs/' + uuid;
             });
@@ -119,9 +124,12 @@ angular.module('bahmni.common.orders')
             var po2 = $http.delete(urlObs[1], config);
             return $q.all([po1,po2]).then(function (data) {
                 return $http.delete(urlObsGroup, config).then(function (data){
-                    return $http.delete(urlEncounter);
-                });
-            });
+                    return $http.delete(urlEncounter).then(function (data) {
+                        // remove uuids from order
+                        bahmniOrder.obsEncounter = '';
+                    });
+                }, function (reason) { Promise.reject(reason) });
+            }, function (reason) { Promise.reject(reason) });
         }
 
         return {
