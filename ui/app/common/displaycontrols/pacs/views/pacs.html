@@ -2,28 +2,37 @@
     <h2 class="section-title">{{::section | titleTranslate}}</h2>
     <div>
         <section ng-hide="noOrdersMessage">
-            <ul class="navigation-link-container clearfix">
-                <li ng-repeat="bahmniOrder in bahmniOrders">
-                <span class="tree-list-item" >
-                    <span class="link" ng-if="!hasStudyuid(bahmniOrder)">
-                        <i class="fa fa-clock-o" aria-hidden="true"></i>
-                        <a ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
-                            <i class="fa fa-trash" aria-hidden="true"></i>
+            <table class="dashboard-table pacs">
+            <tbody ng-repeat="bahmniOrder in bahmniOrders" class="row">
+                 <tr class="view-past" ng-class="::{'test-notes-parent': bahmniOrder.hasObsNote()}">
+                    <td class="actions" style="white-space: nowrap;">
+                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.hasStudyuid()"></i>
+                        <a ng-if="! bahmniOrder.hasStudyuid()" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
+                            <i class="fa fa-trash" aria-hidden="true" style="color:#000;"></i>
                         </a>
+                        <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.hasObsNote()"></i>-->
+                        <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.hasObsNote()"></i>
+                    </td>
+                    <td class="name" style="width:100%;" ng-if="bahmniOrder.hasStudyuid()">
+                            <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{bahmniOrder.label}}</a>
+                    </td>
+                    <td class="name" style="width:100%;" ng-if="!bahmniOrder.hasStudyuid()">
                         {{bahmniOrder.label}}
-                    </span>
-                    <a class="link" ng-if="hasStudyuid(bahmniOrder)" target="_blank" href="{{bahmniOrder.imageUrl}}">
-                        {{bahmniOrder.label}}
-                    </a>
-                    <span class="fr order-sub-heading-container">
-                        <span class="order-sub-heading">
-                            <span class="provider-name fl">{{bahmniOrder.provider}} </span>
-                            <span class="provider-date fr">{{bahmniOrder.orderDate | bahmniDateTime }}</span>
-                        </span>
-                    </span>
-                </span>
-                </li>
-            </ul>
+                    </td>
+                    <td class="provider-name" style="white-space: nowrap;">
+                        {{bahmniOrder.provider}}
+                    </td>
+                    <td class="provider-date" style="white-space: nowrap;">
+                        {{bahmniOrder.orderDate | bahmniDateTime }}
+                    </td>
+                </tr>
+                <tr class="notes-open" ng-if="bahmniOrder.hasObsNote()">
+                    <td colspan="4" style="overflow-y:scroll;">
+                        <div style="max-height:150px;"><pre>{{bahmniOrder.obsNote}}</pre></div>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
         </section>
         <div ng-show="noOrdersMessage">
             <div class="placeholder-text" ><p translate="DISPLAY_CONTROL_ERROR_MESSAGE_KEY" translate-values="{displayControl : '{{noOrdersMessage}}'}"></p></div>

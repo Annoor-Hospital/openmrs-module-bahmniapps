@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.pacs')
-    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'encounterService', 'ngDialog', 'spinner', '$rootScope', 'messagingService', '$translate', '$window', '$q',
-        function (orderService, orderTypeService, pacsService, encounterService, ngDialog, spinner, $rootScope, messagingService, $translate, $window, $q) {
+    .directive('pacs', ['orderService', 'orderTypeService', 'pacsService', 'radiologyObsService', 'encounterService', 'ngDialog', 'spinner', '$rootScope', 'messagingService', '$translate', '$window', '$q',
+        function (orderService, orderTypeService, pacsService, radiologyObsService, encounterService, ngDialog, spinner, $rootScope, messagingService, $translate, $window, $q) {
             var controller = function ($scope) {
                 $scope.print = $rootScope.isBeingPrinted || false;
                 $scope.orderTypeUuid = orderTypeService.getOrderTypeUuid($scope.orderType);
@@ -23,19 +23,28 @@ angular.module('bahmni.common.displaycontrol.pacs')
                 };
                 var getPacsStudies = function () {
                     var params = {
-                        patientid: $scope.patient.identifier.replace(/[a-zA-Z]+/g, ""),
+                        patientid: $scope.patient.identifier, //.replace(/[a-zA-Z]+/g, ""),
                         date: null
                     };
                     return pacsService.getStudies(params);
                 };
+                var getRadiologyObs = function () {
+                    var params = {
+                        patientuuid: $scope.patient.uuid
+                    };
+                    return radiologyObsService.getObsEncounter(params);
+                }
                 var getOrders = function () {
                     var p1 = getOpenMRSOrders();
                     var p2 = getPacsStudies();
-                    return $q.all([p1, p2]).then(function (data) {
+                    var p3 = getRadiologyObs();
+                    return $q.all([p1, p2, p3]).then(function (data) {
                         var orders = data[0];
                         var studies = data[1];
+                        var obs = data[2];
+                        radiologyObsService.addObsEncounterToOrders(obs, studies);
                         var orderList = Bahmni.Common.Orders.CombinedOrderList(orders, studies);
-                        orderList.forEach( function (order) {
+                        orderList.forEach(function (order) {
                             if ("studyuid" in order) order.imageUrl = getImageUrl(order);
                         });
                         $scope.bahmniOrders = orderList;
@@ -54,10 +63,6 @@ angular.module('bahmni.common.displaycontrol.pacs')
                 var getImageUrl = function (bahmniOrder) {
                     var pacsImageTemplate = $scope.config.pacsImageUrl || "";
                     return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyuid);
-                };
-
-                $scope.hasStudyuid = function (bahmniOrder) {
-                    return ("studyuid" in bahmniOrder);
                 };
 
                 $scope.deleteConfirm = function (order) {
