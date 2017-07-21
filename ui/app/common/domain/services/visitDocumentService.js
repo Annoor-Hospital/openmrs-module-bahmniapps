@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('bahmni.common.domain')
-    .service('visitDocumentService', ['$http', 'configurationService', 'auditLogService', function ($http, configurationService, auditLogService) {
+    .service('visitDocumentService', ['$http', 'auditLogService', 'configurations', '$q', function ($http, auditLogService, configurations, $q) {
         var removeVoidedDocuments = function (documents) {
             documents.forEach(function (document) {
                 if (document.voided) {
@@ -11,31 +11,28 @@ angular.module('bahmni.common.domain')
             });
         };
 
-        var log = function (patientUuid, visitUuid, visitType) {
-            configurationService.getConfigurations(['enableAuditLog']).then(function (result) {
-                if (result.enableAuditLog) {
-                    var params = {};
-                    params.patientUuid = patientUuid;
-                    params.eventType = Bahmni.Common.AuditLogEventDetails["OPEN_VISIT"].eventType;
-                    params.message = Bahmni.Common.AuditLogEventDetails["OPEN_VISIT"].message + '~' +
-                                     JSON.stringify({visitUuid: visitUuid, visitType: visitType});
-                    params.module = "document upload";
-                    auditLogService.auditLog(params);
-                }
-            });
-        };
-
-        this.save = function (visitDocument, visitType) {
+        this.save = function (visitDocument) {
             var url = Bahmni.Common.Constants.RESTWS_V1 + "/bahmnicore/visitDocument";
             var isNewVisit = !visitDocument.visitUuid;
             removeVoidedDocuments(visitDocument.documents);
+            var visitTypeName = configurations.encounterConfig().getVisitTypeByUuid(visitDocument.visitTypeUuid)['name'];
+            var encounterTypeName = configurations.encounterConfig().getEncounterTypeByUuid(visitDocument.encounterTypeUuid)['name'];
             return $http.post(url, visitDocument).then(function (response) {
-                if (isNewVisit) {
-                    log(visitDocument.patientUuid, response.data.visitUuid, visitType);
-                }
-                return response;
+                var promise = isNewVisit ? auditLogService.log(visitDocument.patientUuid, "OPEN_VISIT",
+                    {visitUuid: response.data.visitUuid, visitType: visitTypeName}, encounterTypeName) : $q.when();
+                return promise.then(function () {
+                    return auditLogService.log(visitDocument.patientUuid, "EDIT_ENCOUNTER",
+                        {
+                            encounterUuid: response.data.encounterUuid,
+                            encounterType: encounterTypeName
+                        }, encounterTypeName).then(function () {
+                            return response;
+                        }
+                    );
+                });
             });
         };
+
         this.saveFile = function (file, patientUuid, encounterTypeName, fileName, fileType) {
             var searchStr = ";base64";
             var format = file.split(searchStr)[0].split("/")[1];
