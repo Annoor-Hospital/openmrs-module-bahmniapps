@@ -39,9 +39,8 @@ angular.module('bahmni.common.orders')
                 var order = orders.find(function (item) {
                     return item.studyuid == encounters[i].obsExt;
                 });
-                order.obsEncounter = encounters[i];
-                order.obsNote = encounters[i].obsNote;
-                order.studyuid = encounters[i].obsExt;
+                // only fullfilled orders can have studyuid
+                order.addObsEncounter(encounters[i]);
             }
         };
 
