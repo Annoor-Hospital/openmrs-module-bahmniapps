@@ -21,13 +21,13 @@ angular.module('bahmni.radiology')
 
                 var getRadiologyOrders = function (date) {
                     var params = {
-                        asofdate: date
+                        date: date
                     };
                     return radiologyOrderService.getOrders(params);
                 };
                 var getPacsStudies = function (date) {
                     var params = {
-                        asofdate: date
+                        date: date
                     };
                     return pacsService.getStudies(params);
                 };
