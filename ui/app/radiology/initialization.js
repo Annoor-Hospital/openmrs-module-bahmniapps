@@ -1,23 +1,32 @@
 'use strict';
 
+var whitelist = function (src, whitelist) {
+    var dst = {};
+    for (var name of whitelist) {
+        if (src['name']) dst['name'] = src['name'];
+    }
+    return dst;
+};
+
+var assignIf = function (val, def) {
+    return (val !== null) ? val : def;
+}
+
 angular.module('bahmni.radiology').factory('initialization',
     ['$rootScope', '$q', '$window', '$http', '$location', 'configurationService', 'visitService', 'configurations', 'authenticator', 'appService', 'sessionService', 'locationService', 'spinner',
         function ($rootScope, $q, $window, $http, $location, configurationService, visitService, configurations, authenticator, appService, sessionService, locationService, spinner) {
             var initializationPromise = $q.defer();
             var url = purl(decodeURIComponent($window.location));
-            $rootScope.appConfig = url.param();
-            $rootScope.refreshTimeout = 5000;
-            $rootScope.refreshButton = true;
-            $rootScope.pacsImageUrl = 'Not Found';
+            $rootScope.appConfig = whitelist(url.param(), []);
 
             var getConfigs = function () {
                 var defaultVisitType = "OPD";
                 var configNames = ['encounterConfig', 'loginLocationToVisitTypeMapping'];
                 var configtask = configurations.load(configNames).then(function () {
                     $rootScope.encounterConfig = angular.extend(new EncounterConfig(), configurations.encounterConfig());
-                    $rootScope.refreshTimeout = appService.getAppDescriptor().getConfigValue("refreshTimeout");
-                    $rootScope.refreshButton = appService.getAppDescriptor().getConfigValue("refreshButton");
-                    $rootScope.pacsImageUrl = appService.getAppDescriptor().getConfigValue("pacsImageUrl");
+                    $rootScope.refreshTimeout = assignIf(appService.getAppDescriptor().getConfigValue("refreshTimeout"), 5000);
+                    $rootScope.refreshButton = assignIf(appService.getAppDescriptor().getConfigValue("refreshButton"), true);
+                    $rootScope.pacsImageUrl = assignIf(appService.getAppDescriptor().getConfigValue("pacsImageUrl"), "Not Found");
                     var loginLocationUuid = sessionService.getLoginLocationUuid();
 
                     var concepts = ['External Radiology Observation', 'Radiology Notes', 'External Radiology Uuid'];

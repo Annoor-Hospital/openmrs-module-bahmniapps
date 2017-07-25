@@ -21,13 +21,13 @@ angular.module('bahmni.radiology')
 
                 var getRadiologyOrders = function (date) {
                     var params = {
-                        asofdate: date
+                        date: date
                     };
                     return radiologyOrderService.getOrders(params);
                 };
                 var getPacsStudies = function (date) {
                     var params = {
-                        asofdate: date
+                        date: date
                     };
                     return pacsService.getStudies(params);
                 };
@@ -40,8 +40,8 @@ angular.module('bahmni.radiology')
                 var compareOrderLists = function (l1, l2) {
                     if (l1.length != l2.length) return false;
                     for (var i = 0; i < l1.length; i++) {
-                        if (l1[i].studyuid.length > 0 && l1[i].studyuid != l2[i].studyuid) return false;
-                        else if (l1[i].orderuid.length > 0 && l1[i].orderuid != l2[i].orderuid) return false;
+                        if (l1[i].studyuid != l2[i].studyuid) return false;
+                        else if (l1[i].orderuid != l2[i].orderuid) return false;
                     }
                     return true;
                 };
@@ -79,7 +79,11 @@ angular.module('bahmni.radiology')
                 $scope.updateOrders = function () {
                     $timeout.cancel($scope.timeoutPromise);
                     getOrders();
-                    $scope.timeoutPromise = $timeout($scope.updateOrders, $scope.refreshTimeout);
+                    if ($scope.refreshTimeout) {
+                        $scope.timeoutPromise = $timeout($scope.updateOrders, $scope.refreshTimeout);
+                    } else {
+                        console.error("No refresh timeout!");
+                    }
                 };
 
                 var getPatientUuid = function (patientid) {

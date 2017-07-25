@@ -1,23 +1,27 @@
 'use strict';
 
 Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
+    
     var orderSort = function (o1, o2) {
         if (o2.orderNumber == null) return 1;
         if (o1.orderNumber == null) return -1;
         return o1.orderNumber.localeCompare(o2.orderNumber);
     };
+
     var genCompare = function (a, b) {
         if (a > b) return 1;
         if (a < b) return -1;
         return 0;
     };
+
     var eqCallback = function (order, study) {
         if (order.orderNumber != null) {
-            return [study.combineWithOrder(order)];
+            return [study.combineWithPendingOrder(order)];
         } else {
             return [order, study];
         }
     };
+
     // combine the 2 orderable arrays l1,l2 according to compare function
     // On equality, add to the array the list return value of equality callback.
     var arrayCombine = function (l1, l2, compare, equality) {
@@ -41,6 +45,7 @@ Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
         }
         return res;
     };
+
     var orderList = arrayCombine(orders, studies, orderSort, eqCallback);
     orderList.sort(function (o1, o2) {
         return genCompare(o2.orderDate, o1.orderDate);
