@@ -13,7 +13,7 @@ angular.module('bahmni.common.orders')
             }).then(function (response) {
                 var orders = [];
                 for (var i = 0; i < response.data.length; i++) {
-                    orders.push(mapToPendingOrder[response.data[i]]);
+                    orders.push(mapToPendingOrder(response.data[i]));
                 }
                 return orders;
             });
