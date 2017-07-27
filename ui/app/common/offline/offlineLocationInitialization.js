@@ -29,7 +29,7 @@ angular.module('bahmni.common.offline')
                     };
 
                     offlineDbService.getReferenceData('AddressHierarchyLevels').then(function (addressHierarchyLevel) {
-                        if (addressHierarchyLevel && addressHierarchyLevel.data ? false : true) {
+                        if (!(addressHierarchyLevel && addressHierarchyLevel.data)) {
                             deferred.resolve();
                             return;
                         }

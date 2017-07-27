@@ -59,10 +59,9 @@ angular.module('bahmni.clinical').controller('ConsultationController',
 
             _.each(visitConfig.tabs, setVisitTabPrintAction);
             _.each(clinicalDashboardConfig.tabs, setDashboardPrintAction);
-            $scope.printList = _.concat(clinicalDashboardConfig.tabs, visitConfig.tabs).filter(function(item) {
+            $scope.printList = _.concat(clinicalDashboardConfig.tabs, visitConfig.tabs).filter(function (item) {
                 return item.printing != null;
             });
-
 
             clinicalDashboardConfig.quickPrints = appService.getAppDescriptor().getConfigValue('quickPrints');
             $scope.printDashboard = function (tab) {

@@ -146,7 +146,8 @@ angular.module('bahmni.common.domain')
                             "locationName": null,
                             "context": {},
                             "extensions": {}
-                        }}; }
+                        }};
+                    }
                 });
             };
 

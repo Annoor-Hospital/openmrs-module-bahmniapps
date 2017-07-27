@@ -24,7 +24,8 @@ angular.module('bahmni.common.domain')
             } else {
                 return observationsServiceStrategy.fetchObsForVisit(params).then(function (results) {
                     return $q.when(results.data);
-                }); }
+                });
+            }
         };
 
         var getObservationByIterateOverGroupMembers = function (obs, conceptName, results) {

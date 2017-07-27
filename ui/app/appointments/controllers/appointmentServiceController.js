@@ -147,8 +147,7 @@ angular.module('bahmni.appointments')
                     $scope.serviceType = {name: undefined, duration: Bahmni.Appointments.Constants.defaultServiceTypeDuration};
                     $scope.oneServiceTypeSelected = true;
                     $scope.createServiceForm.serviceTypeName.$setValidity('uniqueServiceTypeName', true);
-                }
-                else {
+                } else {
                     $scope.createServiceForm.serviceTypeName.$setValidity('uniqueServiceTypeName', false);
                 }
             };

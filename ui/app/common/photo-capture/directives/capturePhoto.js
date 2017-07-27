@@ -95,7 +95,10 @@ angular.module('bahmni.common.photoCapture')
                 captureConfirmImageButton.focus();
             };
 
-            captureDialogElement.dialog({autoOpen: false, height: 300, width: 500, modal: true,
+            captureDialogElement.dialog({autoOpen: false,
+                height: 300,
+                width: 500,
+                modal: true,
                 close: function () {
                     dialogOpen = false;
                     if (captureActiveStream) {
@@ -136,7 +139,10 @@ angular.module('bahmni.common.photoCapture')
                 uploadConfirmImageButton.focus();
             };
 
-            uploadDialogElement.dialog({autoOpen: false, height: 350, width: 350, modal: true,
+            uploadDialogElement.dialog({autoOpen: false,
+                height: 350,
+                width: 350,
+                modal: true,
                 close: function () {
                     dialogOpen = false;
                 }

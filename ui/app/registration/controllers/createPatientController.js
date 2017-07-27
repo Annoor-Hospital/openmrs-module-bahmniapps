@@ -61,7 +61,7 @@ angular.module('bahmni.registration')
                     var notNullAttribute = _.find(section && section.attributes, function (attribute) {
                         return $scope.patient[attribute.name] !== undefined;
                     });
-                    section.expand = section.expanded || (notNullAttribute ? true : false);
+                    section.expand = section.expanded || (!!notNullAttribute);
                 });
             };
 

@@ -24,8 +24,7 @@ angular.module('bahmni.common.offline')
                         if (!event) {
                             deferred.resolve();
                             return;
-                        }
-                        else {
+                        } else {
                             return processEvent(event, dbs[event.data.dbName]);
                         }
                     });
@@ -35,8 +34,7 @@ angular.module('bahmni.common.offline')
                     return eventQueue.consumeFromErrorQueue().then(function (event) {
                         if (!event) {
                             return;
-                        }
-                        else {
+                        } else {
                             return processEvent(event, dbs[event.data.dbName]);
                         }
                     });

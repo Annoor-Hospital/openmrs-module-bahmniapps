@@ -35,7 +35,7 @@ angular.module('bahmni.registration')
                     var notNullAttribute = _.find(section && section.attributes, function (attribute) {
                         return $scope.patient[attribute.name] !== undefined;
                     });
-                    section.expand = section.expanded || (notNullAttribute ? true : false);
+                    section.expand = section.expanded || (!!notNullAttribute);
                 });
             };
 
@@ -85,7 +85,7 @@ angular.module('bahmni.registration')
             };
 
             $scope.isReadOnly = function (field) {
-                return $scope.readOnlyFields ? ($scope.readOnlyFields[field] ? true : false) : undefined;
+                return $scope.readOnlyFields ? (!!$scope.readOnlyFields[field]) : undefined;
             };
 
             $scope.afterSave = function () {

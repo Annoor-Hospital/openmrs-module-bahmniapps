@@ -24,8 +24,7 @@ angular.module('bahmni.offline', ['ui.router', 'httpErrorInterceptor', 'bahmni.c
                             return offlineDbService.getConfig("dbNameCondition").then(function (result) {
                                 if (result || checkConfig()) {
                                     return $q.when();
-                                }
-                                else return offlineConfigInitialization();
+                                } else return offlineConfigInitialization();
                             });
                         },
                         offlineReferenceDataInitialization: function (offlineReferenceDataInitialization, offlineDbService, offlineService, androidDbService, $state, offlineConfigInitialization) {

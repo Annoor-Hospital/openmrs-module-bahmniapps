@@ -2,7 +2,6 @@
 
 angular.module('bahmni.common.orders')
     .factory('pacsService', ['$http', '$filter', function ($http, $filter) {
-        
         var getStudies = function (data) {
             var params = {};
             if (data.patientid) params.patientid = data.patientid;
@@ -21,15 +20,15 @@ angular.module('bahmni.common.orders')
 
         var dateFromString = function (dpart, tpart) {
             var date;
-            if(dpart && tpart) {
+            if (dpart && tpart) {
                 date = moment(dpart + ' ' + tpart, 'YYYYMMDD HHmmss.SSS').toDate();
-            } else if(dpart) {
+            } else if (dpart) {
                 date = moment(dpart, 'YYYYMMDD').toDate();
             } else {
                 console.error("Date parse failed: " + dpart + " " + tpart);
             }
             return date;
-        }
+        };
 
         var getDcmValue = function (study, tag, defval) {
             return tag in study && "Value" in study[tag] ? study[tag].Value[0] : defval;
@@ -54,9 +53,9 @@ angular.module('bahmni.common.orders')
             var fo = new Bahmni.Common.Orders.FulfilledOrder();
             fo.patientid = getDcmValue(study, "00100020", "");
             // prepend MAF if no prefix present
-            //if (this.patientid.match(/^[0-9]+/)) {
+            // if (this.patientid.match(/^[0-9]+/)) {
             //    this.patientid = "MAF" + this.patientid;
-            //}
+            // }
             fo.patientName = getDcmName(study, "00100010", "");
             fo.accessionNumber = getDcmValue(study, "00080050", '');
             fo.label = getDcmValue(study, "00321060", "X-Ray");
@@ -68,7 +67,7 @@ angular.module('bahmni.common.orders')
             // use part of study uid to get orderNumber!!! (hack)
             // this.orderNumber = getDcmValue(study, "00402016", "");
             var onMatch = fo.studyuid.match(/\.([0-9]+)\.[0-9]+$/);
-            if(onMatch) {
+            if (onMatch) {
                 fo.orderNumber = "ORD-" + onMatch[1];
             }
             return fo;

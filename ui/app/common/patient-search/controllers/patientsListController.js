@@ -38,7 +38,8 @@ angular.module('bahmni.common.patientSearch')
         };
         var getPatientCount = function (searchType) {
             if (searchType.handler) {
-                var params = { q: searchType.handler, v: "full",
+                var params = { q: searchType.handler,
+                    v: "full",
                     location_uuid: $bahmniCookieStore.get(Bahmni.Common.Constants.locationCookieName).uuid,
                     provider_uuid: $rootScope.currentProvider.uuid };
                 if (searchType.additionalParams) {

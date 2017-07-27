@@ -85,7 +85,7 @@ Bahmni.Clinical.DrugOrderViewModel = function (config, proto, encounterDate) {
         return response;
     };
 
-    this.encounterDate = encounterDate ? encounterDate : now;
+    this.encounterDate = encounterDate || now;
     this.asNeeded = this.asNeeded || false;
     this.route = this.route || undefined;
     this.durationUnit = this.durationUnit || inputOptionsConfig.defaultDurationUnit;
@@ -112,7 +112,7 @@ Bahmni.Clinical.DrugOrderViewModel = function (config, proto, encounterDate) {
     this.isBeingEdited = this.isBeingEdited || false;
     this.orderAttributes = [];
     this.isNonCodedDrug = this.isNonCodedDrug || false;
-    this.isDurationRequired = inputOptionsConfig.duration && inputOptionsConfig.duration.required == false ? false : true;
+    this.isDurationRequired = !(inputOptionsConfig.duration && inputOptionsConfig.duration.required == false);
 
     if (inputOptionsConfig.defaultStartDate === false && !this.effectiveStartDate) {
         this.effectiveStartDate = null;
@@ -611,7 +611,7 @@ Bahmni.Clinical.DrugOrderViewModel = function (config, proto, encounterDate) {
             return orderAttributesWithValues.map(function (orderAttribute) {
                 return {
                     uuid: orderAttribute.obsUuid,
-                    value: orderAttribute.value ? true : false,
+                    value: !!orderAttribute.value,
                     orderUuid: self.uuid,
                     concept: {uuid: orderAttribute.conceptUuid }
                 };
@@ -717,9 +717,9 @@ Bahmni.Clinical.DrugOrderViewModel.createFromContract = function (drugOrderRespo
     viewModel.orderReasonText = drugOrderResponse.orderReasonText;
     viewModel.orderNumber = drugOrderResponse.orderNumber && parseInt(drugOrderResponse.orderNumber.replace("ORD-", ""));
     viewModel.drugNonCoded = drugOrderResponse.drugNonCoded;
-    viewModel.isNonCodedDrug = drugOrderResponse.drugNonCoded ? true : false;
-    viewModel.drugNameDisplay = viewModel.drugNonCoded || constructDrugNameDisplay(viewModel.drug)
-        || _.get(viewModel, 'concept.name');
+    viewModel.isNonCodedDrug = !!drugOrderResponse.drugNonCoded;
+    viewModel.drugNameDisplay = viewModel.drugNonCoded || constructDrugNameDisplay(viewModel.drug) ||
+        _.get(viewModel, 'concept.name');
     if (config) {
         viewModel.loadOrderAttributes(drugOrderResponse);
     } else {

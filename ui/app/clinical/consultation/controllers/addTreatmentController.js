@@ -56,7 +56,7 @@ angular.module('bahmni.clinical')
 
             $scope.showDoseFractions = treatmentConfig.inputOptionsConfig.showDoseFractions;
             $scope.isDoseFractionsAvailable = function () {
-                return $scope.doseFractions && !_.isEmpty($scope.doseFractions) ? true : false;
+                return !!($scope.doseFractions && !_.isEmpty($scope.doseFractions));
             };
 
             $scope.isSelected = function (drug) {
@@ -553,7 +553,7 @@ angular.module('bahmni.clinical')
             };
 
             $scope.toggleDrugOrderAttribute = function (orderAttribute) {
-                orderAttribute.value = orderAttribute.value ? false : true;
+                orderAttribute.value = !orderAttribute.value;
             };
             contextChangeHandler.add(contextChange);
 

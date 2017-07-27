@@ -49,7 +49,5 @@ angular.module('radiology').config(['$stateProvider', '$httpProvider', '$urlRout
     }]).run(['backlinkService', function (backlinkService) {
         FastClick.attach(document.body);
 
-        
-
         backlinkService.addBackUrl();
     }]);

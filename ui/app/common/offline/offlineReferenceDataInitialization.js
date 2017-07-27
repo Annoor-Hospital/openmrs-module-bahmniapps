@@ -9,10 +9,10 @@ angular.module('bahmni.common.offline')
                         offlineDbService = androidDbService;
                     }
                     var referenceDataMap;
-                    referenceDataMap = isAuthenticated ?
-                        angular.extend(Bahmni.Common.Constants.authenticatedReferenceDataMap,
-                            Bahmni.Common.Constants.unAuthenticatedReferenceDataMap) :
-                        Bahmni.Common.Constants.unAuthenticatedReferenceDataMap;
+                    referenceDataMap = isAuthenticated
+                        ? angular.extend(Bahmni.Common.Constants.authenticatedReferenceDataMap,
+                            Bahmni.Common.Constants.unAuthenticatedReferenceDataMap)
+                        : Bahmni.Common.Constants.unAuthenticatedReferenceDataMap;
 
                     var requests = [];
 

@@ -10,7 +10,7 @@ Bahmni.PatientContextMapper = function () {
         patientContext.gender = patient.person.gender;
         if (patient.identifiers) {
             var primaryIdentifier = patient.identifiers[0].primaryIdentifier;
-            patientContext.identifier = primaryIdentifier ? primaryIdentifier : patient.identifiers[0].identifier;
+            patientContext.identifier = primaryIdentifier || patient.identifiers[0].identifier;
         }
 
         if (patient.person.birthdate) {

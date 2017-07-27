@@ -56,7 +56,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     };
 
     self.filterPatients = function (matchingCriteria) {
-        matchingCriteria = matchingCriteria ? matchingCriteria : matchesNameOrId;
+        matchingCriteria = matchingCriteria || matchesNameOrId;
         self.searchResults = self.searchParameter ? self.activePatients.filter(matchingCriteria) : self.activePatients;
     };
 

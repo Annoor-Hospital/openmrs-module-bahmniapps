@@ -4,11 +4,10 @@ angular.module('bahmni.radiology')
     .directive('radiologyReviewOrders', ['ngDialog', 'messagingService', 'radiologyObsService', 'orderService', 'pacsService', 'radiologyOrderService', 'encounterService', 'visitService', 'patientService', 'spinner', '$q', '$timeout', '$rootScope', '$http',
         function (ngDialog, messagingService, radiologyObsService, orderService, pacsService, radiologyOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http) {
             var controller = function ($scope) {
-
                 var getActiveVisit = function (patientUuid, currentVisitLocation) {
                     return visitService.search({patient: patientUuid, v: 'custom:(uuid,visitType,startDatetime,stopDatetime,location,encounters:(uuid))', includeInactive: true})
                         .then(function (data) {
-                            if(data.data && data.data.results) {
+                            if (data.data && data.data.results) {
                                 var activeVisits = data.data.results.filter(function (visit) {
                                     return visit.stopDatetime == null && visit.location.uuid == currentVisitLocation;
                                 });
@@ -36,7 +35,7 @@ angular.module('bahmni.radiology')
                         obsdate: date
                     };
                     return radiologyObsService.getObsEncounter(params);
-                }
+                };
                 var compareOrderLists = function (l1, l2) {
                     if (l1.length != l2.length) return false;
                     for (var i = 0; i < l1.length; i++) {
@@ -47,7 +46,7 @@ angular.module('bahmni.radiology')
                 };
                 var getOrders = function () {
                     var date = $scope.targetDate;
-                    if(!date) date = new Date();
+                    if (!date) date = new Date();
                     var p1 = getRadiologyOrders(date);
                     var p2 = getPacsStudies(date);
                     var p3 = getRadiologyObs(date);
@@ -72,8 +71,8 @@ angular.module('bahmni.radiology')
                     return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyuid);
                 };
 
-                $scope.$watch('targetDate',function(newDate,oldDate){
-                    if(newDate != oldDate) $scope.updateOrders();
+                $scope.$watch('targetDate', function (newDate, oldDate) {
+                    if (newDate != oldDate) $scope.updateOrders();
                 });
 
                 $scope.updateOrders = function () {
@@ -97,7 +96,6 @@ angular.module('bahmni.radiology')
                     });
                 };
 
-
                 $scope.openObsDialog = function (bahmniOrder) {
                     var errorNotRegistered = function () {
                         messagingService.showMessage('error', "Patient is not registered");
@@ -116,19 +114,19 @@ angular.module('bahmni.radiology')
                             disableBodyScroll: false
                         });
                     };
-                    
+
                     if (bahmniOrder.patientUuid) {
                         openDialog(bahmniOrder);
                     } else if (bahmniOrder.patientid) {
                         getPatientUuid(bahmniOrder.patientid).then(function (data) {
-                            if(data.data.length > 0) {
-                                bahmniOrder.patientUuid = data.data[0].uuid,
+                            if (data.data.length > 0) {
+                                bahmniOrder.patientUuid = data.data[0].uuid;
                                 openDialog(bahmniOrder);
                             } else {
                                 errorNotRegistered();
                             }
                         });
-                    }else{
+                    } else {
                         errorNotRegistered();
                     }
                 };
@@ -140,9 +138,9 @@ angular.module('bahmni.radiology')
                 $scope.saveObsDialog = function (bahmniOrder, text) {
                     if (bahmniOrder.obsNote != text) {
                         bahmniOrder.obsNote = text;
-                        if(text.length > 0) {
+                        if (text.length > 0) {
                             saveObs(bahmniOrder);
-                        }else{
+                        } else {
                             delObs(bahmniOrder);
                         }
                     } else {
@@ -163,7 +161,7 @@ angular.module('bahmni.radiology')
                             obsNoteConceptId: $rootScope.concepts["Radiology Notes"],
                             obsExtConceptId: $rootScope.concepts["External Radiology Uuid"]
                         };
-                        radiologyObsService.saveObsFromOrder(bahmniOrder, context).then(function(data) {
+                        radiologyObsService.saveObsFromOrder(bahmniOrder, context).then(function (data) {
                             messagingService.showMessage("info", "Radiology Observation Saved.");
                             ngDialog.close();
                         }, function (reason) {
@@ -182,7 +180,7 @@ angular.module('bahmni.radiology')
                         console.error(reason);
                         messagingService.showMessage("error", "Radiology Observation Delete Failed.");
                     });
-                }
+                };
 
                 var init = function () {
                     if (angular.isUndefined($scope.refreshButton)) { $scope.refreshButton = true; }

@@ -16,11 +16,11 @@ Bahmni.Common.Orders.PendingOrder = function () {
 
     this.hasStudyuid = function () {
         return false;
-    }
+    };
 
     this.hasObsNote = function () {
         return false;
-    }
+    };
 
     create.apply(this, []);
 };

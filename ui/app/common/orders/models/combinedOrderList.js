@@ -1,7 +1,6 @@
 'use strict';
 
 Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
-    
     var orderSort = function (o1, o2) {
         if (o2.orderNumber == null) return 1;
         if (o1.orderNumber == null) return -1;
@@ -33,7 +32,7 @@ Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
             while (j < l2.length && compare(l1[i], l2[j]) > 0) {
                 res.push(l2[j]); j++;
             }
-            if(j < l2.length && compare(l1[i], l2[j]) == 0) {
+            if (j < l2.length && compare(l1[i], l2[j]) == 0) {
                 equality(l1[i], l2[j]).forEach(function (item) { res.push(item); });
                 j++;
             } else {

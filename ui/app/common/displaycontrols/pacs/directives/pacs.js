@@ -23,7 +23,7 @@ angular.module('bahmni.common.displaycontrol.pacs')
                 };
                 var getPacsStudies = function () {
                     var params = {
-                        patientid: $scope.patient.identifier, //.replace(/[a-zA-Z]+/g, ""),
+                        patientid: $scope.patient.identifier, // .replace(/[a-zA-Z]+/g, ""),
                         date: null
                     };
                     return pacsService.getStudies(params);
@@ -33,7 +33,7 @@ angular.module('bahmni.common.displaycontrol.pacs')
                         patientuuid: $scope.patient.uuid
                     };
                     return radiologyObsService.getObsEncounter(params);
-                }
+                };
                 var getOrders = function () {
                     var p1 = getOpenMRSOrders();
                     var p2 = getPacsStudies();

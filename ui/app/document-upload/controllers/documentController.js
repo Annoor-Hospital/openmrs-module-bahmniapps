@@ -115,7 +115,8 @@ angular.module('opd.documentupload')
                             uuid: concept.uuid,
                             name: concept.name.name,
                             editableName: concept.name.name
-                        }, 'value': concept.name.name
+                        },
+                        'value': concept.name.name
                     };
                 } else if ($rootScope.appConfig.defaultOption) {
                     concept = topLevelConcept.setMembers.filter(function (member) {
@@ -126,7 +127,8 @@ angular.module('opd.documentupload')
                             uuid: concept.uuid,
                             name: concept.name.name,
                             editableName: concept.name.name
-                        }, 'value': concept.name.name
+                        },
+                        'value': concept.name.name
                     };
                 }
             };

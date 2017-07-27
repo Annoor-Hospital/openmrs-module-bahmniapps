@@ -235,9 +235,9 @@ angular.module('bahmni.common.offline')
             };
 
             var insertLog = function (errorLogUuid, failedRequest, responseStatus, stacktrace, requestPayload) {
-                var provider = _.has(requestPayload, 'providers') ? requestPayload.providers[0] :
-                    (_.has(requestPayload, 'auditInfo.creator') ? requestPayload.auditInfo.creator : null);
-                requestPayload = requestPayload ? requestPayload : null;
+                var provider = _.has(requestPayload, 'providers') ? requestPayload.providers[0]
+                    : (_.has(requestPayload, 'auditInfo.creator') ? requestPayload.auditInfo.creator : null);
+                requestPayload = requestPayload || null;
                 var deferred = $q.defer();
                 try {
                     var response = AndroidOfflineService.insertLog(errorLogUuid, failedRequest, responseStatus, JSON.stringify(stacktrace), JSON.stringify(requestPayload), JSON.stringify(provider));

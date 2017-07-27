@@ -75,7 +75,7 @@ angular.module('bahmni.registration')
                             });
                         }
                         self.hasActiveVisit = activeVisitForCurrentLoginLocation && (activeVisitForCurrentLoginLocation.length > 0);
-                        self.hasActiveVisit = self.hasActiveVisit ? self.hasActiveVisit : (isOfflineApp ? true : false);
+                        self.hasActiveVisit = self.hasActiveVisit ? self.hasActiveVisit : (!!isOfflineApp);
                         if (self.hasActiveVisit) {
                             self.activeVisit = activeVisitForCurrentLoginLocation[0];
                         }

@@ -11,7 +11,7 @@ Bahmni.Common.Domain.AttributeTypeMapper = (function () {
                 var element = _.find(mandatoryAttributes, function (mandatoryAttribute) {
                     return mandatoryAttribute == mrsAttributeType.name;
                 });
-                return element ? true : false;
+                return !!element;
             };
 
             var attributeType = {

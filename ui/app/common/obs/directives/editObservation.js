@@ -13,7 +13,7 @@ angular.module('bahmni.common.obs')
                     });
                 };
                 var shouldEditSpecificObservation = function () {
-                    return $scope.observation.uuid ? true : false;
+                    return !!$scope.observation.uuid;
                 };
                 var contextChange = function () {
                     return contextChangeHandler.execute();
@@ -112,7 +112,8 @@ angular.module('bahmni.common.obs')
                             return Bahmni.Clinical.Order.discontinue(order);
                         }
                         return {
-                            uuid: order.uuid, concept: {name: order.concept.name, uuid: order.concept.uuid},
+                            uuid: order.uuid,
+                            concept: {name: order.concept.name, uuid: order.concept.uuid},
                             commentToFulfiller: order.commentToFulfiller
                         };
                     });

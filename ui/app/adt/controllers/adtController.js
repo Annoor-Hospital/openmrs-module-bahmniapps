@@ -161,7 +161,7 @@ angular.module('bahmni.adt')
             };
 
             $scope.visitExists = function () {
-                return $scope.visitSummary ? true : false;
+                return !!$scope.visitSummary;
             };
 
             var getEncounterData = function (encounterTypeUuid, visitTypeUuid) {

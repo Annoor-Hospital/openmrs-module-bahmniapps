@@ -25,19 +25,19 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         return this;
     };
 
-    this.addObsEncounter = function(obsEncounter) {
+    this.addObsEncounter = function (obsEncounter) {
         this.obsEncounter = obsEncounter;
         this.obsNote = obsEncounter.obsNote;
         this.studyuid = obsEncounter.obsExt;
-    }
+    };
 
     this.hasStudyuid = function () {
         return this.studyuid && this.studyuid.length > 0;
-    }
+    };
 
     this.hasObsNote = function () {
         return this.obsNote && this.obsNote.length > 0;
-    }
+    };
 
     create.apply(this, []);
 };

@@ -86,7 +86,7 @@ angular.module('bahmni.clinical')
                 $scope.tabs = [];
                 _.forEach($scope.allOrdersTemplates, function (item) {
                     var conceptName = $scope.getName(item);
-                    $scope.tabs.push({name: conceptName ? conceptName : item.name.name, topLevelConcept: item.name.name});
+                    $scope.tabs.push({name: conceptName || item.name.name, topLevelConcept: item.name.name});
                 });
                 if ($scope.tabs) {
                     $scope.activateTab($scope.tabs[0]);
@@ -222,15 +222,13 @@ angular.module('bahmni.clinical')
             $scope.isPrintShown = function (isOrderSaved) {
                 return _.some($scope.enableRadiologyOrderOptions, function (option) {
                     return option.toLowerCase() === 'needsprint';
-                })
-                &&
+                }) &&
                 $scope.activeTab.name == 'Radiology' && !isOrderSaved;
             };
             $scope.isUrgent = function () {
                 return _.some($scope.enableRadiologyOrderOptions, function (option) {
                     return option.toLowerCase() === 'urgent';
-                })
-                &&
+                }) &&
                 $scope.activeTab.name == 'Radiology';
             };
             $scope.setEditedFlag = function (order, orderNoteText) {
