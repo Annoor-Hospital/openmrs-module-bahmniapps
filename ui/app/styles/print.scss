@@ -796,7 +796,14 @@ h3 {
     }
 }
 .dashboard-section{box-shadow: none}
-.patient-gender-age, .patient-estimated-text, .patient-birth-time{
+.patient-estimated-text, .patient-birth-time{
+    display: inline;
+}
+..patient-gender-age{
+    display:block;
+}
+
+.patient-name-gender-age-dash{
     display: none;
 }
 
@@ -891,6 +898,9 @@ h3 {
         h2.section-title{
             margin:0 0 3px !important;
             font-size: 13px !important;
+        }
+        .navigation-links-wrapper{
+            display:none;
         }
         .tabular-obs,.chronic-treatment, .dashboard-more-info .block{
             margin-top: 4px;
