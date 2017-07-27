@@ -10,9 +10,12 @@
                         </span>
                         <div class="patient-value">
                              <span class="patient-name">
-                                {{::patient.name | titleCase}} ({{::patient.identifier}})</span> -
-                             <span class="patient-gender-age" ng-bind-html="::patientAttributeTypes"></span>
-                             <span class="patient-estimated-text" ng-if="::patient.birthdateEstimated"> (est.)</span>
+                                {{::patient.name | titleCase}} ({{::patient.identifier}})</span><span class="patient-name-gender-age-dash"> - </span>
+                                <span class="patient-gender-age">
+                                  <span ng-bind-html="::patientAttributeTypes"></span>
+                                  <span ng-if="::patient.birthdateEstimated"> (est.)</span>
+                                </span>
+                             </span>
                              <span class="patient-birth-time" ng-show="::patient.birthtime">
                                  <span>Time of Birth</span>
                                  <span ng-bind-html="::patient.birthtime | date:'hh:mm a'"></span>

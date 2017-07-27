@@ -367,7 +367,7 @@ angular.module('consultation')
                 url: '/dashboard/visit/:visitUuid/:tab/:print',
                 views: {
                     'dashboard-content': {
-                        template: '<div>Print is getting ready</div>',
+                        template: '<div></div>',
                         controller: 'VisitController'
                     },
                     'print-content': {
