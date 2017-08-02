@@ -4,31 +4,31 @@
         <section ng-hide="noOrdersMessage">
             <table class="dashboard-table pacs">
             <tbody ng-repeat="bahmniOrder in bahmniOrders" class="row">
-                 <tr class="view-past" ng-class="::{'test-notes-parent': bahmniOrder.hasObsNote()}">
-                    <td class="actions" style="white-space: nowrap;">
-                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.hasStudyuid()"></i>
-                        <a ng-if="! bahmniOrder.hasStudyuid()" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
-                            <i class="fa fa-trash" aria-hidden="true" style="color:#000;"></i>
+                 <tr class="view-past" ng-class="::{'test-notes-parent': bahmniOrder.obsNote}">
+                    <td class="actions pacs-shrink">
+                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.studyuid"></i>
+                        <a ng-if="! bahmniOrder.studyuid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
+                            <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
-                        <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.hasObsNote()"></i>-->
-                        <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.hasObsNote()"></i>
+                        <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>-->
+                        <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </td>
-                    <td class="name" style="width:100%;" ng-if="bahmniOrder.hasStudyuid()">
+                    <td class="name pacs-expand" ng-if="bahmniOrder.studyuid">
                             <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{bahmniOrder.label}}</a>
                     </td>
-                    <td class="name" style="width:100%;" ng-if="!bahmniOrder.hasStudyuid()">
+                    <td class="name pacs-expand" ng-if="!bahmniOrder.studyuid">
                         {{bahmniOrder.label}}
                     </td>
-                    <td class="provider-name" style="white-space: nowrap;">
+                    <td class="provider-name pacs-shrink">
                         {{bahmniOrder.provider}}
                     </td>
-                    <td class="provider-date" style="white-space: nowrap;">
+                    <td class="provider-date pacs-shrink">
                         {{bahmniOrder.orderDate | bahmniDateTime }}
                     </td>
                 </tr>
-                <tr class="notes-open" ng-if="bahmniOrder.hasObsNote()">
-                    <td colspan="4" style="padding:0;">
-                        <div style="overflow-y:auto;max-height:100px;padding:2px 10px;line-height: normal;"><pre>{{bahmniOrder.obsNote}}</pre></div>
+                <tr class="notes-open" ng-if="bahmniOrder.obsNote">
+                    <td colspan="4">
+                        <div><pre>{{bahmniOrder.obsNote}}</pre></div>
                     </td>
                 </tr>
             </tbody>

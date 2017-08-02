@@ -1,13 +1,44 @@
 <div class="form">
-  <h1>Radiologist Note</h1>
-  <div class="obs-note-name">Patient Name: <span>{{ngDialogData.bahmniOrder.patientName}}</span></div>
-  <div class="obs-note-number">Accession Number: <span>{{ngDialogData.bahmniOrder.accessionNumber}}</span></div>
-  <div class="form-field">
-    <div class="field-value">
-      <textarea id="obs-note" ng-model="ngDialogData.textarea"></textarea>
+  <h1>X-Ray Study Notes</h1>
+  <table>
+  <tbody>
+    <tr><td class="obs-note-label">Patient Name: </td><td>{{ngDialogData.bahmniOrder.patientName}}</td></tr>
+    <tr><td class="obs-note-label">Patient id: </td><td>{{ngDialogData.bahmniOrder.patientid}}</td></tr>
+    <tr ng-if="ngDialogData.bahmniOrder.studyuid">
+      <td class="obs-note-label">Study Accession Number: </td><td>{{ngDialogData.bahmniOrder.accessionNumber}}</td>
+    </tr>
+    <tr><td class="obs-note-label">Provider: </td><td>{{ngDialogData.bahmniOrder.provider}}</td></tr>
+    <tr>
+      <td colspan="2">
+        <a ng-if="ngDialogData.bahmniOrder.patientUuid" class="obs-note-link" target="PatientDashboardWindow" href="{{ngDialogData.bahmniOrder.dashboardUrl}}">Link to patient dashboard</a>
+        <a ng-if="ngDialogData.bahmniOrder.studyuid" class="obs-note-link" target="PatientXrayWindow" href="{{ngDialogData.bahmniOrder.imageUrl}}">Link to X-Ray</a>
+      </td>
+    </tr>
+  </tbody>
+  </table>
+  <div ng-if="ngDialogData.bahmniOrder.patientUuid">
+    <div class="obs-note-block-label">Provider Note:</div>
+    <div class="obs-note-comment">
+      <pre>{{ngDialogData.bahmniOrder.fulfillerComment}}</pre>
     </div>
+  </div>
+  <div ng-if="ngDialogData.bahmniOrder.patientUuid && ngDialogData.bahmniOrder.studyuid">
+    <div class="obs-note-block-label">Radiologist Note:</div>
+    <div class="form-field">
+      <div class="field-value">
+        <textarea id="obs-note" ng-model="ngDialogData.textarea"></textarea>
+      </div>
+      <div class="dialog-button-group">
+        <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="closeConfirmObsDialog(ngDialogData.bahmniOrder, ngDialogData.textarea)">Close</button>
+        <button id="obs-note-save" class="secondary-button ng-binding" ng-click="saveObsDialog(ngDialogData.bahmniOrder, ngDialogData.textarea)">Save</button>
+      </div>
+    </div>
+  </div>
+  <div ng-if="!ngDialogData.bahmniOrder.patientUuid || !ngDialogData.bahmniOrder.studyuid">
+    <div ng-if="!ngDialogData.bahmniOrder.patientUuid" class="obs-note-warning">Patient is not registered</div>
+    <div ng-if="!ngDialogData.bahmniOrder.studyuid" class="obs-note-warning">Order not yet fulfilled</div>
     <div class="dialog-button-group">
-      <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="closeObsDialog()">Cancel</button>
-      <button id="obs-note-save" class="secondary-button ng-binding" ng-click="saveObsDialog(ngDialogData.bahmniOrder, ngDialogData.textarea)">Save</button>
+      <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="closeObsDialog()">Close</button>
+    </div>
   </div>
 </div>

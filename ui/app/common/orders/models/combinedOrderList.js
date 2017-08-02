@@ -23,6 +23,7 @@ Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
 
     // combine the 2 orderable arrays l1,l2 according to compare function
     // On equality, add to the array the list return value of equality callback.
+    // this code needs re-designing with a visually clearer method (like a nested for loop)
     var arrayCombine = function (l1, l2, compare, equality) {
         l1.sort(compare);
         l2.sort(compare);

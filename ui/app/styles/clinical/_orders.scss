@@ -368,6 +368,27 @@
   }
 }
 
+table.pacs {
+  td.pacs-expand {
+    width:100%;
+  }
+  td.pacs-shrink {
+    white-space: nowrap;
+  }
+  .actions a{
+    color:#000;
+  }
+  .notes-open td{
+    padding:0;
+    div {
+      overflow-y:auto;
+      max-height:100px;
+      padding:2px 30px;
+      line-height: normal;
+    }
+  }
+}
+
 #Pacs {
   .order-sub-heading-container {
     padding-top: 7px;

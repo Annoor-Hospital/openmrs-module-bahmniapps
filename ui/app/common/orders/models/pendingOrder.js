@@ -12,14 +12,7 @@ Bahmni.Common.Orders.PendingOrder = function () {
         this.orderDate = '';
         this.orderNumber = '';
         this.orderuid = '';
-    };
-
-    this.hasStudyuid = function () {
-        return false;
-    };
-
-    this.hasObsNote = function () {
-        return false;
+        this.fulfillerComment = '';
     };
 
     create.apply(this, []);

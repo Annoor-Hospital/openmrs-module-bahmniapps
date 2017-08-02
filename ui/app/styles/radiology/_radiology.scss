@@ -1,3 +1,7 @@
+html {
+  overflow-y:scroll;
+}
+
 body{
   font-size: 14px;
   //@media (max-width : 768px){
@@ -13,10 +17,42 @@ body.ngdialog-open{
   margin-top: 45px;
 }
 
+table.radiology-review-table tr.link:hover {
+    background-color: #ddd;
+    cursor:pointer;
+}
+
 .ngdialog.ngdialog-theme-default.ng-dialog-radiology-note .ngdialog-content{
   width: 80%;
+  td.obs-note-label {
+    white-space:nowrap;
+    width:1px
+  }
+  a.obs-note-link {
+    border-radius:3px;
+    background:#ddd;
+    margin-right:3px;
+    padding:3px;
+    color:black;
+    &:hover {
+      color:#2b95ff;
+    }
+  }
+  div.obs-note-block-label{
+    margin-top:5px;
+    margin-left:10px;
+  }
+  div.obs-note-comment{
+      margin-left:20px;
+  }
+  div.obs-note-warning{
+      margin-left:0px;
+      margin-top:10px;
+      font-style:italic;
+      color:#e00;
+  }
   .field-value{
-    padding: 20px;
+    padding: 0px 20px 20px 20px;
     width:100%;
   }
   form .form-field textarea, .form .form-field textarea{
