@@ -43,7 +43,7 @@ angular.module('bahmni.common.orders')
             var po = new Bahmni.Common.Orders.PendingOrder();
             po.label = order.concept.shortName || order.concept.name;
             po.provider = order.provider;
-            po.orderDate = new Date(order.orderDate * 1000);
+            po.orderDate = new Date(order.orderDate);
             po.orderNumber = order.orderNumber;
             po.orderuid = order.orderUuid;
             return po;

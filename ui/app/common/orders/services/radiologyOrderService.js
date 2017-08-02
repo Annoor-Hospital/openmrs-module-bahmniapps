@@ -29,6 +29,7 @@ angular.module('bahmni.common.orders')
             po.orderDate = new Date(order.orderDate * 1000);
             po.orderNumber = order.orderNumber;
             po.orderuid = order.orderUuid;
+            po.fulfillerComment = order.commentToFulfiller;
             return po;
         };
 
