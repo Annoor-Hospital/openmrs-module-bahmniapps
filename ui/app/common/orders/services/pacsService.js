@@ -11,8 +11,12 @@ angular.module('bahmni.common.orders')
                 withCredentials: false
             }).then(function (response) {
                 var studies = [];
-                for (var i = 0; i < response.data.length; i++) {
-                    studies.push(mapToFullfilledOrder(response.data[i]));
+                if(response.data.length == 1 && response.data[0].error) {
+                    console.error(response.data[0].error);
+                } else {
+                    for (var i = 0; i < response.data.length; i++) {
+                        studies.push(mapToFullfilledOrder(response.data[i]));
+                    }
                 }
                 return studies;
             });

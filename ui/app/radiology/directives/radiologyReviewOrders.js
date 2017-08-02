@@ -4,7 +4,6 @@ angular.module('bahmni.radiology')
     .directive('radiologyReviewOrders', ['ngDialog', 'messagingService', 'radiologyObsService', 'orderService', 'pacsService', 'radiologyOrderService', 'encounterService', 'visitService', 'patientService', 'spinner', '$q', '$timeout', '$rootScope', '$http', '$window',
         function (ngDialog, messagingService, radiologyObsService, orderService, pacsService, radiologyOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http, $window) {
             var controller = function ($scope) {
-
                 var getActiveVisit = function (patientUuid, currentVisitLocation) {
                     return visitService.search({patient: patientUuid, v: 'custom:(uuid,visitType,startDatetime,stopDatetime,location,encounters:(uuid))', includeInactive: true})
                         .then(function (data) {
