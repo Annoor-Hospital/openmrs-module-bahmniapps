@@ -12,15 +12,8 @@ Bahmni.Common.Orders.PendingOrder = function () {
         this.orderDate = '';
         this.orderNumber = '';
         this.orderuid = '';
+        this.fulfillerComment = '';
     };
-
-    this.hasStudyuid = function () {
-        return false;
-    }
-
-    this.hasObsNote = function () {
-        return false;
-    }
 
     create.apply(this, []);
 };

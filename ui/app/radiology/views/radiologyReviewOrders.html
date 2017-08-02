@@ -3,51 +3,31 @@
         <button ng-if="refreshButton" ng-click="updateOrders()">Refresh</button>
     </div>
     <div>
-        <table>
+        <table class="radiology-review-table">
             <tr>
                 <th></th>
                 <th>Patient Name</th>
                 <th>Patient ID</th>
-                <th>Accession Number</th>
+                <th>Accession #</th>
                 <th>Type</th>
                 <th>Provider</th>
                 <th>Date &amp; Time</th>
             </tr>
-            <tr ng-repeat="bahmniOrder in bahmniOrders">
+            <tr class="link" ng-repeat="bahmniOrder in bahmniOrders" ng-click="openObsDialog(bahmniOrder)">
                 <td>
-                    <span class="link" ng-if="!bahmniOrder.hasStudyuid()">
+                    <span ng-if="!bahmniOrder.studyuid">
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                     </span>
-                    <span class="link" ng-if="bahmniOrder.hasStudyuid()">
-                        <a ng-click="openObsDialog(bahmniOrder)" class="radiology-note" target="_blank" >
-                            <i class="fa fa-file-text-o" aria-hidden="true" style="color:#000000;" ng-if="bahmniOrder.hasObsNote()"></i>
-                            <i class="fa fa-file-text-o" aria-hidden="true" style="color:#cccccc;" ng-if="!bahmniOrder.hasObsNote()"></i>
-                        </a>
+                    <span ng-if="bahmniOrder.studyuid">
+                        <i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </span>
                 </td>
-                <td>
-                    <span class="link" ng-if="!bahmniOrder.hasStudyuid()">
-                        {{bahmniOrder.patientName}}
-                    </span>
-                    <a class="link" ng-if="bahmniOrder.hasStudyuid()" target="BahmniPacsWindow" href="{{bahmniOrder.imageUrl}}">
-                        {{bahmniOrder.patientName}}
-                    </a>
-                </td>
-                <td>
-                    {{bahmniOrder.patientid}}
-                </td>
-                <td>
-                    {{bahmniOrder.accessionNumber}}
-                </td>
-                <td>
-                    {{bahmniOrder.label}}
-                </td>
-                <td>
-                    <span class="provider-name fl">{{bahmniOrder.provider}} </span>
-                </td>
-                <td>
-                    <span class="provider-date fr">{{bahmniOrder.orderDate | bahmniDateTime }}</span>
-                </td>
+                <td>{{bahmniOrder.patientName}}</td>
+                <td>{{bahmniOrder.patientid}}</td>
+                <td>{{bahmniOrder.accessionNumber}}</td>
+                <td>{{bahmniOrder.label}}</td>
+                <td><span class="provider-name fl">{{bahmniOrder.provider}}</span></td>
+                <td><span class="provider-date fr">{{bahmniOrder.orderDate | bahmniDateTime }}</span></td>
             </tr>
         </table>
     </div>
