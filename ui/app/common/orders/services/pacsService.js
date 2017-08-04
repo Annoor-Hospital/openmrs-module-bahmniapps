@@ -11,7 +11,7 @@ angular.module('bahmni.common.orders')
                 withCredentials: false
             }).then(function (response) {
                 var studies = [];
-                if(response.data.length == 1 && response.data[0].error) {
+                if (response.data.length == 1 && response.data[0].error) {
                     console.error(response.data[0].error);
                 } else {
                     for (var i = 0; i < response.data.length; i++) {
