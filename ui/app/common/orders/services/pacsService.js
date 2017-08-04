@@ -58,9 +58,9 @@ angular.module('bahmni.common.orders')
             var fo = new Bahmni.Common.Orders.FulfilledOrder();
             fo.patientid = getDcmValue(study, "00100020", "");
             // prepend MAF if no prefix present
-            //if (this.patientid.match(/^[0-9]+/)) {
-            //    this.patientid = "MAF" + this.patientid;
-            //}
+            // if(fo.patientid.match(/^[0-9]+/) && parseInt(fo.patientid) > 200000) {
+            //     fo.patientid = "MAF" + fo.patientid;
+            // }
             fo.patientName = getDcmName(study, "00100010", "");
             fo.accessionNumber = getDcmValue(study, "00080050", '');
             fo.label = getDcmValue(study, "00321060", "X-Ray");
@@ -69,6 +69,7 @@ angular.module('bahmni.common.orders')
             var sTime = getDcmValue(study, "00080030", null);
             fo.orderDate = dateFromString(sDate, sTime);
             fo.studyuid = getDcmValue(study, "0020000D", "");
+            fo.seriesCount = getDcmValue(study, "00201206", "1");
             // use part of study uid to get orderNumber!!! (hack)
             // this.orderNumber = getDcmValue(study, "00402016", "");
             var onMatch = fo.studyuid.match(/\.([0-9]+)\.[0-9]+$/);

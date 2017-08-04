@@ -13,6 +13,7 @@ Bahmni.Common.Orders.PendingOrder = function () {
         this.orderNumber = '';
         this.orderuid = '';
         this.fulfillerComment = '';
+        this.isOrderExpired = false;
     };
 
     create.apply(this, []);

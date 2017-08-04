@@ -2,9 +2,9 @@
 
 var whitelist = function (src, whitelist) {
     var dst = {};
-    for (var name of whitelist) {
+    whitelist.forEach(function (name) {
         if (src['name']) dst['name'] = src['name'];
-    }
+    });
     return dst;
 };
 
