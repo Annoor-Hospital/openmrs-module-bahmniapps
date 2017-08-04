@@ -1,12 +1,29 @@
 'use strict';
 
 angular.module('bahmni.common.orders')
-    .factory('radiologyOrderService', ['$http', '$filter', function ($http, $filter) {
-        var getOrders = function (data) {
+    .factory('pacsOrderService', ['$http', '$filter', function ($http, $filter) {
+        var getOrdersByDate = function (data) {
             var params = {};
             params.date = $filter('date')(data.date, 'yyyy-MM-dd');
             params.q = 'radiology.sqlSearch.activeOrdersByDate';
             params.v = 'full';
+            return getOrders(params);
+        };
+
+        var getOrdersByPatient = function (data) {
+            var params = {};
+            params.patientUuid = data.patientUuid;
+            params.v = 'full';
+            if (data.visitUuid) {
+                params.q = 'radiology.sqlSearch.activeOrdersByPatientVisit';
+                params.visitUuid = data.visitUuid;
+            } else {
+                params.q = 'radiology.sqlSearch.activeOrdersByPatient';
+            }
+            return getOrders(params);
+        };
+
+        var getOrders = function (params) {
             return $http.get(Bahmni.Common.Constants.sqlUrl, {
                 params: params,
                 withCredentials: true
@@ -30,10 +47,12 @@ angular.module('bahmni.common.orders')
             po.orderNumber = order.orderNumber;
             po.orderuid = order.orderUuid;
             po.fulfillerComment = order.commentToFulfiller;
+            po.isOrderExpired = order.isExpired;
             return po;
         };
 
         return {
-            getOrders: getOrders
+            getOrdersByPatient: getOrdersByPatient,
+            getOrdersByDate: getOrdersByDate
         };
     }]);

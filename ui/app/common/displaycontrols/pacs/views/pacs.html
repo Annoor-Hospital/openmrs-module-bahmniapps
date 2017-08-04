@@ -10,6 +10,7 @@
                         <a ng-if="! bahmniOrder.studyuid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
+                        <span ng-if="bahmniOrder.seriesCount > 1">x{{bahmniOrder.seriesCount}}</span>
                         <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>-->
                         <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </td>

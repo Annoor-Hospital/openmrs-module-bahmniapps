@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.radiology')
-    .directive('radiologyReviewOrders', ['ngDialog', 'messagingService', 'radiologyObsService', 'orderService', 'pacsService', 'radiologyOrderService', 'encounterService', 'visitService', 'patientService', 'spinner', '$q', '$timeout', '$rootScope', '$http', '$window',
-        function (ngDialog, messagingService, radiologyObsService, orderService, pacsService, radiologyOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http, $window) {
+    .directive('radiologyReviewOrders', ['ngDialog', 'messagingService', 'radiologyObsService', 'pacsService', 'pacsOrderService', 'encounterService', 'visitService', 'patientService', 'spinner', '$q', '$timeout', '$rootScope', '$http', '$window',
+        function (ngDialog, messagingService, radiologyObsService, pacsService, pacsOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http, $window) {
             var controller = function ($scope) {
 
                 var getActiveVisit = function (patientUuid, currentVisitLocation) {
@@ -24,7 +24,7 @@ angular.module('bahmni.radiology')
                     var params = {
                         date: date
                     };
-                    return radiologyOrderService.getOrders(params);
+                    return pacsOrderService.getOrdersByDate(params);
                 };
 
                 var getPacsStudies = function (date) {
@@ -38,7 +38,7 @@ angular.module('bahmni.radiology')
                     var params = {
                         obsdate: date
                     };
-                    return radiologyObsService.getObsEncounter(params);
+                    return radiologyObsService.getObs(params);
                 };
 
                 var compareOrderLists = function (l1, l2) {
@@ -60,10 +60,14 @@ angular.module('bahmni.radiology')
                         var orders = data[0];
                         var studies = data[1];
                         var obs = data[2];
-                        radiologyObsService.addObsEncounterToOrders(obs, studies);
+                        radiologyObsService.addObsToOrders(obs, studies);
                         var orderList = Bahmni.Common.Orders.CombinedOrderList(orders, studies);
                         orderList.forEach(function (order) {
                             if ("studyuid" in order) order.imageUrl = getImageUrl(order);
+                        });
+                        // pending orders not interesting to radiologist
+                        orderList = orderList.filter(function (order) {
+                            return order.studyuid != null;
                         });
                         // only modify scope variable on changes
                         if (!compareOrderLists($scope.bahmniOrders, orderList)) {
@@ -112,7 +116,6 @@ angular.module('bahmni.radiology')
 
                 $scope.openPatientWindow = function (patientid, target) {
                     spinner.forPromise(getPatientUuid(patientid).then(function (data) {
-                        console.log(data);
                         if (data.data && data.data.length > 0 && data.data[0].uuid && data.data[0].uuid.match(/[a-z0-9\-]+/)) {
                             $window.open(patientDashboardUrl(data.data[0].uuid), target);
                         } else {
@@ -172,30 +175,23 @@ angular.module('bahmni.radiology')
                 };
 
                 var saveObs = function (bahmniOrder) {
-                    var promise = getActiveVisit(bahmniOrder.patientUuid, $rootScope.visitLocationUuid);
-                    spinner.forPromise(promise).then(function (visituuid) {
-                        var context = {
-                            encounterTypeUuid: $rootScope.encounterConfig.encounterTypes.RADIOLOGY,
-                            encounterLocationUuid: $rootScope.visitLocationUuid,
-                            encounterProviderUuid: $rootScope.currentProvider.uuid,
-                            encounterRoleUuid: $rootScope.encounterRoleUuid,
-                            obsGroupConceptId: $rootScope.concepts["External Radiology Observation"],
-                            obsNoteConceptId: $rootScope.concepts["Radiology Notes"],
-                            obsExtConceptId: $rootScope.concepts["External Radiology Uuid"]
-                        };
-                        if (visituuid) context.visitUuid = visituuid;
-                        radiologyObsService.saveObsFromOrder(bahmniOrder, context).then(function (data) {
-                            messagingService.showMessage("info", "Radiology Observation Saved.");
-                        }, function (reason) {
-                            console.error(reason);
-                            messagingService.showMessage("error", "Radiology Observation Save Failed.");
-                        });
+                    var context = {
+                        locationUuid: $rootScope.visitLocationUuid,
+                        obsGroupConceptId: $rootScope.concepts["External Radiology Observation"],
+                        obsNoteConceptId: $rootScope.concepts["Radiology Notes"],
+                        obsExtConceptId: $rootScope.concepts["External Radiology Uuid"]
+                    };
+                    radiologyObsService.saveObsFromOrder(bahmniOrder, context).then(function (data) {
+                        messagingService.showMessage("info", "Radiology Observation Saved.");
+                    }, function (reason) {
+                        console.error(reason);
+                        messagingService.showMessage("error", "Radiology Observation Save Failed.");
                     });
                 };
 
                 var delObs = function (bahmniOrder) {
                     var promise = $q.all([radiologyObsService.delObsFromOrder(bahmniOrder)]); // wrap to support spinner
-                    spinner.forPromise(promise).then(function (obsEncounter) {
+                    spinner.forPromise(promise).then(function (Obs) {
                         messagingService.showMessage("info", "Radiology Observation Deleted.");
                     }, function (reason) {
                         console.error(reason);
