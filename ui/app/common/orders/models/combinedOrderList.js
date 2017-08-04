@@ -1,54 +1,39 @@
 'use strict';
 
 Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
+    var compare = function (obj1, obj2) {
+        return obj1 == obj2 ? 0 : obj1 > obj2 ? 1 : -1;
+    };
+
     var orderSort = function (o1, o2) {
-        if (o2.orderNumber == null) return 1;
-        if (o1.orderNumber == null) return -1;
-        return o1.orderNumber.localeCompare(o2.orderNumber);
+        if (o2.orderDate == null) return 1;
+        if (o1.orderDate == null) return -1;
+        return -compare(o1.orderDate, o2.orderDate);
     };
 
-    var genCompare = function (a, b) {
-        if (a > b) return 1;
-        if (a < b) return -1;
-        return 0;
-    };
-
-    var eqCallback = function (order, study) {
-        if (order.orderNumber != null) {
-            return [study.combineWithPendingOrder(order)];
-        } else {
-            return [order, study];
+    // match studies and orders, allowing many studies to one order
+    var matchedOrders = [];
+    for (var i = 0; i < studies.length; i++) {
+        var study = studies[i];
+        var order = orders.find(function (elem) {
+            return elem.orderNumber == study.orderNumber;
+        });
+        if (order) {
+            study.combineWithPendingOrder(order);
+            matchedOrders.push(order);
         }
-    };
+    }
 
-    // combine the 2 orderable arrays l1,l2 according to compare function
-    // On equality, add to the array the list return value of equality callback.
-    // this code needs re-designing with a visually clearer method (like a nested for loop)
-    var arrayCombine = function (l1, l2, compare, equality) {
-        l1.sort(compare);
-        l2.sort(compare);
-        var j = 0;
-        var res = [];
-        for (var i = 0; i < l1.length; i++) {
-            while (j < l2.length && compare(l1[i], l2[j]) > 0) {
-                res.push(l2[j]); j++;
-            }
-            if (j < l2.length && compare(l1[i], l2[j]) == 0) {
-                equality(l1[i], l2[j]).forEach(function (item) { res.push(item); });
-                j++;
-            } else {
-                res.push(l1[i]);
-            }
-        }
-        while (j < l2.length) {
-            res.push(l2[j]); j++;
-        }
-        return res;
-    };
-
-    var orderList = arrayCombine(orders, studies, orderSort, eqCallback);
-    orderList.sort(function (o1, o2) {
-        return genCompare(o2.orderDate, o1.orderDate);
+    // get unmatched orders, assuming unique orderNumber
+    var unmatchedOrders = orders.filter(function (elem) {
+        var ismatched = matchedOrders.find(function (elem2) {
+            return elem.orderNumber == elem2.orderNumber;
+        });
+        return !ismatched;
     });
-    return orderList;
+
+    // extend studies with unmatched orders
+    Array.prototype.push.apply(studies, unmatchedOrders);
+    studies.sort(orderSort);
+    return studies;
 };

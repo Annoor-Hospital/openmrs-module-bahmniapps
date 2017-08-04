@@ -19,6 +19,7 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
     };
 
     this.combineWithPendingOrder = function (pendingOrder) {
+        this.patientName = pendingOrder.patientName;
         this.label = pendingOrder.label;
         this.provider = pendingOrder.provider;
         this.orderuid = pendingOrder.orderuid;
