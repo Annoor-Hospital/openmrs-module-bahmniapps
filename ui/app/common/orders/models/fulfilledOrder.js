@@ -16,6 +16,7 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         this.obsNote = '';
         this.obsEncounter = null;
         this.fulfillerComment = '';
+        this.isExpired = false;
     };
 
     this.combineWithPendingOrder = function (pendingOrder) {
@@ -27,10 +28,9 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         return this;
     };
 
-    this.addObsEncounter = function (obsEncounter) {
-        this.obsEncounter = obsEncounter;
-        this.obsNote = obsEncounter.obsNote;
-        this.studyuid = obsEncounter.obsExt;
+    this.addObs = function (obs) {
+        this.obs = obs; // needed for uuids
+        this.obsNote = obs.obsNote;
     };
 
     create.apply(this, []);

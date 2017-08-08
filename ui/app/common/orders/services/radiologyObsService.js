@@ -3,7 +3,7 @@
 angular.module('bahmni.common.orders')
     .factory('radiologyObsService', ['$http', '$filter', '$q', function ($http, $filter, $q) {
         // get a set of obervations by date by patient uuid
-        var getObsEncounter = function (data) {
+        var getObs = function (data) {
             var params = {};
             if (data.obsdate) {
                 params.q = 'radiology.sqlSearch.obsByDate';
@@ -19,87 +19,78 @@ angular.module('bahmni.common.orders')
             }).then(function (response) {
                 return response.data.map(function (item) {
                     return {
-                        encounterUuid: item.encounter_uuid,
                         obsGroupUuid: item.obs_group_uuid,
                         obsNoteUuid: item.obs_note_uuid,
                         obsNote: item.obs_note_value,
                         obsExtUuid: item.obs_ext_uuid,
-                        obsExtDate: item.obs_ext_date,
                         obsExt: item.obs_ext_value,
-                        encounterProviderUuid: item.encounter_provider_uuid
+                        obsExtDate: item.obs_ext_date
                     };
                 });
             });
         };
 
-        // set observation encounter on appropriate orders
-        var addObsEncounterToOrders = function (encounters, orders) {
-            for (var i = 0; i < encounters.length; i++) {
+        // set observation on appropriate orders
+        var addObsToOrders = function (obs, orders) {
+            for (var i = 0; i < obs.length; i++) {
                 var order = orders.find(function (item) {
-                    return item.studyuid == encounters[i].obsExt;
+                    return item.studyuid == obs[i].obsExt;
                 });
                 // only fullfilled orders can have studyuid
-                order.addObsEncounter(encounters[i]);
+                order.addObs(obs[i]);
             }
         };
 
-        var buildObsEncounter = function (bahmniOrder, context) {
-            var obsEncounter = {
-                obs: [{
-                    concept: context.obsGroupConceptId,
-                    groupMembers: [{
-                        concept: context.obsNoteConceptId,
-                        value: bahmniOrder.obsNote
-                    }, {
-                        concept: context.obsExtConceptId,
-                        value: bahmniOrder.studyuid,
-                        obsDatetime: bahmniOrder.orderDate.toISOString()
-                    }]
+        var buildObs = function (bahmniOrder, context) {
+            var obs = {
+                concept: context.obsGroupConceptId,
+                groupMembers: [{
+                    concept: context.obsNoteConceptId,
+                    value: bahmniOrder.obsNote
+                }, {
+                    concept: context.obsExtConceptId,
+                    value: bahmniOrder.studyuid,
+                    obsDatetime: bahmniOrder.orderDate.toISOString()
                 }]
             };
 
-            if (bahmniOrder.obsEncounter && bahmniOrder.obsEncounter.encounterUuid) {
-                // edit/delete encounter
-                obsEncounter.uuid = bahmniOrder.obsEncounter.encounterUuid;
-                obsEncounter.obs[0].uuid = bahmniOrder.obsEncounter.obsGroupUuid;
-                obsEncounter.obs[0].groupMembers[0].uuid = bahmniOrder.obsEncounter.obsNoteUuid;
-                obsEncounter.obs[0].groupMembers[1].uuid = bahmniOrder.obsEncounter.obsExtUuid;
+            var currentdate = new Date();
+
+            if (bahmniOrder.obs && bahmniOrder.obs.obsGroupUuid) {
+                // edit/delete obs
+                obs.uuid = bahmniOrder.obs.obsGroupUuid;
+                obs.groupMembers[0].uuid = bahmniOrder.obs.obsNoteUuid;
+                obs.groupMembers[1].uuid = bahmniOrder.obs.obsExtUuid;
             } else {
-                // create encounter
-                obsEncounter.patient = bahmniOrder.patientUuid;
-                obsEncounter.encounterType = context.encounterTypeUuid;
-                obsEncounter.location = context.encounterLocationUuid;
-                obsEncounter.encounterProviders = [{
-                    provider: context.encounterProviderUuid,
-                    encounterRole: context.encounterRoleUuid
-                }];
-                obsEncounter.visit = context.visitUuid;
+                // create obs
+                obs.person = bahmniOrder.patientUuid;
+                obs.location = context.locationUuid;
+                obs.obsDatetime = currentdate.toISOString();
+                obs.groupMembers[0].person = bahmniOrder.patientUuid;
+                obs.groupMembers[0].obsDatetime = currentdate.toISOString();
+                obs.groupMembers[1].person = bahmniOrder.patientUuid;
             }
-            return obsEncounter;
+            return obs;
         };
 
         /* context = {
-            encounterTypeUuid
-            encounterLocationUuid
-            encounterProviderUuid
-            encounterRoleUuid
-            visitUuid
+            locationUuid
             obsGroupConceptId
             obsNoteConceptId
             obsExtConceptId
         }; */
         var saveObsFromOrder = function (bahmniOrder, context) {
-            var obsEncounter = buildObsEncounter(bahmniOrder, context);
-            var url = '/openmrs/ws/rest/v1/encounter';
-            var url = obsEncounter.uuid ? url + '/' + obsEncounter.uuid : url;
+            var obs = buildObs(bahmniOrder, context);
+            var url = '/openmrs/ws/rest/v1/obs';
+            var url = obs.uuid ? url + '/' + obs.uuid : url;
 
-            return $http.post(url, obsEncounter, {
+            return $http.post(url, obs, {
                 withCredentials: true,
                 headers: {"Accept": "application/json", "Content-Type": "application/json"}
             }).then(function (data) {
-                // add the new uuids to the existing order
-                return getObsEncounter({patientuuid: bahmniOrder.patientUuid}).then(function (obs) {
-                    addObsEncounterToOrders(obs, [bahmniOrder]);
+                // refresh observations of the order (since returned data doesn't contain all info needed)
+                return getObs({patientuuid: bahmniOrder.patientUuid}).then(function (obs) {
+                    addObsToOrders(obs, [bahmniOrder]);
                     return bahmniOrder;
                 });
             }, function (reason) {
@@ -108,31 +99,28 @@ angular.module('bahmni.common.orders')
         };
 
         var delObsFromOrder = function (bahmniOrder) {
-            if (!(bahmniOrder.obsEncounter && bahmniOrder.obsEncounter.encounterUuid)) {
+            if (!bahmniOrder.obs || !bahmniOrder.obs.obsGroupUuid) {
                 return Promise.reject('Observation note not found');
             }
-            var urlObs = [bahmniOrder.obsEncounter.obsNoteUuid, bahmniOrder.obsEncounter.obsExtUuid].map(function (uuid) {
+            var urlObs = [bahmniOrder.obs.obsNoteUuid, bahmniOrder.obs.obsExtUuid].map(function (uuid) {
                 return '/openmrs/ws/rest/v1/obs/' + uuid;
             });
-            var urlObsGroup = '/openmrs/ws/rest/v1/obs/' + bahmniOrder.obsEncounter.obsGroupUuid;
-            var urlEncounter = '/openmrs/ws/rest/v1/encounter/' + bahmniOrder.obsEncounter.encounterUuid;
-            // var urlEncounterProvider = urlEncounter + '/encounterProvider/' + bahmniOrder.obsEncounter.encounterProviderUuid;
+            var urlObsGroup = '/openmrs/ws/rest/v1/obs/' + bahmniOrder.obs.obsGroupUuid;
             var config = {params: {purge: false}, withCredentials: true};
             var po1 = $http.delete(urlObs[0], config);
             var po2 = $http.delete(urlObs[1], config);
             return $q.all([po1, po2]).then(function (data) {
                 return $http.delete(urlObsGroup, config).then(function (data) {
-                    return $http.delete(urlEncounter).then(function (data) {
-                        // remove uuids from order
-                        bahmniOrder.obsEncounter = '';
-                    });
+                    // remove obs from order
+                    bahmniOrder.obs = '';
+                    bahmniOrder.obsNote = '';
                 }, function (reason) { Promise.reject(reason); });
             }, function (reason) { Promise.reject(reason); });
         };
 
         return {
-            getObsEncounter: getObsEncounter,
-            addObsEncounterToOrders: addObsEncounterToOrders,
+            getObs: getObs,
+            addObsToOrders: addObsToOrders,
             saveObsFromOrder: saveObsFromOrder,
             delObsFromOrder: delObsFromOrder
         };

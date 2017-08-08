@@ -26,10 +26,10 @@ Bahmni.Common.Orders.CombinedOrderList = function (orders, studies) {
 
     // get unmatched orders, assuming unique orderNumber
     var unmatchedOrders = orders.filter(function (elem) {
-        var ismatched = matchedOrders.find(function (elem2) {
+        // get active orders which are unmatched to any matched order
+        return !elem.isOrderExpired && !matchedOrders.find(function (elem2) {
             return elem.orderNumber == elem2.orderNumber;
         });
-        return !ismatched;
     });
 
     // extend studies with unmatched orders
