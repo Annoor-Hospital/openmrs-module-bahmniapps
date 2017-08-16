@@ -64,6 +64,10 @@ angular.module('bahmni.radiology')
                         orderList.forEach(function (order) {
                             if ("studyuid" in order) order.imageUrl = getImageUrl(order);
                         });
+                        // pending orders not interesting to radiologist
+                        orderList = orderList.filter(function (order) {
+                            return order.studyuid != null;
+                        });
                         // only modify scope variable on changes
                         if (!compareOrderLists($scope.bahmniOrders, orderList)) {
                             $scope.bahmniOrders = orderList;

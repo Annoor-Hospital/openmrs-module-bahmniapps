@@ -36,8 +36,8 @@ angular.module('bahmni.common.orders')
                 var order = orders.find(function (item) {
                     return item.studyuid == obs[i].obsExt;
                 });
-                // only fullfilled orders can have studyuid
-                order.addObs(obs[i]);
+                // only fullfilled orders can have studyuid, so safe to use addObs
+                if (order) order.addObs(obs[i]);
             }
         };
 

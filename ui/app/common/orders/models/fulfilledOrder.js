@@ -16,6 +16,7 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         this.obsNote = '';
         this.obsEncounter = null;
         this.fulfillerComment = '';
+        this.seriesCount = '';
         this.isExpired = false;
     };
 

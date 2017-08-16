@@ -8,6 +8,9 @@
       <td class="obs-note-label">Study Accession Number: </td><td>{{ngDialogData.bahmniOrder.accessionNumber}}</td>
     </tr>
     <tr><td class="obs-note-label">Provider: </td><td>{{ngDialogData.bahmniOrder.provider}}</td></tr>
+    <tr ng-if="ngDialogData.bahmniOrder.seriesCount > 1">
+      <td colspan="2" class="obs-note-notice">This study contains {{ngDialogData.bahmniOrder.seriesCount}} images.</td>
+    </tr>
     <tr>
       <td colspan="2">
         <a ng-if="ngDialogData.bahmniOrder.patientUuid" class="obs-note-link" target="PatientDashboardWindow" href="{{ngDialogData.bahmniOrder.dashboardUrl}}">Link to patient dashboard</a>

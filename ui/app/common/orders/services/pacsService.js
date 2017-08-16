@@ -68,6 +68,7 @@ angular.module('bahmni.common.orders')
             var sTime = getDcmValue(study, "00080030", null);
             fo.orderDate = dateFromString(sDate, sTime);
             fo.studyuid = getDcmValue(study, "0020000D", "");
+            fo.seriesCount = getDcmValue(study, "00201206", "1");
             // use part of study uid to get orderNumber!!! (hack)
             // this.orderNumber = getDcmValue(study, "00402016", "");
             var onMatch = fo.studyuid.match(/\.([0-9]+)\.[0-9]+$/);
