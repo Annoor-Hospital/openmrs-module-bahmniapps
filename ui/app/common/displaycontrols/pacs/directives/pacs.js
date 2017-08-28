@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.pacs')
-    .directive('pacs', ['pacsOrderService', 'orderTypeService', 'pacsService', 'radiologyObsService', 'encounterService', 'ngDialog', 'spinner', '$rootScope', 'messagingService', '$translate', '$window', '$q',
-        function (pacsOrderService, orderTypeService, pacsService, radiologyObsService, encounterService, ngDialog, spinner, $rootScope, messagingService, $translate, $window, $q) {
+    .directive('pacs', ['pacsOrderService', 'orderTypeService', 'pacsService', 'radiologyObsService', 'encounterService', 'visitService', 'ngDialog', 'spinner', '$rootScope', 'messagingService', '$translate', '$window', '$q',
+        function (pacsOrderService, orderTypeService, pacsService, radiologyObsService, encounterService, visitService, ngDialog, spinner, $rootScope, messagingService, $translate, $window, $q) {
             var controller = function ($scope) {
                 $scope.print = $rootScope.isBeingPrinted || false;
                 $scope.orderTypeUuid = orderTypeService.getOrderTypeUuid($scope.orderType);
@@ -20,7 +20,15 @@ angular.module('bahmni.common.displaycontrol.pacs')
                         patientid: $scope.patient.identifier, //.replace(/[a-zA-Z]+/g, ""),
                         date: null
                     };
-                    return pacsService.getStudies(params);
+                    // if context is a visit, set query date to visit date
+                    if ($scope.visitUuid) {
+                        return visitService.getVisitSummary($scope.visitUuid).then(function(response){
+                            params.date = new Date(response.data.startDateTime);
+                            return pacsService.getStudies(params);
+                        });
+                    }else{
+                        return pacsService.getStudies(params);
+                    }
                 };
                 var getRadiologyObs = function () {
                     var params = {
