@@ -43,7 +43,7 @@
                 };
 
                 var isOrderSetHavingMinimumOrders = function () {
-                    return _.filter($scope.orderSet.orderSetMembers, function (setMember) { return !setMember.retired; }).length >= 2;
+                    return _.filter($scope.orderSet.orderSetMembers, function (setMember) { return !setMember.retired; }).length >= 1;
                 };
 
                 $scope.remove = function (orderSetMember) {
@@ -141,7 +141,7 @@
                     }
 
                     if (!$scope.orderSet.orderSetMembers || !isOrderSetHavingMinimumOrders()) {
-                        messagingService.showMessage('error', 'An orderSet should have a minimum of two orderSetMembers');
+                        messagingService.showMessage('error', 'An orderSet should have a minimum of one orderSetMembers');
                         return false;
                     }
 
