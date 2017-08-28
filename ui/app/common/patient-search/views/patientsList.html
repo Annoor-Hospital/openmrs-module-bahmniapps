@@ -78,6 +78,7 @@
                     <img class="smallImages" ng-src="{{::patient.image}}" fallback-src='../images/blank-user.png'>
 
                 <div class="patient-name">{{::patient.name}}</div>
+                <div class="patient-name">{{::patient.localName}}</div>
                 <div class="patient-id">{{::patient.identifier}}</div>
                 <i class="ipd-indication fa fa-bed" ng-if="::(patient.hasBeenAdmitted===true||patient.hasBeenAdmitted==='true')"></i>
             </li>
