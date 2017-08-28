@@ -5,7 +5,7 @@ angular.module('bahmni.common.orders')
         var getOrdersByDate = function (data) {
             var params = {};
             params.date = $filter('date')(data.date, 'yyyy-MM-dd');
-            params.q = 'radiology.sqlSearch.activeOrdersByDate';
+            params.q = 'radiology.sqlSearch.ordersByDate';
             params.v = 'full';
             return getOrders(params);
         };
@@ -15,10 +15,10 @@ angular.module('bahmni.common.orders')
             params.patientUuid = data.patientUuid;
             params.v = 'full';
             if (data.visitUuid) {
-                params.q = 'radiology.sqlSearch.activeOrdersByPatientVisit';
+                params.q = 'radiology.sqlSearch.ordersByPatientVisit';
                 params.visitUuid = data.visitUuid;
             } else {
-                params.q = 'radiology.sqlSearch.activeOrdersByPatient';
+                params.q = 'radiology.sqlSearch.ordersByPatient';
             }
             return getOrders(params);
         };
@@ -41,6 +41,7 @@ angular.module('bahmni.common.orders')
             var po = new Bahmni.Common.Orders.PendingOrder();
             po.patientid = order.patientid;
             po.patientName = order.patientName;
+            po.patientBirthDate = new Date(order.patientBirthDate * 1000);
             po.label = order.conceptShortName || order.conceptName;
             po.provider = order.provider;
             po.orderDate = new Date(order.orderDate * 1000);

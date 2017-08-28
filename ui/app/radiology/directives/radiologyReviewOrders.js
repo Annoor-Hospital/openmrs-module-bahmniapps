@@ -5,21 +5,6 @@ angular.module('bahmni.radiology')
         function (ngDialog, messagingService, radiologyObsService, pacsService, pacsOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http, $window) {
             var controller = function ($scope) {
 
-                var getActiveVisit = function (patientUuid, currentVisitLocation) {
-                    return visitService.search({patient: patientUuid, v: 'custom:(uuid,visitType,startDatetime,stopDatetime,location,encounters:(uuid))', includeInactive: true})
-                        .then(function (data) {
-                            if(data.data && data.data.results) {
-                                var activeVisits = data.data.results.filter(function (visit) {
-                                    return visit.stopDatetime == null && visit.location.uuid == currentVisitLocation;
-                                });
-                                if (activeVisits.length > 0) { return activeVisits[0].uuid; }
-                                return null;
-                            } else {
-                                return null;
-                            }
-                        });
-                };
-
                 var getRadiologyOrders = function (date) {
                     var params = {
                         date: date
@@ -114,15 +99,9 @@ angular.module('bahmni.radiology')
                     return "/bahmni/clinical/index.html#/default/patient/" + uuid + "/dashboard";
                 };
 
-                $scope.openPatientWindow = function (patientid, target) {
-                    spinner.forPromise(getPatientUuid(patientid).then(function (data) {
-                        if (data.data && data.data.length > 0 && data.data[0].uuid && data.data[0].uuid.match(/[a-z0-9\-]+/)) {
-                            $window.open(patientDashboardUrl(data.data[0].uuid), target);
-                        } else {
-                            errorNotRegistered();
-                        }
-                    }));
-                };
+                $scope.getAgeYears = function (patientDOB) {
+                    return moment().diff(patientDOB, 'years');
+                }
 
                 $scope.openObsDialog = function (bahmniOrder) {
                     var openDialog = function (bahmniOrder) {

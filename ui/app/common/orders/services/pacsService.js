@@ -23,7 +23,7 @@ angular.module('bahmni.common.orders')
             });
         };
 
-        var dateFromString = function (dpart, tpart) {
+        var dateFromDicomString = function (dpart, tpart) {
             var date;
             if(dpart && tpart) {
                 date = moment(dpart + ' ' + tpart, 'YYYYMMDD HHmmss.SSS').toDate();
@@ -62,12 +62,16 @@ angular.module('bahmni.common.orders')
             //     fo.patientid = "MAF" + fo.patientid;
             // }
             fo.patientName = getDcmName(study, "00100010", "");
+            var pDOB = getDcmValue(study, "00100030", null);
+            if(pDOB) {
+                fo.patientBirthDate = dateFromDicomString(pDOB);
+            }
             fo.accessionNumber = getDcmValue(study, "00080050", '');
             fo.label = getDcmValue(study, "00321060", "X-Ray");
-            fo.provider = "Unknown";
+            fo.provider = '';
             var sDate = getDcmValue(study, "00080020", null);
             var sTime = getDcmValue(study, "00080030", null);
-            fo.orderDate = dateFromString(sDate, sTime);
+            fo.orderDate = dateFromDicomString(sDate, sTime);
             fo.studyuid = getDcmValue(study, "0020000D", "");
             fo.seriesCount = getDcmValue(study, "00201206", "1");
             // use part of study uid to get orderNumber!!! (hack)

@@ -6,6 +6,7 @@ Bahmni.Common.Orders.PendingOrder = function () {
     var create = function () {
         this.patientid = '';
         this.patientName = '';
+        this.patientBirthDate = null;
         this.accessionNumber = '';
         this.label = '';
         this.provider = '';

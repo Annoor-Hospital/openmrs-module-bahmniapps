@@ -3,6 +3,7 @@
   <table>
   <tbody>
     <tr><td class="obs-note-label">Patient Name: </td><td>{{ngDialogData.bahmniOrder.patientName}}</td></tr>
+    <tr><td class="obs-note-label">Patient Age / DOB: </td><td>{{ngDialogData.bahmniOrder.patientBirthDate | bahmniDate }} ({{getAgeYears(ngDialogData.bahmniOrder.patientBirthDate)}} Years)</td></tr>
     <tr><td class="obs-note-label">Patient id: </td><td>{{ngDialogData.bahmniOrder.patientid}}</td></tr>
     <tr ng-if="ngDialogData.bahmniOrder.studyuid">
       <td class="obs-note-label">Study Accession Number: </td><td>{{ngDialogData.bahmniOrder.accessionNumber}}</td>
