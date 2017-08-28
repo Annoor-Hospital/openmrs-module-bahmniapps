@@ -10,7 +10,7 @@ var whitelist = function (src, whitelist) {
 
 var assignIf = function (val, def) {
     return (val !== null) ? val : def;
-}
+};
 
 angular.module('bahmni.radiology').factory('initialization',
     ['$rootScope', '$q', '$window', '$http', '$location', 'configurationService', 'visitService', 'configurations', 'authenticator', 'appService', 'sessionService', 'locationService', 'spinner',
