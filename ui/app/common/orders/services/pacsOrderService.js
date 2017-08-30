@@ -41,7 +41,7 @@ angular.module('bahmni.common.orders')
             var po = new Bahmni.Common.Orders.PendingOrder();
             po.patientid = order.patientid;
             po.patientName = order.patientName;
-            po.patientBirthDate = new Date(order.patientBirthDate * 1000);
+            po.patientBirthDate = moment(order.patientBirthDate, 'YYYY-MM-DD').toDate();
             po.label = order.conceptShortName || order.conceptName;
             po.provider = order.provider;
             po.orderDate = new Date(order.orderDate * 1000);

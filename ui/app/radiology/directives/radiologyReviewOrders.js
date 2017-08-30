@@ -73,10 +73,9 @@ angular.module('bahmni.radiology')
                 $scope.updateOrders = function () {
                     $timeout.cancel($scope.timeoutPromise);
                     getOrders();
-                    if ($scope.refreshTimeout) {
+                    // restrict auto-refresh functionality to those with edit note privileges, to avoid overworking pacs
+                    if ($scope.refreshTimeout && $scope.canEditNote) {
                         $scope.timeoutPromise = $timeout($scope.updateOrders, $scope.refreshTimeout);
-                    } else {
-                        console.error("No refresh timeout!");
                     }
                 };
 
@@ -141,15 +140,19 @@ angular.module('bahmni.radiology')
                 };
 
                 $scope.saveObsDialog = function (bahmniOrder, text) {
-                    if (bahmniOrder.obsNote != text) {
-                        bahmniOrder.obsNote = text;
-                        if(text.length > 0) {
-                            saveObs(bahmniOrder);
-                        }else{
-                            delObs(bahmniOrder);
+                    if ($scope.canEditNote) {
+                        if (bahmniOrder.obsNote != text) {
+                            bahmniOrder.obsNote = text;
+                            if(text.length > 0) {
+                                saveObs(bahmniOrder);
+                            }else{
+                                delObs(bahmniOrder);
+                            }
+                        } else {
+                            messagingService.showMessage('info', "Already Saved");
                         }
                     } else {
-                        messagingService.showMessage('info', "Already Saved");
+                        messagingService.showMessage('error', "Edit note privilege lacking");
                     }
                 };
 
@@ -197,7 +200,8 @@ angular.module('bahmni.radiology')
                     refreshButton: "=",
                     refreshTimeout: "=",
                     pacsImageUrl: "=",
-                    targetDate: "="
+                    targetDate: "=",
+                    canEditNote: "="
                 },
                 templateUrl: "views/radiologyReviewOrders.html"
             };

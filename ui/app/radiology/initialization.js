@@ -74,7 +74,7 @@ angular.module('bahmni.radiology').factory('initialization',
             };
 
             var initApp = function () {
-                return appService.initApp('radiology', {'app': true, 'extension': false});
+                return appService.initApp('radiology', {'app': true, 'extension': true});
             };
 
             $rootScope.$on("$stateChangeError", function () {

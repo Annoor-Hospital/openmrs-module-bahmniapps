@@ -26,7 +26,7 @@
       <pre>{{ngDialogData.bahmniOrder.fulfillerComment}}</pre>
     </div>
   </div>
-  <div ng-if="ngDialogData.bahmniOrder.patientUuid && ngDialogData.bahmniOrder.studyuid">
+  <div ng-if="canEditNote && ngDialogData.bahmniOrder.patientUuid && ngDialogData.bahmniOrder.studyuid">
     <div class="obs-note-block-label">Radiologist Note:</div>
     <div class="form-field">
       <div class="field-value">
@@ -38,7 +38,13 @@
       </div>
     </div>
   </div>
-  <div ng-if="!ngDialogData.bahmniOrder.patientUuid || !ngDialogData.bahmniOrder.studyuid">
+  <div ng-if="!canEditNote">
+    <div class="obs-note-block-label">Radiologist Note:</div>
+    <div class="obs-note-comment">
+      <pre>{{ngDialogData.textarea}}</pre>
+    </div>
+  </div>
+  <div ng-if="!canEditNote || !ngDialogData.bahmniOrder.patientUuid || !ngDialogData.bahmniOrder.studyuid">
     <div ng-if="!ngDialogData.bahmniOrder.patientUuid" class="obs-note-warning">Patient is not registered</div>
     <div ng-if="!ngDialogData.bahmniOrder.studyuid" class="obs-note-warning">Order not yet fulfilled</div>
     <div class="dialog-button-group">
