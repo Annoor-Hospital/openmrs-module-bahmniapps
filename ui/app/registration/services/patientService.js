@@ -15,7 +15,7 @@ angular.module('bahmni.registration')
                     s: "byIdOrNameOrVillage",
                     addressFieldName: addressFieldName,
                     addressFieldValue: addressFieldValue,
-                    customAttribute: customAttributeValue.split(" "), // MATT: attempt repeated parameter using split
+                    customAttribute: customAttributeValue ? customAttributeValue.split(" ") : null, // MATT: try repeated parameter using split
                     startIndex: offset || 0,
                     patientAttributes: customAttributeFields,
                     programAttributeFieldName: programAttributeFieldName,
