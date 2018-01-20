@@ -176,7 +176,6 @@ category:  Layout - sections
     top: 46px;
     width: 220px;
     padding: 10px 10px 0;
-    right: 385px;
     li{
       display: block;
       padding-bottom: 10px;
@@ -190,92 +189,86 @@ category:  Layout - sections
 
 .dashboard-sections-wrapper {
   @include clearfix();
-  .halfpage-section {
-    column-count: 2;
-    @media print {
-      column-count: 1;
-    }
-    .dashboard-sections {
-      @include clearfix;
-      margin: 0;
-      box-sizing: border-box;
-      float: none;
-      width: 100%;
-      padding: 0;
-      break-inside: avoid-column;
-      &.halfpage-container{
-        width: 50%;
-        .LAYOUT_25_75{
-          width: 49.7%;
-          @media screen and (max-width: 760px) {
-            width:100%;
-            float:none;
-          }
-        }
-        &.dashboard-sections-left{
-          .LAYOUT_25_75{
-            width:48.3%;
-            @media screen and (max-width: 760px) {
-              width:100%;
-              float:none;
-            }
-          }
-        }
-        @media screen and (max-width: 859px) {
-          width: 100%;
-          margin: 0 auto;
-          padding: 0;
-          float: none;
-        }
-      }
-      &.dashboard-sections-right{
-        padding: 0px 0px 0px 5px;
-        @media screen and (max-width: 859px) {
-          padding: 0;
+  .dashboard-sections {
+    @include clearfix;
+    margin: 0;
+    box-sizing: border-box;
+    float: left;
+    width: 100%;
+    padding: 0;
+    &.halfpage-container{
+      width: 50%;
+      .LAYOUT_25_75{
+        width: 49.7%;
+        @media screen and (max-width: 760px) {
+          width:100%;
+          float:none;
         }
       }
       &.dashboard-sections-left{
-        padding: 0px 5px 0px 0px;
-        @media screen and (max-width: 859px) {
-          padding: 0;
-        }
-      }
-      &.three-fourth-page-container{
-        div.three-fourth-page{
-          box-sizing: border-box;
-            &.section-0{
-              padding-right: 5px;
-            }
-            &.section-1{
-              padding-left: 5px;
-            }
-        }
         .LAYOUT_25_75{
-          width: 24.5%;
-          float: left;
-          @media screen and (max-width: 760px) {
-            width:100%;
-            float:none;
-          }
-        }
-
-        .LAYOUT_75_25{
-          width: 75.5%;
-          float: left;
+          width:48.3%;
           @media screen and (max-width: 760px) {
             width:100%;
             float:none;
           }
         }
       }
-      .disease-date{
-        font-family: OpenSansSemiBold;
-        text-decoration: underline;
+      @media screen and (max-width: 859px) {
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+        float: none;
       }
     }
-  }
-}
+    &.dashboard-sections-right{
+      padding: 0px 0px 0px 5px;
+      @media screen and (max-width: 859px) {
+        padding: 0;
+      }
+    }
+    &.dashboard-sections-left{
+      padding: 0px 5px 0px 0px;
+      @media screen and (max-width: 859px) {
+        padding: 0;
+      }
+    }
+    &.three-fourth-page-container{
+      div.three-fourth-page{
+        box-sizing: border-box;
+          &.section-0{
+            padding-right: 5px;
+          }
+          &.section-1{
+            padding-left: 5px;
+          }
+      }
+      .LAYOUT_25_75{
+        width: 24.5%;
+        float: left;
+        @media screen and (max-width: 760px) {
+          width:100%;
+          float:none;
+        }
+      }
 
+      .LAYOUT_75_25{
+        width: 75.5%;
+        float: left;
+        @media screen and (max-width: 760px) {
+          width:100%;
+          float:none;
+        }
+      }
+    }
+    .disease-date{
+      font-family: OpenSansSemiBold;
+      text-decoration: underline;
+    }
+
+  }
+
+}
 #diagnosisSection{
   .ruled-out.diagnosis-name {
     color: $mediumGray;
