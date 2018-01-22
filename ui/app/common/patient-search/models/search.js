@@ -72,6 +72,10 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         return self.searchType && self.searchType.handler;
     };
 
+    self.isCurrentSearchCustom = function (type) {
+        return self.searchType && self.searchType.customSearch == type;
+    };
+
     self.isTileView = function () {
         return self.searchType && self.searchType.view === Bahmni.Common.PatientSearch.Constants.searchExtensionTileViewType;
     };
