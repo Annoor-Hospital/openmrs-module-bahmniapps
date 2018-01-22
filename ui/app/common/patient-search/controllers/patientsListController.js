@@ -2,8 +2,8 @@
 
 angular.module('bahmni.common.patientSearch')
 .controller('PatientsListController', ['$scope', '$window', 'patientService', '$rootScope', 'appService', 'spinner',
-    '$stateParams', '$bahmniCookieStore', 'offlineService', 'printer', 'configurationService',
-    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, offlineService, printer, configurationService) {
+    '$stateParams', '$bahmniCookieStore', 'offlineService', 'printer', 'configurationService', 'criteriaSearchService', 'messagingService',
+    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, offlineService, printer, configurationService, criteriaSearchService, messagingService) {
         var initialize = function () {
             var searchTypes = appService.getAppDescriptor().getExtensions("org.bahmni.patient.search", "config").map(mapExtensionToSearchType);
             $scope.search = new Bahmni.Common.PatientSearch.Search(_.without(searchTypes, undefined));
@@ -31,11 +31,28 @@ angular.module('bahmni.common.patientSearch')
             });
         };
 
+        $scope.criteria_search_submit = function (params) {
+          return spinner.forPromise(criteriaSearchService.search(params)).then(function (response) {
+              if(response.data && response.data.pageOfResults) {
+                $scope.search.updateSearchResults(response.data.pageOfResults);
+                if ($scope.search.hasSingleActivePatient()) {
+                    $scope.forwardPatient($scope.search.activePatients[0]);
+                }
+              }else {
+                if(response.data && response.data.error)
+                  messagingService.showMessage("error", "Search failed: " + response.data.error);
+                else
+                  messagingService.showMessage("error", "Search failed");
+              }
+          });
+        }
+
         $scope.filterPatientsAndSubmit = function () {
             if ($scope.search.searchResults.length == 1) {
                 $scope.forwardPatient($scope.search.searchResults[0]);
             }
         };
+
         var getPatientCount = function (searchType) {
             if (searchType.handler) {
                 var params = { q: searchType.handler, v: "full",
@@ -93,10 +110,12 @@ angular.module('bahmni.common.patientSearch')
             if (offlineService.isOfflineApp() && appExtn.offline == false) {
                 return;
             }
+
             return {
                 name: appExtn.label,
                 display: appExtn.extensionParams.display,
                 handler: appExtn.extensionParams.searchHandler,
+                customSearch: appExtn.extensionParams.customSearch,
                 forwardUrl: appExtn.extensionParams.forwardUrl,
                 id: appExtn.id,
                 params: appExtn.extensionParams.searchParams,
