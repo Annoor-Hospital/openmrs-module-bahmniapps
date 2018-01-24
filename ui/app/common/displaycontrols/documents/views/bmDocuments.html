@@ -4,7 +4,7 @@
         <ul>
             <li ng-repeat="recordGroup in recordGroups" class="radiology-doc-item"
                 bm-gallery patient="patient" access-impression="true">
-                <a class="document-link" bm-image-observation-gallery-items list=recordGroup.records>
+                <a class="document-link" bm-image-observation-gallery-items style="display:inline;" list=recordGroup.records>
                     {{::recordGroup.conceptName}}
                 </a>
                 <i ng-show="shouldShowActiveVisitStar(recordGroup.records)"
