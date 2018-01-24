@@ -53,7 +53,8 @@ angular.module('bahmni.clinical')
                         if (!_.isEmpty(drugOrderResponse[Constants.otherActiveDrugOrders])) {
                             var mergedOtherActiveDrugOrders = Bahmni.Clinical.DrugOrder.Util.mergeContinuousTreatments(drugOrderResponse[Constants.otherActiveDrugOrders]);
                             treatmentSections.push({
-                                visitDate: Constants.otherActiveDrugOrders,
+                                title: Constants.otherActiveDrugOrders,
+                                visitDate: 0,
                                 drugOrders: mergedOtherActiveDrugOrders
                             });
                         }
