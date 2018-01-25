@@ -20,15 +20,7 @@ angular.module('bahmni.common.displaycontrol.pacs')
                         patientid: $scope.patient.identifier, //.replace(/[a-zA-Z]+/g, ""),
                         date: null
                     };
-                    // if context is a visit, set query date to visit date
-                    if ($scope.visitUuid) {
-                        return visitService.getVisitSummary($scope.visitUuid).then(function(response){
-                            params.date = new Date(response.data.startDateTime);
-                            return pacsService.getStudies(params);
-                        });
-                    }else{
-                        return pacsService.getStudies(params);
-                    }
+                    return pacsService.getStudies(params);
                 };
                 var getRadiologyObs = function () {
                     var params = {
@@ -46,8 +38,12 @@ angular.module('bahmni.common.displaycontrol.pacs')
                         var obs = data[2];
                         radiologyObsService.addObsToOrders(obs, studies);
                         var orderList = Bahmni.Common.Orders.CombinedOrderList(orders, studies);
+                        if($scope.visitUuid)
+                            orderList = orderList.filter(order => order.orderUuid);
+                        if($scope.config.limit && $scope.config.limit > 0)
+                            orderList = orderList.slice(0,$scope.config.limit);
                         orderList.forEach(function (order) {
-                            if ("studyuid" in order) order.imageUrl = getImageUrl(order);
+                            if ("studyUid" in order) order.imageUrl = getImageUrl(order);
                         });
                         $scope.bahmniOrders = orderList;
                     });
@@ -64,7 +60,7 @@ angular.module('bahmni.common.displaycontrol.pacs')
 
                 var getImageUrl = function (bahmniOrder) {
                     var pacsImageTemplate = $scope.config.pacsImageUrl || "";
-                    return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyuid);
+                    return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyUid);
                 };
 
                 $scope.deleteConfirm = function (order) {
@@ -79,17 +75,17 @@ angular.module('bahmni.common.displaycontrol.pacs')
 
                 $scope.deleteOrder = function () {
                     // Basic task is to retrieve the encounter to which this order belongs, delete the order, and re-save the encounter.
-                    // The trouble is that a bahmni order (which is what we have access to here) doesn't have the encounter UID data in it. This is frustrating.
+                    // The trouble is that a bahmni order (which is what we have access to here) doesn't have the encounter uuid data in it. This is frustrating.
                     // encounterService.findByEncounterUuid($scope.observation.encounterUuid)
 
                     // encounter needs orders, providers,
-                    var promise = encounterService.findByOrderUuid($scope.targetOrder.orderuid);
+                    var promise = encounterService.findByOrderUuid($scope.targetOrder.orderUuid);
                     spinner.forPromise(promise).then(function (data) {
                         var encounter = data.data;
                         // find this particular order and mark it for deletion
-                        // need encounter.orders[i].uuid = $scope.targetOrder.orderuid
+                        // need encounter.orders[i].uuid = $scope.targetOrder.orderUuid
                         var i = encounter.orders.findIndex(function (order) {
-                            return order.uuid == $scope.targetOrder.orderuid;
+                            return order.uuid == $scope.targetOrder.orderUuid;
                         });
                         encounter.orders = [Bahmni.Clinical.Order.discontinue(encounter.orders[i])];
                         encounter.observations = [];
@@ -103,11 +99,11 @@ angular.module('bahmni.common.displaycontrol.pacs')
                     });
                 };
 
-                $scope.getUrl = function (orderNumber, studyUID) {
+                $scope.getUrl = function (orderNumber, studyUid) {
                     var pacsImageTemplate = $scope.config.pacsImageUrl || "";
                     return pacsImageTemplate
                         .replace('{{patientID}}', $scope.patient.identifier)
-                        .replace('{{studyUID}}', studyUID)
+                        .replace('{{studyUID}}', studyUid)
                         .replace('{{orderNumber}}', orderNumber);
                 };
 

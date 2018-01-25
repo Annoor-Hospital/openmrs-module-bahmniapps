@@ -11,9 +11,9 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         this.label = '';
         this.provider = '';
         this.orderDate = '';
-        this.studyuid = '';
+        this.studyUid = '';
         this.orderNumber = '';
-        this.orderuid = '';
+        this.orderUuid = '';
         this.obsNote = '';
         this.obsEncounter = null;
         this.fulfillerComment = '';
@@ -24,9 +24,11 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
     this.combineWithPendingOrder = function (pendingOrder) {
         this.patientName = pendingOrder.patientName;
         this.label = pendingOrder.label;
+        this.visitUuid = pendingOrder.visitUuid;
+        this.visitStartDate = pendingOrder.visitStartDate;
         this.patientBirthDate = pendingOrder.patientBirthDate;
         this.provider = pendingOrder.provider;
-        this.orderuid = pendingOrder.orderuid;
+        this.orderUuid = pendingOrder.orderUuid;
         this.fulfillerComment = pendingOrder.fulfillerComment;
         return this;
     };

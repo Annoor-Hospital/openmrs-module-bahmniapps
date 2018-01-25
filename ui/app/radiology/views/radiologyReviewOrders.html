@@ -15,10 +15,10 @@
             </tr>
             <tr class="link" ng-repeat="bahmniOrder in bahmniOrders" ng-click="openObsDialog(bahmniOrder)">
                 <td>
-                    <span ng-if="!bahmniOrder.studyuid">
+                    <span ng-if="!bahmniOrder.studyUid">
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                     </span>
-                    <span ng-if="bahmniOrder.studyuid">
+                    <span ng-if="bahmniOrder.studyUid">
                         <i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </span>
                 </td>

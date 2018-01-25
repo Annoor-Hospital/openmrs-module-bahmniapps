@@ -29,8 +29,8 @@ angular.module('bahmni.radiology')
                 var compareOrderLists = function (l1, l2) {
                     if (l1.length != l2.length) return false;
                     for (var i = 0; i < l1.length; i++) {
-                        if (l1[i].studyuid != l2[i].studyuid) return false;
-                        else if (l1[i].orderuid != l2[i].orderuid) return false;
+                        if (l1[i].studyUid != l2[i].studyUid) return false;
+                        else if (l1[i].orderUuid != l2[i].orderUuid) return false;
                     }
                     return true;
                 };
@@ -48,11 +48,11 @@ angular.module('bahmni.radiology')
                         radiologyObsService.addObsToOrders(obs, studies);
                         var orderList = Bahmni.Common.Orders.CombinedOrderList(orders, studies);
                         orderList.forEach(function (order) {
-                            if ("studyuid" in order) order.imageUrl = getImageUrl(order);
+                            if ("studyUid" in order) order.imageUrl = getImageUrl(order);
                         });
                         // pending orders not interesting to radiologist
                         orderList = orderList.filter(function (order) {
-                            return order.studyuid != null;
+                            return order.studyUid != null;
                         });
                         // only modify scope variable on changes
                         if (!compareOrderLists($scope.bahmniOrders, orderList)) {
@@ -63,7 +63,7 @@ angular.module('bahmni.radiology')
 
                 var getImageUrl = function (bahmniOrder) {
                     var pacsImageTemplate = $scope.pacsImageUrl || "";
-                    return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyuid);
+                    return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyUid);
                 };
 
                 $scope.$watch('targetDate',function(newDate,oldDate){

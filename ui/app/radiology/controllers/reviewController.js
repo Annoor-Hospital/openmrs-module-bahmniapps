@@ -7,7 +7,6 @@ angular.module('radiology')
             var init = function () {
                 var deferrables = $q.defer();
                 var promises = [];
-                // promises.push(getVisitTypes());
                 $q.all(promises).then(function () {
                     $scope.extensions = appService.getAppDescriptor().getExtensions("bahmni.radiology") || [];
                     if($scope.extensions.find(function(ext) {

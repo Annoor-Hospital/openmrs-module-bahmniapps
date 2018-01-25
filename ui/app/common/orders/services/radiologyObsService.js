@@ -35,9 +35,9 @@ angular.module('bahmni.common.orders')
         var addObsToOrders = function (obs, orders) {
             for (var i = 0; i < obs.length; i++) {
                 var order = orders.find(function (item) {
-                    return item.studyuid == obs[i].obsExt;
+                    return item.studyUid == obs[i].obsExt;
                 });
-                // only fullfilled orders can have studyuid, so safe to use addObs
+                // only fullfilled orders can have studyUid, so safe to use addObs
                 if (order) order.addObs(obs[i]);
             }
         };
@@ -50,7 +50,7 @@ angular.module('bahmni.common.orders')
                     value: bahmniOrder.obsNote
                 }, {
                     concept: context.obsExtConceptId,
-                    value: bahmniOrder.studyuid,
+                    value: bahmniOrder.studyUid,
                     obsDatetime: bahmniOrder.orderDate.toISOString()
                 }]
             };
