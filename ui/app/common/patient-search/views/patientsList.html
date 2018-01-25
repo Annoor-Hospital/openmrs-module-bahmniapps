@@ -51,7 +51,7 @@
                     <thead>
                     <tr>
                         <!-- <th><strong>Sl.No</strong></th> -->
-                        <th ng-repeat="heading in getHeadings(search.visiblePatients)"><strong>{{ ::heading | translate }}</strong></th>
+                        <th ng-repeat="heading in getHeadings(search.visiblePatients)"><strong>{{ ::heading | translate | snakeToUpper}}</strong></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -60,8 +60,7 @@
                             {{$index + 1}}
                         </td> -->
                         <td ng-repeat="heading in getHeadings(search.visiblePatients)">
-                            <a ng-if="::isHeadingOfIdentifier(heading)"
-                               ng-click="forwardPatient(row)">{{::row[heading]}}</a>
+                            <a ng-if="::isHeadingOfIdentifier(heading)" target="{{::forwardPatientTarget(row)}}" href="{{::forwardPatientUrl(row)}}">{{::row[heading]}}</a>
                             <span ng-if="::isHeadingOfName(heading)" ng-click="forwardPatient(row)">{{::row[heading]}}
                                 <i class="ipd-indication fa fa-bed" ng-if="::(row.hasBeenAdmitted===true||row.hasBeenAdmitted==='true')"></i>
                             </span>
