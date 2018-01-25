@@ -42,11 +42,13 @@ angular.module('bahmni.common.orders')
             po.patientid = order.patientid;
             po.patientName = order.patientName;
             po.patientBirthDate = moment(order.patientBirthDate, 'YYYY-MM-DD').toDate();
+            po.visitUuid = order.visitUuid;
+            po.visitStartDate = new Date(order.visitStartDate * 1000);
             po.label = order.conceptShortName || order.conceptName;
             po.provider = order.provider;
             po.orderDate = new Date(order.orderDate * 1000);
             po.orderNumber = order.orderNumber;
-            po.orderuid = order.orderUuid;
+            po.orderUuid = order.orderUuid;
             po.fulfillerComment = order.commentToFulfiller;
             po.isOrderExpired = order.isExpired;
             return po;

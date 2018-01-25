@@ -6,18 +6,18 @@
             <tbody ng-repeat="bahmniOrder in bahmniOrders" class="row">
                  <tr class="view-past" ng-class="::{'test-notes-parent': bahmniOrder.obsNote}">
                     <td class="actions pacs-shrink">
-                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.studyuid"></i>
-                        <a ng-if="! bahmniOrder.studyuid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
+                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.studyUid"></i>
+                        <a ng-if="! bahmniOrder.studyUid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
                         <span ng-if="bahmniOrder.seriesCount > 1">x{{bahmniOrder.seriesCount}}</span>
                         <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>-->
                         <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </td>
-                    <td class="name pacs-expand" ng-if="bahmniOrder.studyuid">
+                    <td class="name pacs-expand" ng-if="bahmniOrder.studyUid">
                             <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{bahmniOrder.label}}</a>
                     </td>
-                    <td class="name pacs-expand" ng-if="!bahmniOrder.studyuid">
+                    <td class="name pacs-expand" ng-if="!bahmniOrder.studyUid">
                         {{bahmniOrder.label}}
                     </td>
                     <td class="accession-number pacs-shrink">
