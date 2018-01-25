@@ -84,6 +84,7 @@ angular.module('bahmni.clinical')
                 accessions = _.union(initial, latest);
             }
             accessions.reverse();
+            tabularResult.tabularResult.dates.reverse();
             return {
                 accessions: groupByPanel(accessions),
                 tabularResult: tabularResult

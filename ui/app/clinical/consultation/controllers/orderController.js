@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('OrderController', ['$scope', 'allOrderables', 'ngDialog', 'retrospectiveEntryService', 'appService', '$translate',
-        function ($scope, allOrderables, ngDialog, retrospectiveEntryService, appService, $translate) {
+    .controller('OrderController', ['$scope', '$rootScope', 'allOrderables', 'providerService', 'ngDialog', 'retrospectiveEntryService', 'appService', '$translate',
+        function ($scope, $rootScope, allOrderables, providerService, ngDialog, retrospectiveEntryService, appService, $translate) {
             $scope.consultation.orders = $scope.consultation.orders || [];
             $scope.consultation.childOrders = $scope.consultation.childOrders || [];
             $scope.allOrdersTemplates = allOrderables;
@@ -62,6 +62,13 @@ angular.module('bahmni.clinical')
                     discontinuedOrder.isDiscontinued = false;
                 } else {
                     var createdOrder = Bahmni.Clinical.Order.create(test);
+                    // MAF get provider display name and use it as the default commentToFulfiller
+                    providerService.list().then(function (response){
+                        if(response.data) {
+                            var currentProvider = response.data.results.find(provider => (provider.uuid == $rootScope.currentProvider.uuid));
+                            createdOrder.commentToFulfiller = currentProvider.display;
+                        }
+                    });
                     $scope.consultation.orders.push(createdOrder);
                 }
             };
