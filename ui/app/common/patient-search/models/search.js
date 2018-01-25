@@ -89,6 +89,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     };
 
     function mapPatient (patient) {
+        console.log(patient);
         if (patient.name || patient.givenName || patient.familyName) {
             patient.name = patient.name || (patient.givenName + ' ' + patient.familyName);
         }

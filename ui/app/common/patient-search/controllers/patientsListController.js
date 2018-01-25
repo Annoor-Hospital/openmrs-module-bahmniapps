@@ -31,6 +31,7 @@ angular.module('bahmni.common.patientSearch')
             });
         };
 
+        // MAF search for patients by criteria
         $scope.criteria_search_submit = function (params) {
           return spinner.forPromise(criteriaSearchService.search(params)).then(function (response) {
               if(response.data && response.data.pageOfResults) {
@@ -143,7 +144,12 @@ angular.module('bahmni.common.patientSearch')
             }
         };
 
-        $scope.forwardPatient = function (patient) {
+        // MAF: added a function to get forwarding URL, so that the link can behave like a link
+        var hasPatientForwardUrl = function (patient) {
+            return ($stateParams.forwardUrl != null || patient.forwardUrl != null);
+        };
+
+        $scope.forwardPatientUrl = function (patient) {
             var options = $.extend({}, $stateParams);
             $.extend(options, {
                 patientUuid: patient.uuid,
@@ -155,11 +161,30 @@ angular.module('bahmni.common.patientSearch')
             });
 
             if (options.forwardUrl !== null) {
-                $window.open(appService.getAppDescriptor().formatUrl(options.forwardUrl, options, true), '_blank');
+                return appService.getAppDescriptor().formatUrl(options.forwardUrl, options, true);
             } else {
-                $window.location = appService.getAppDescriptor().formatUrl($scope.search.searchType.forwardUrl, options, true);
+                return appService.getAppDescriptor().formatUrl($scope.search.searchType.forwardUrl, options, true);
             }
         };
+
+        $scope.forwardPatientTarget = function (patient) {
+            return hasPatientForwardUrl(patient) ? '_blank' : '_self';
+        };
+
+        $scope.forwardPatient = function (patient) {
+            var url = $scope.forwardPatientUrl(patient);
+
+            if (hasPatientForwardUrl(patient)) {
+                $window.open(url, '_blank');
+            } else {
+                $window.location = url;
+            }
+        };
+
         initialize();
     }
-]);
+]).filter('snakeToUpper', function() {
+    return function (input) {
+        return input.replace(/_([A-Z])?/, ' $1');
+    }
+});
