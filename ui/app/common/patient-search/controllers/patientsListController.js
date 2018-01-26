@@ -79,7 +79,6 @@ angular.module('bahmni.common.patientSearch')
                         return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
                     })
                     .value();
-                //console.log($scope.search.searchType);
                 if($scope.search.searchType.headingOrder) {
                     var new_headings = $scope.search.searchType.headingOrder.filter(header => headings.includes(header));
                     var missed_headings = headings.filter(header => !new_headings.includes(header));
