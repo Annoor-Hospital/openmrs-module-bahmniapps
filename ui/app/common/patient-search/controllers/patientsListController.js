@@ -79,7 +79,12 @@ angular.module('bahmni.common.patientSearch')
                         return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
                     })
                     .value();
-
+                //console.log($scope.search.searchType);
+                if($scope.search.searchType.headingOrder) {
+                    var new_headings = $scope.search.searchType.headingOrder.filter(header => headings.includes(header));
+                    var missed_headings = headings.filter(header => !new_headings.includes(header));
+                    headings = new_headings.concat(missed_headings);
+                }
                 return headings;
             }
             return [];
@@ -124,6 +129,7 @@ angular.module('bahmni.common.patientSearch')
                 view: appExtn.extensionParams.view || Bahmni.Common.PatientSearch.Constants.searchExtensionTileViewType,
                 showPrint: appExtn.extensionParams.showPrint || false,
                 printHtmlLocation: appExtn.extensionParams.printHtmlLocation || null,
+                headingOrder: appExtn.extensionParams.headingOrder,
                 additionalParams: appExtn.extensionParams.additionalParams,
                 searchColumns: appExtn.extensionParams.searchColumns,
                 translationKey: appExtn.extensionParams.translationKey
@@ -185,6 +191,6 @@ angular.module('bahmni.common.patientSearch')
     }
 ]).filter('snakeToUpper', function() {
     return function (input) {
-        return input.replace(/_([A-Z])?/, ' $1');
+        return input.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
     }
 });

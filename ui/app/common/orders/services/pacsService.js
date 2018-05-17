@@ -67,7 +67,13 @@ angular.module('bahmni.common.orders')
                 fo.patientBirthDate = dateFromDicomString(pDOB);
             }
             fo.accessionNumber = getDcmValue(study, "00080050", '');
-            fo.label = getDcmValue(study, "00321060", "X-Ray");
+            fo.label = getDcmValue(study, "00400254", "");
+            if(!fo.label)
+                fo.label = getDcmValue(study, "00400255", "");
+            if(!fo.label)
+                fo.label = getDcmValue(study, "00081030", "");
+            if(!fo.label)
+                fo.label = getDcmValue(study, "00321060", "image");
             fo.provider = '';
             var sDate = getDcmValue(study, "00080020", null);
             var sTime = getDcmValue(study, "00080030", null);

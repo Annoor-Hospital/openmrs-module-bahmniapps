@@ -15,7 +15,7 @@
                         <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
                     </td>
                     <td class="name pacs-expand" ng-if="bahmniOrder.studyUid">
-                            <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{bahmniOrder.label}}</a>
+                            <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{ (bahmniOrder.label.length > 25) ? (bahmniOrder.label.substring(0,22)) + '...' : (bahmniOrder.label) }}</a>
                     </td>
                     <td class="name pacs-expand" ng-if="!bahmniOrder.studyUid">
                         {{bahmniOrder.label}}
