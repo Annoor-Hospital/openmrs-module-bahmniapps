@@ -81,6 +81,20 @@ angular.module('bahmni.common.orders')
             fo.studyUid = getDcmValue(study, "0020000D", "");
             fo.seriesCount = getDcmValue(study, "00201206", "1");
             // use part of study uid to get orderNumber!!! (hack)
+            /*  The 'proper' solution here is to have bahmni generate
+             *  the accession number, such that the accession number IS
+             *  the order number. Then tag 00080050 can be referenced to
+             *  match pacs images to orders in bahmni. However, at MAF
+             *  we wanted to allow the accession number system to be
+             *  able to continue even with the PACS system offline, so
+             *  that accession numbers are not interrupted. This is why
+             *  the accession numbers were made independant from bahmni.
+             *  
+             *  The suggested solution (online) is that when the pacs
+             *  system is offline, x-rays can still be taken with a blank
+             *  accession number, and these can be filled in at a later
+             *  time.
+             */
             // this.orderNumber = getDcmValue(study, "00402016", "");
             var onMatch = fo.studyUid.match(/\.([0-9]+)\.[0-9]+$/);
             if(onMatch) {

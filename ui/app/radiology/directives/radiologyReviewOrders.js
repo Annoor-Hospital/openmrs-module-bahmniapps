@@ -38,6 +38,8 @@ angular.module('bahmni.radiology')
                 var getOrders = function () {
                     var date = $scope.targetDate;
                     if(!date) date = new Date();
+                    // TODO
+                    // - What if order was on a date prior to date of x-ray? not possible to match in js
                     var p1 = getRadiologyOrders(date);
                     var p2 = getPacsStudies(date);
                     var p3 = getRadiologyObs(date);
