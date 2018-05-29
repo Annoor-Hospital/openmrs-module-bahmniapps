@@ -196,6 +196,7 @@ module.exports = function (grunt) {
                 '<%= yeoman.app %>/admin/**/*.html',
                 '<%= yeoman.app %>/registration/**/*.html',
                 '<%= yeoman.app %>/ot/**/*.html',
+                '<%= yeoman.app %>/radiology/**/*.html',
                 '<%= yeoman.app %>/document-upload/**/*.html',
                 '<%= yeoman.app %>/reports/**/*.html',
                 '<%= yeoman.app %>/appointments/**/*.html'
@@ -270,6 +271,7 @@ module.exports = function (grunt) {
                             'admin/**/*.html',
                             'reports/**/*.html',
                             'registration/**/*.html',
+                            'radiology/**/*.html',
                             'document-upload/**/*.html',
                             'appointments/**/*.html'
                         ],
@@ -358,6 +360,12 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= yeoman.dist %>',
+                        src: ['radiology.*.js'],
+                        dest: '<%= yeoman.dist %>/radiology/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= yeoman.dist %>',
                         src: ['registration.*.js'],
                         dest: '<%= yeoman.dist %>/registration/'
                     },
@@ -425,6 +433,12 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= yeoman.dist %>',
+                        src: ['radiology.*.css'],
+                        dest: '<%= yeoman.dist %>/radiology/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= yeoman.dist %>',
                         src: ['document-upload.*.css'],
                         dest: '<%= yeoman.dist %>/document-upload/'
                     },
@@ -477,6 +491,7 @@ module.exports = function (grunt) {
             multifile: {
                 files: {
                     '<%= yeoman.dist %>/registration.min.js': '<%= yeoman.dist %>/registration.min.js',
+                    '<%= yeoman.dist %>/radiology.min.js': '<%= yeoman.dist %>/radiology.min.js',
                     '<%= yeoman.dist %>/admin.min.js': '<%= yeoman.dist %>/admin.min.js',
                     '<%= yeoman.dist %>/adt.min.js': '<%= yeoman.dist %>/adt.min.js',
                     '<%= yeoman.dist %>/document-upload.min.js': '<%= yeoman.dist %>/document-upload.min.js',

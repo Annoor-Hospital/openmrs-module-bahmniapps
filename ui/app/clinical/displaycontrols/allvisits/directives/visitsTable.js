@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .directive('visitsTable', ['patientVisitHistoryService', 'conceptSetService', 'spinner', '$state', '$q',
-        function (patientVisitHistoryService, conceptSetService, spinner, $state, $q) {
+    .directive('visitsTable', ['patientVisitHistoryService', 'conceptSetService', 'observationsService', 'spinner', '$state', '$q',
+        function (patientVisitHistoryService, conceptSetService, observationsService, spinner, $state, $q) {
             var controller = function ($scope) {
                 var emitNoDataPresentEvent = function () {
                     $scope.$emit("no-data-present-event");
@@ -81,6 +81,14 @@ angular.module('bahmni.clinical')
                         $scope.visits = results[0].visits;
                         $scope.patient = {uuid: $scope.patientUuid};
                         if (!$scope.hasVisits()) emitNoDataPresentEvent();
+                        // MATT try to get a Chief Complaint observation for this visit
+                        $scope.visits.forEach(function(visit) {
+                            observationsService.fetch(null, ["Chief Complaint Data", "Presenting Complaint", "Tuberculosis, Symptoms"], null, null, visit.uuid).then(function(obs_resp){
+                                if(obs_resp.data && obs_resp.data.length > 0) {
+                                    visit.summary = (obs_resp.data[0].concept.shortName ? obs_resp.data[0].concept.shortName : obs_resp.data[0].conceptNameToDisplay) + ": " + obs_resp.data[0].valueAsString;
+                                }
+                            });
+                        });
                     });
                 };
 

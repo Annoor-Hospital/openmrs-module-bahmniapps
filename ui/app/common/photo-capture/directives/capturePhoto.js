@@ -80,7 +80,16 @@ angular.module('bahmni.common.photoCapture')
                             alert("Could not get access to web camera. Please allow access to web camera");
                         }
                     );
-                } else {
+                }else if(navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({video: true, augio: false})
+                        .then(function (localMediaStream) {
+                            captureVideo.src = $window.URL.createObjectURL(localMediaStream);
+                            captureActiveStream = localMediaStream;
+                            captureDialogElement.dialog('open');
+                        }).catch(function () {
+                            alert("Could not get access to web camera. Please allow access to web camera");
+                        });
+                }else{
                     alert('Photo capture is not supported in your browser. Please use chrome');
                 }
             };

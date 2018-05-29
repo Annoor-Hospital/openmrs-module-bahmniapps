@@ -141,7 +141,7 @@
                     }
 
                     if (!$scope.orderSet.orderSetMembers || !isOrderSetHavingMinimumOrders()) {
-                        messagingService.showMessage('error', 'An orderSet should have a minimum of two orderSetMembers');
+                        messagingService.showMessage('error', 'An orderSet should have a minimum of one orderSetMembers');
                         return false;
                     }
 

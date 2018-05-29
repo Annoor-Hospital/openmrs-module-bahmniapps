@@ -67,7 +67,7 @@
             "config": {
                 "translationKey": "VISIT_TITLE_LAB_INVESTIGATIONS_KEY",
                 "showChart": true,
-                "showTable": true,
+                "showTable": false,
                 "showNormalLabResults": true,
                 "showCommentsExpanded": true,
                 "showAccessionNotes": true,
@@ -87,13 +87,6 @@
                 "showRoute": true,
                 "showDrugForm": true,
                 "showProvider" : true
-            }
-        },
-        "Radiology": {
-            "type": "radiology",
-            "displayOrder": 7,
-            "config": {
-                "translationKey": "VISIT_TITLE_RADIOLOGY_KEY"
             }
         },
         "Patient Files": {

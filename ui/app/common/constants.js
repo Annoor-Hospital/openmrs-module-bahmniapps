@@ -80,6 +80,7 @@ Bahmni.Common = Bahmni.Common || {};
         locationUrl: RESTWS_V1 + "/location",
         bahmniVisitLocationUrl: BAHMNI_CORE + "/visitLocation",
         bahmniOrderUrl: BAHMNI_CORE + "/orders",
+        pacsUrl: hostUrl + "/openmrs/module/pacsquery/query.form",
         bahmniDrugOrderUrl: BAHMNI_CORE + "/drugOrders",
         bahmniDispositionByVisitUrl: BAHMNI_CORE + "/disposition/visit",
         bahmniDispositionByPatientUrl: BAHMNI_CORE + "/disposition/patient",

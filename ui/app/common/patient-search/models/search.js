@@ -54,6 +54,15 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         }
     };
 
+    self.setSort = function (heading) {
+        if (self.searchType.sortBy == heading){
+            self.searchType.sortReverse = !self.searchType.sortReverse;
+        }else{
+            self.searchType.sortBy = heading;
+            self.searchType.sortReverse = false;
+        }
+    }
+
     self.hasSingleActivePatient = function () {
         return self.activePatients.length === 1;
     };
@@ -73,6 +82,10 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     self.isCurrentSearchLookUp = function () {
         return self.searchType && self.searchType.handler;
+    };
+
+    self.isCurrentSearchCustom = function (type) {
+        return self.searchType && self.searchType.customSearch == type;
     };
 
     self.isTileView = function () {

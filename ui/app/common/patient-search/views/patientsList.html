@@ -26,7 +26,7 @@
                 </div>
             </form>
         </span>
-        <span ng-if="search.searchType && !search.isCurrentSearchLookUp()">
+        <span ng-if="search.searchType && !search.isCurrentSearchLookUp() && !search.isCurrentSearchCustom('criteria')">
             <form name="searchPatientForm" ng-submit="searchPatients()" class="overflow-hidden">
                 <div class="search-patient-id left">
                     <input type="text" id="patientIdentifier" ng-model="::search.searchParameter"
@@ -40,6 +40,9 @@
                 </div>
             </form>
         </span>
+        <div ng-if="search.searchType && search.isCurrentSearchCustom('criteria')">
+          <criteria-search submit="criteria_search_submit"></criteria-search>
+        </div>
         <resize ng-if="search.isTabularView()" search-results="search.searchResults"
                 visible-results="search.visiblePatients" class="active-visits">
             <div class="ward-details-container">
@@ -47,11 +50,11 @@
                     <thead>
                     <tr>
                         <!-- <th><strong>Sl.No</strong></th> -->
-                        <th ng-repeat="heading in getHeadings(search.visiblePatients)"><strong>{{ ::heading | translate }}</strong></th>
+                        <th ng-repeat="heading in getHeadings(search.visiblePatients)" ng-click="search.setSort(heading)"><strong>{{ ::heading | translate | snakeToUpper}}</strong></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in search.visiblePatients">
+                    <tr ng-repeat="row in search.visiblePatients | orderBy : search.searchType.sortBy : search.searchType.sortReverse ">
                         <!-- <td>
                             {{$index + 1}}
                         </td> -->
@@ -75,10 +78,12 @@
             <ul>
                 <li ng-repeat="patient in search.visiblePatients" class="active-patient" ng-click="forwardPatient(patient)">
                     <img class="smallImages" ng-src="{{::patient.image}}" fallback-src='../images/blank-user.png'>
-                    <div class="patient-name">{{::patient.name}}</div>
-                    <div class="patient-id">{{::patient.identifier}}</div>
-                    <i class="ipd-indication fa fa-bed" ng-if="::(patient.hasBeenAdmitted===true||patient.hasBeenAdmitted==='true')"></i>
-                </li>
+
+                <div class="patient-name">{{::patient.name}}</div>
+                <div class="patient-name">{{::patient.localName}}</div>
+                <div class="patient-id">{{::patient.identifier}}</div>
+                <i class="ipd-indication fa fa-bed" ng-if="::(patient.hasBeenAdmitted===true||patient.hasBeenAdmitted==='true')"></i>
+            </li>
             </ul>
         </resize>
         <div class="note-container" ng-if="search.noResultsMessage">
