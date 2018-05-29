@@ -173,6 +173,27 @@ Bahmni.Common.Util.DateUtil = {
             dateOne.getDate() === dateTwo.getDate();
     },
 
+    diffInYearsMonthsDays2: function (dateFrom, dateTo) {
+        dateFrom = moment(dateFrom);
+        dateTo = moment(dateTo);
+        dateFrom.local();
+        dateTo.local();
+
+        var age = {
+            days: 0,
+            months: 0,
+            years: 0
+        };
+
+        age.years = dateTo.diff(dateFrom, 'years');
+        dateFrom.add(age.years, 'years');
+        age.months = dateTo.diff(dateFrom, 'months');
+        dateFrom.add(age.months, 'months');
+        age.days = dateTo.diff(dateFrom, 'days');
+
+        return age;
+    },
+
     diffInYearsMonthsDays: function (dateFrom, dateTo) {
         dateFrom = this.parse(dateFrom);
         dateTo = this.parse(dateTo);
