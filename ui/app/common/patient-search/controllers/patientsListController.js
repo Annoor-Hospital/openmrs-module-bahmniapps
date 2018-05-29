@@ -6,6 +6,7 @@ angular.module('bahmni.common.patientSearch')
     function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, offlineService, printer, configurationService, criteriaSearchService, messagingService) {
         var initialize = function () {
             var searchTypes = appService.getAppDescriptor().getExtensions("org.bahmni.patient.search", "config").map(mapExtensionToSearchType);
+
             $scope.search = new Bahmni.Common.PatientSearch.Search(_.without(searchTypes, undefined));
             $scope.search.markPatientEntry();
             $scope.$watch('search.searchType', function (currentSearchType) {
@@ -129,6 +130,8 @@ angular.module('bahmni.common.patientSearch')
                 showPrint: appExtn.extensionParams.showPrint || false,
                 printHtmlLocation: appExtn.extensionParams.printHtmlLocation || null,
                 headingOrder: appExtn.extensionParams.headingOrder,
+                sortBy: appExtn.extensionParams.defaultSortBy || "",
+                sortReverse: appExtn.extensionParams.defaultSortReverse || false,
                 additionalParams: appExtn.extensionParams.additionalParams,
                 searchColumns: appExtn.extensionParams.searchColumns,
                 translationKey: appExtn.extensionParams.translationKey
