@@ -51,6 +51,15 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         }
     };
 
+    self.setSort = function (heading) {
+        if (self.searchType.sortBy == heading){
+            self.searchType.sortReverse = !self.searchType.sortReverse;
+        }else{
+            self.searchType.sortBy = heading;
+            self.searchType.sortReverse = false;
+        }
+    }
+
     self.hasSingleActivePatient = function () {
         return self.activePatients.length === 1;
     };

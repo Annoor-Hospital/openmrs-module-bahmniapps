@@ -51,11 +51,11 @@
                     <thead>
                     <tr>
                         <!-- <th><strong>Sl.No</strong></th> -->
-                        <th ng-repeat="heading in getHeadings(search.visiblePatients)"><strong>{{ ::heading | translate | snakeToUpper}}</strong></th>
+                        <th ng-repeat="heading in getHeadings(search.visiblePatients)" ng-click="search.setSort(heading)"><strong>{{ ::heading | translate | snakeToUpper}}</strong></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in search.visiblePatients">
+                    <tr ng-repeat="row in search.visiblePatients | orderBy : search.searchType.sortBy : search.searchType.sortReverse ">
                         <!-- <td>
                             {{$index + 1}}
                         </td> -->
