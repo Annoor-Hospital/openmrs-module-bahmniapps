@@ -122,7 +122,7 @@ angular.module('bahmni.common.patientSearch')
             }
             if(row.condition_type == 'age') {
               var age_from = parseInt(row.age_from);
-              var age_to = parseInt(row.age_from);
+              var age_to = parseInt(row.age_to);
               if(age_from === "" || age_from < 0 || age_from > 180) {
                 fail = true;
                 messagingService.showMessage("error", "From age out of range");
