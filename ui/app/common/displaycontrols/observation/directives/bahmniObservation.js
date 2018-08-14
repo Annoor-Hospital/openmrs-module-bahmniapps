@@ -5,9 +5,10 @@ angular.module('bahmni.common.displaycontrol.observation')
         function (observationsService, appService, $q, spinner, $rootScope, formHierarchyService) {
             var controller = function ($scope) {
                 $scope.print = $rootScope.isBeingPrinted || false;
-
+                $scope.numberOfVisits = $scope.config.numberOfVisits;
+                $scope.config.numberOfVisits = 0;
                 $scope.showGroupDateTime = $scope.config.showGroupDateTime !== false;
-
+                console.log($scope.config);
                 var mapObservation = function (observations) {
                     var conceptsConfig = appService.getAppDescriptor().getConfigValue("conceptSetUI") || {};
                     observations = new Bahmni.Common.Obs.ObservationMapper().map(observations, conceptsConfig);

@@ -19,6 +19,12 @@
                 <td id="visitType" width="10%">{{::visit.getVisitType()}}</td>
                 <td class="value" id="visitSummary">{{::visit.summary}}</td>
             </tr>
+            <tr ng-if="::visits.length > params.maximumNoOfVisits">
+                <td class="name" width="35%">{{ ::visits.length - params.maximumNoOfVisits }} more...</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
             </tbody>
         </table>
     </div>

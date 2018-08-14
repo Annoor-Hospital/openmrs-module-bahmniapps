@@ -15,7 +15,7 @@
     <div class="concept-set-container-view">
         <section class="block hierarchy">
             <ul class="form-field" ng-if="bahmniObservations.length > 0">
-                <li ng-repeat="obsGroup in ::bahmniObservations">
+                <li ng-repeat="obsGroup in ::bahmniObservations | limitTo: numberOfVisits">
                     <span ng-if="showGroupDateTime" class="tree-list-item row-click toggle-container" toggle="obsGroup.isOpen">
                         <i class="fa fa-caret-right"></i>
                         <i class="fa fa-caret-down"></i>
@@ -39,6 +39,7 @@
                                           level="2"></show-observation>
                     </ul>
                 </li>
+                <li ng-if="::bahmniObservations.length > numberOfVisits" style="background-color:#fff;"><span class="tree-list-item">{{ bahmniObservations.length - numberOfVisits }} more...</span></li>
             </ul>
             <div ng-if="::noObsMessage">
                 <div class="placeholder-text" ng-if="::!message"><p translate="DISPLAY_CONTROL_ERROR_MESSAGE_KEY"
