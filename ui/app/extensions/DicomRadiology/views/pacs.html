@@ -1,0 +1,45 @@
+<section class="dashboard-section ng-scope pacs">
+    <h2 class="section-title">{{::section | titleTranslate}}</h2>
+    <div>
+        <section ng-hide="noOrdersMessage">
+            <table class="dashboard-table pacs">
+            <tbody ng-repeat="bahmniOrder in bahmniOrders" class="row">
+                 <tr class="view-past" ng-class="::{'test-notes-parent': bahmniOrder.obsNote}">
+                    <td class="actions pacs-shrink">
+                        <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.studyUid"></i>
+                        <a ng-if="! bahmniOrder.studyUid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete" target="_blank" >
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </a>
+                        <span ng-if="bahmniOrder.seriesCount > 1">x{{bahmniOrder.seriesCount}}</span>
+                        <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>-->
+                        <i class="fa fa-comments" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
+                    </td>
+                    <td class="name pacs-expand" ng-if="bahmniOrder.studyUid">
+                            <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{ (bahmniOrder.label.length > 25) ? (bahmniOrder.label.substring(0,22)) + '...' : (bahmniOrder.label) }}</a>
+                    </td>
+                    <td class="name pacs-expand" ng-if="!bahmniOrder.studyUid">
+                        {{bahmniOrder.label}}
+                    </td>
+                    <td class="accession-number pacs-shrink">
+                        {{bahmniOrder.accessionNumber}}
+                    </td>
+                    <td class="provider-name pacs-shrink">
+                        {{bahmniOrder.provider}}
+                    </td>
+                    <td class="provider-date pacs-shrink">
+                        {{bahmniOrder.orderDate | bahmniDateTime }}
+                    </td>
+                </tr>
+                <tr class="notes-open" ng-if="bahmniOrder.obsNote">
+                    <td colspan="5">
+                        <div><pre>{{bahmniOrder.obsNote}}</pre></div>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        </section>
+        <div ng-show="noOrdersMessage">
+            <div class="placeholder-text" ><p translate="DISPLAY_CONTROL_ERROR_MESSAGE_KEY" translate-values="{displayControl : '{{noOrdersMessage}}'}"></p></div>
+        </div>
+    </div>
+</section>
