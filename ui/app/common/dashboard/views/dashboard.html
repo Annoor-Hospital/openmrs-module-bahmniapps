@@ -3,18 +3,18 @@
         <article>
             <div ng-repeat="group in sectionGroups" class="dashboard-sections-wrapper">
                 <div ng-if="::{group.type=='full'}" ng-repeat="section in group.full" class="dashboard-sections fullpage-container">
-                    <dashboard-section section="section" config="section.dashboardConfig" patient="patient" visit="visit" encounter="encounter"></dashboard-section>
+                    <dashboard-section section="section" context="dashboard" patient="patient" visit="visit"></dashboard-section>
                 </div>
                 <div ng-if="::{group.type=='half'}">
                     <div class="dashboard-sections halfpage-container dashboard-sections-left">
                         <div ng-repeat="section in group.left">
-                            <dashboard-section section="section" patient="patient" visit="visit" encounter="encounter"></dashboard-section>
+                            <dashboard-section section="section" context="dashboard" patient="patient" visit="visit"></dashboard-section>
                         </div>
                     </div>
 
                     <div class="dashboard-sections halfpage-container dashboard-sections-right">
                         <div ng-repeat="section in group.right">
-                            <dashboard-section section="section" patient="patient" visit="visit" encounter="encounter"></dashboard-section>
+                            <dashboard-section section="section" context="dashboard" patient="patient" visit="visit"></dashboard-section>
                         </div>
                     </div>
                 </div>

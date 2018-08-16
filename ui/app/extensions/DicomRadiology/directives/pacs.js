@@ -40,8 +40,8 @@ angular.module('bahmni.DicomRadiology.pacs')
                         var orderList = Bahmni.DicomRadiology.CombinedOrderList(orders, studies);
                         if($scope.visit.uuid)
                             orderList = orderList.filter(order => order.orderUuid);
-                        if($scope.section.dashboardConfig.limit && $scope.section.dashboardConfig.limit > 0)
-                            orderList = orderList.slice(0,$scope.section.dashboardConfig.limit);
+                        if($scope.contextConfig.limit && $scope.contextConfig.limit > 0)
+                            orderList = orderList.slice(0,$scope.contextConfig.limit);
                         orderList.forEach(function (order) {
                             if ("studyUid" in order) order.imageUrl = getImageUrl(order);
                         });
@@ -52,14 +52,14 @@ angular.module('bahmni.DicomRadiology.pacs')
                 var init = function () {
                     return getOrders().then(function () {
                         if (_.isEmpty($scope.bahmniOrders)) {
-                            $scope.noOrdersMessage = $scope.section.orderType;
+                            $scope.noOrdersMessage = $scope.config.orderType;
                             $scope.$emit("no-data-present-event");
                         }
                     });
                 };
 
                 var getImageUrl = function (bahmniOrder) {
-                    var pacsImageTemplate = $scope.section.dashboardConfig.pacsImageUrl || "";
+                    var pacsImageTemplate = $scope.contextConfig.pacsImageUrl || "";
                     return pacsImageTemplate.replace('{{studyUID}}', bahmniOrder.studyUid);
                 };
 
@@ -113,7 +113,8 @@ angular.module('bahmni.DicomRadiology.pacs')
                 link: link,
                 templateUrl: "/bahmni/extensions/DicomRadiology/views/pacs.html",
                 scope: {
-                    section: "=config",
+                    config: "=",
+                    contextConfig: "=",
                     patient: "=",
                     visit:   "=?"
                 }

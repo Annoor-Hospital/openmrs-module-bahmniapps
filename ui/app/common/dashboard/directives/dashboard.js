@@ -31,7 +31,7 @@ angular.module('bahmni.common.dashboard')
             Object.keys(sectionConfigs).forEach(function(key) {
                 displayType = sectionConfigs[key].displayType || default_type(prev_type);
                 if(needNewGroup(currentGroup, displayType)){
-                    sectionGroups.push(currentGroup);
+                    if(currentGroup !== null) sectionGroups.push(currentGroup);
                     currentGroup = {left: [],right: [],full: []};
                     if(displayType == "Full-Page") currentGroup.type = "full";
                     if(displayType == "Half-Left" || displayType == "Half-Right") currentGroup.type = "half";

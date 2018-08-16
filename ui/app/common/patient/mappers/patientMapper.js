@@ -1,135 +1,92 @@
 'use strict';
 
-Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
+Bahmni.PatientMapper = function (patientConfig) {
     this.patientConfig = patientConfig;
 
     this.map = function (openmrsPatient) {
-        var patient = this.mapBasic(openmrsPatient);
-        this.mapAttributes(patient, openmrsPatient.person.attributes);
-        return patient;
-    };
-
-    this.mapBasic = function (openmrsPatient) {
-        var patient = {};
-        patient.uuid = openmrsPatient.uuid;
-        patient.givenName = openmrsPatient.person.preferredName.givenName;
-        patient.familyName = openmrsPatient.person.preferredName.familyName;
-        patient.name = patient.givenName + ' ' + patient.familyName;
-        patient.age = openmrsPatient.person.age;
-        patient.ageText = calculateAge(Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthdate));
-        patient.gender = openmrsPatient.person.gender;
-        patient.genderText = mapGenderText(patient.gender);
-        patient.address = mapAddress(openmrsPatient.person.preferredAddress);
-        patient.birthdateEstimated = openmrsPatient.person.birthdateEstimated;
-        patient.birthtime = Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthtime);
-        patient.bloodGroupText = getPatientBloodGroupText(openmrsPatient);
-        patient.localName = getPatientLocalName(openmrsPatient);
-
+        var DateUtil = Bahmni.Common.Util.DateUtil;
+        var patient = Bahmni.Common.Patient({
+            "uuid": openmrsPatient.uuid,
+            "givenName" : openmrsPatient.person.preferredName.givenName,
+            "familyName" : openmrsPatient.person.preferredName.familyName,
+            "name" : patient.givenName + ' ' + patient.familyName,
+            "localName": getLocalName(openmrsPatient),
+            "gender" : openmrsPatient.person.gender,
+            "birthtime" : getBirthTime(openmrsPatient),
+            "birthdateEstimated" : openmrsPatient.person.birthdateEstimated,
+            "address" : mapAddress(openmrsPatient.person.preferredAddress),
+            "bloodGroup" : getBloodGroup(openmrsPatient),
+            "patientImage" : Bahmni.Common.Constants.patientImageUrlByPatientUuid + openmrsPatient.uuid,
+            "registrationDate" : getDateCreated(openmrsPatient),
+            "birthdate" : getBirthDate(openmrsPatient),
+            "attributes" : getAttributes(openmrsPatient),
+        });
         if (openmrsPatient.identifiers) {
-            var primaryIdentifier = openmrsPatient.identifiers[0].primaryIdentifier;
-            patient.identifier = primaryIdentifier ? primaryIdentifier : openmrsPatient.identifiers[0].identifier;
-            patient.extraIdentifiers = [];
+            var identifier = openmrsPatient.identifiers[0].identifier;
+            identifier = identifier ? identifier : openmrsPatient.identifiers[0].identifier;
+            var extraIdentifiers = [];
             for (var i = 0; i < openmrsPatient.identifiers.length; i++) {
-                if (openmrsPatient.identifiers[i].identifier != patient.identifier) {
-                    patient.extraIdentifiers.push({
+                if (openmrsPatient.identifiers[i].identifier != identifier) {
+                    extraIdentifiers.push({
                         "type": openmrsPatient.identifiers[i].identifierType.display,
                         "value": openmrsPatient.identifiers[i].identifier
                     });
                 }
             }
+            patient["identifier"] = primaryIdentifier;
+            patient["extraIdentifiers"]  = extraIdentifiers;
         }
-
-        if (openmrsPatient.person.birthdate) {
-            patient.birthdate = parseDate(openmrsPatient.person.birthdate);
-        }
-
-        if (openmrsPatient.person.personDateCreated) {
-            patient.registrationDate = parseDate(openmrsPatient.person.personDateCreated);
-        }
-
-        patient.image = Bahmni.Common.Constants.patientImageUrlByPatientUuid + openmrsPatient.uuid;
+        
         return patient;
     };
 
-    this.getPatientConfigByUuid = function (patientConfig, attributeUuid) {
-        if (this.patientConfig.personAttributeTypes) {
-            return patientConfig.personAttributeTypes.filter(function (item) {
-                return item.uuid === attributeUuid;
-            })[0];
-        }
-        return {};
-    };
-
-    this.mapAttributes = function (patient, attributes) {
-        var self = this;
-        if (this.patientConfig) {
-            attributes.forEach(function (attribute) {
-                var x = self.getPatientConfigByUuid(patientConfig, attribute.attributeType.uuid);
-                patient[x.name] = {label: x.description, value: attribute.value, isDateField: checkIfDateField(x) };
-            });
-        }
-    };
-
-    var calculateAge = function (birthDate) {
-        var DateUtil = Bahmni.Common.Util.DateUtil;
-        var age = DateUtil.diffInYearsMonthsDays(birthDate, DateUtil.now());
-        var ageInString = "";
-        if (age.years) {
-            ageInString += age.years + " <span> " + $translate.instant("CLINICAL_YEARS_TRANSLATION_KEY") + " </span>";
-        }
-        if (age.months) {
-            ageInString += age.months + "<span>  " + $translate.instant("CLINICAL_MONTHS_TRANSLATION_KEY") + " </span>";
-        }
-        if (age.days) {
-            ageInString += age.days + "<span>  " + $translate.instant("CLINICAL_DAYS_TRANSLATION_KEY") + " </span>";
-        }
-        return ageInString;
-    };
-
-    var mapAddress = function (preferredAddress) {
-        return preferredAddress ? {
-            "address1": preferredAddress.address1,
-            "address2": preferredAddress.address2,
-            "address3": preferredAddress.address3,
-            "cityVillage": preferredAddress.cityVillage,
-            "countyDistrict": preferredAddress.countyDistrict === null ? '' : preferredAddress.countyDistrict,
-            "country": preferredAddress.country === null ? '' : preferredAddress.country,
-            "stateProvince": preferredAddress.stateProvince
-        } : {};
-    };
-
-    var parseDate = function (dateStr) {
-        if (dateStr) {
-            return Bahmni.Common.Util.DateUtil.parse(dateStr.substr(0, 10));
-        }
-        return dateStr;
-    };
-
-    var mapGenderText = function (genderChar) {
-        if (genderChar == null) {
+    var getDateCreated = function(openmrsPatient) {
+        if(openmrsPatient.person.personDateCreated) {
+            return = DateUtil.parseServerDateToDate(openmrsPatient.person.personDateCreated);
+        } else {
             return null;
         }
-        return "<span>" + $rootScope.genderMap[angular.uppercase(genderChar)] + "</span>";
     };
 
-    var getPatientBloodGroupText = function (openmrsPatient) {
-        if (openmrsPatient.person.bloodGroup) {
-            return "<span>" + openmrsPatient.person.bloodGroup + "</span>";
+    var getBirthDate = function(openmrsPatient) {
+        if(openmrsPatient.person.birthdate) {
+            return DateUtil.parseServerDateToDate(openmrsPatient.person.birthdate);
+        } else {
+            return null;
         }
-        if (openmrsPatient.person.attributes && openmrsPatient.person.attributes.length > 0) {
-            var bloodGroup;
-            _.forEach(openmrsPatient.person.attributes, function (attribute) {
-                if (attribute.attributeType.display == "bloodGroup") {
-                    bloodGroup = attribute.display;
+    };
+
+    var getBirthTime = function(openmrsPatient) {
+        if(openmrsPatient.person.birthtime) {
+            return DateUtil.parseServerDateToDate(openmrsPatient.person.birthtime)
+        } else {
+            return null;
+        }
+    };
+
+    var getAttributes = function(openmrsPatient) {
+        if (this.patientConfig && this.patientConfig.personAttributeTypes){
+            var getAttrTypeByUuid = function(uuid){
+                return _.find(patientConfig.personAttributeTypes, attrType => attrType.uuid = uuid);
+            };
+            var checkIfDateField = function (attrType) {
+                return attrType.format === Bahmni.Common.Constants.patientAttributeDateFieldFormat;
+            };
+            var attributes = {};
+            openmrsPatient.person.attributes.forEach(function(attr){
+                attrType = getAttrTypeByUuid(attr.attributeType.uuid);
+                attributes[attrType.name] = {
+                    label: attrType.description,
+                    value: attrType.value,
+                    isDateField: checkIfDateField(attrType),
                 }
             });
-            if (bloodGroup) {
-                return "<span>" + bloodGroup + "</span>";
-            }
+            return attributes;
         }
+        return null;
     };
 
-    var getPatientLocalName = function (openmrsPatient) {
+    var getLocalName = function (openmrsPatient) {
         if (openmrsPatient.person.localName) {
             return openmrsPatient.person.localName;
         }
@@ -154,9 +111,37 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
                 return localName;
             }
         }
+        return null;
     };
 
-    var checkIfDateField = function (x) {
-        return x.format === Bahmni.Common.Constants.patientAttributeDateFieldFormat;
+    var getPatientBloodGroup = function (openmrsPatient) {
+        if (openmrsPatient.person.bloodGroup) {
+            return openmrsPatient.person.bloodGroup;
+        }
+        if (openmrsPatient.person.attributes && openmrsPatient.person.attributes.length > 0) {
+            var bloodGroup;
+            _.forEach(openmrsPatient.person.attributes, function (attribute) {
+                if (attribute.attributeType.display == "bloodGroup") {
+                    bloodGroup = attribute.display;
+                }
+            });
+            if (bloodGroup) {
+                return bloodGroup;
+            }
+        }
+        return null;
+    };
+
+    var mapAddress = function (preferredAddress) {
+        var addressKeys = [
+            "address1","address2","address3","cityVillage","countyDistrict","country","stateProvince",
+        ];
+        var address = [];
+        if(preferredAddress){
+            _.keys(preferredAddress).filter(k => _.contains(addressKeys, k)).forEach(function(k){
+                if(preferredAddress[k] === null) address[k] = '';
+            })
+        }
+        return address;
     };
 };
