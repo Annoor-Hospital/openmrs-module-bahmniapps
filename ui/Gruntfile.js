@@ -118,7 +118,7 @@ module.exports = function (grunt) {
         eslint: {
             options: {
                 fix: false,
-                quiet: false
+                quiet: true
             },
             target: [
                 'Gruntfile.js',
@@ -530,7 +530,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', ['karma:unit']);
 
     grunt.registerTask('bundle', [
-        'eslint',
+        //'eslint',
         'copy:nodeModules',
         'clean:dist',
         'compass:dist',
