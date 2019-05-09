@@ -14,7 +14,7 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
         this.studyUid = '';
         this.orderNumber = '';
         this.orderUuid = '';
-        this.obsNote = '';
+        this.obs = [];
         this.obsEncounter = null;
         this.fulfillerComment = '';
         this.seriesCount = '';
@@ -34,8 +34,7 @@ Bahmni.Common.Orders.FulfilledOrder = function () {
     };
 
     this.addObs = function (obs) {
-        this.obs = obs; // needed for uuids
-        this.obsNote = obs.obsNote;
+        this.obs = obs;
     };
 
     create.apply(this, []);

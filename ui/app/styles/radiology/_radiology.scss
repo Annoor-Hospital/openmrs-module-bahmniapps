@@ -63,7 +63,7 @@ table.radiology-review-table tr.link:hover {
     width:100%;
     word-wrap: break-word;
     resize: both;
-    height: 135px;
+    min-height: 70px;
   }
   .obs-note-name{
     width: 50%;
@@ -72,6 +72,19 @@ table.radiology-review-table tr.link:hover {
   .obs-note-number{
     width:50%;
     float: right;
+  }
+  .obs-note-group{
+    margin-left:1em;
+  }
+  .obs-note-info {
+    border-radius: 10px;
+    background: #ddd;
+    display: inline;
+    padding: 1px 8px;
+  }
+  .obs-note-note {
+    white-space: pre-wrap;
+    margin-left:1em;
   }
 }
 

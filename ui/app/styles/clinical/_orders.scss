@@ -381,14 +381,25 @@ table.pacs {
   .actions a{
     color:#000;
   }
-  .notes-open td{
-    padding:0;
+  tr.notes-open td{
+    padding:0 10px;
     div {
       overflow-y:auto;
       max-height:100px;
-      padding:2px 30px;
+      padding:2px 2px 2px 30px;
       line-height: normal;
     }
+  }
+  tr.pacs-note{
+    span.toggle-btn{
+      float:right;
+    }
+    div{
+      margin-right:2em;
+    }
+  }
+  tr.pacs-note-provider td{
+    text-align:right;
   }
 }
 

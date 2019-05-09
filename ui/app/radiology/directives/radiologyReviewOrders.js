@@ -4,7 +4,6 @@ angular.module('bahmni.radiology')
     .directive('radiologyReviewOrders', ['ngDialog', 'messagingService', 'radiologyObsService', 'pacsService', 'pacsOrderService', 'encounterService', 'visitService', 'patientService', 'spinner', '$q', '$timeout', '$rootScope', '$http', '$window',
         function (ngDialog, messagingService, radiologyObsService, pacsService, pacsOrderService, encounterService, visitService, patientService, spinner, $q, $timeout, $rootScope, $http, $window) {
             var controller = function ($scope) {
-
                 var getRadiologyOrders = function (date) {
                     var params = {
                         date: date
@@ -107,13 +106,12 @@ angular.module('bahmni.radiology')
                 $scope.openObsDialog = function (bahmniOrder) {
                     var openDialog = function (bahmniOrder) {
                         bahmniOrder.dashboardUrl = bahmniOrder.patientUuid ? patientDashboardUrl(bahmniOrder.patientUuid) : null;
-                        var text = bahmniOrder.obsNote;
                         ngDialog.open({
                             template: 'views/editNote.html',
                             scope: $scope,
                             data: {
                                 bahmniOrder: bahmniOrder,
-                                textarea: text
+                                textarea: ""
                             },
                             className: 'ngdialog-theme-default ng-dialog-radiology-note',
                             closeByDocument: false,
@@ -132,7 +130,7 @@ angular.module('bahmni.radiology')
                 };
 
                 $scope.closeConfirmObsDialog = function (bahmniOrder, text) {
-                    if (text == bahmniOrder.obsNote || confirm("Discard unsaved note changes?")) {
+                    if (text == "" || confirm("Discard unsaved note?")) {
                         ngDialog.close();
                     }
                 };
@@ -141,31 +139,29 @@ angular.module('bahmni.radiology')
                     ngDialog.close();
                 };
 
-                $scope.saveObsDialog = function (bahmniOrder, text) {
+                $scope.saveObsDialog = function (dialogData) {
+                    let bahmniOrder = dialogData.bahmniOrder;
+                    let text = dialogData.textarea;
                     if ($scope.canEditNote) {
-                        if (bahmniOrder.obsNote != text) {
-                            bahmniOrder.obsNote = text;
-                            if(text.length > 0) {
-                                saveObs(bahmniOrder);
-                            }else{
-                                delObs(bahmniOrder);
-                            }
+                        if (text.length > 0) {
+                            saveNote(bahmniOrder, text);
+                            dialogData.textarea = "";
                         } else {
-                            messagingService.showMessage('info', "Already Saved");
+                            messagingService.showMessage('info', "Empty note");
                         }
                     } else {
                         messagingService.showMessage('error', "Edit note privilege lacking");
                     }
                 };
 
-                var saveObs = function (bahmniOrder) {
+                var saveNote = function (bahmniOrder, text) {
                     var context = {
                         locationUuid: $rootScope.visitLocationUuid,
                         obsGroupConceptId: $rootScope.concepts["External Radiology Observation"],
                         obsNoteConceptId: $rootScope.concepts["Radiology Notes"],
                         obsExtConceptId: $rootScope.concepts["External Radiology Uuid"]
                     };
-                    radiologyObsService.saveObsFromOrder(bahmniOrder, context).then(function (data) {
+                    radiologyObsService.saveObsFromOrder(bahmniOrder, context, text).then(function (data) {
                         messagingService.showMessage("info", "Radiology Observation Saved.");
                     }, function (reason) {
                         console.error(reason);
