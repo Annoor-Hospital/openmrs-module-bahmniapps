@@ -19,7 +19,7 @@
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                     </span>
                     <span ng-if="bahmniOrder.studyUid">
-                        <i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>
+                        <i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obs && bahmniOrder.obs.length > 0"></i>
                     </span>
                 </td>
                 <td>{{bahmniOrder.patientName}}</td>

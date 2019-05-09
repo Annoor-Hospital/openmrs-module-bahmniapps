@@ -25,7 +25,10 @@ angular.module('bahmni.common.orders')
                         obsNote: item.obs_note_value,
                         obsExtUuid: item.obs_ext_uuid,
                         obsExt: item.obs_ext_value,
-                        obsExtDate: item.obs_ext_date
+                        obsExtDate: moment(item.obs_ext_date, 'YYYY-MM-DD').toDate(),
+                        obsNoteDatetime: new Date(item.obs_note_date),
+                        obsProvider: item.obs_provider,
+                        obsProviderUuid: item.obs_provider_uuid
                     };
                 });
             });
@@ -33,21 +36,20 @@ angular.module('bahmni.common.orders')
 
         // set observation on appropriate orders
         var addObsToOrders = function (obs, orders) {
-            for (var i = 0; i < obs.length; i++) {
-                var order = orders.find(function (item) {
-                    return item.studyUid == obs[i].obsExt;
-                });
-                // only fullfilled orders can have studyUid, so safe to use addObs
-                if (order) order.addObs(obs[i]);
-            }
+            orders.forEach(order => {
+                let order_obs = obs.filter(o => order.studyUid == o.obsExt);
+                if(order_obs && order_obs.length > 0){
+                    order.addObs(order_obs);
+                }
+            });
         };
 
-        var buildObs = function (bahmniOrder, context) {
+        var buildObs = function (bahmniOrder, context, text) {
             var obs = {
                 concept: context.obsGroupConceptId,
                 groupMembers: [{
                     concept: context.obsNoteConceptId,
-                    value: bahmniOrder.obsNote
+                    value: text
                 }, {
                     concept: context.obsExtConceptId,
                     value: bahmniOrder.studyUid,
@@ -80,8 +82,8 @@ angular.module('bahmni.common.orders')
             obsNoteConceptId
             obsExtConceptId
         };*/
-        var saveObsFromOrder = function (bahmniOrder, context) {
-            var obs = buildObs(bahmniOrder, context);
+        var saveObsFromOrder = function (bahmniOrder, context, text) {
+            var obs = buildObs(bahmniOrder, context, text);
             var url = '/openmrs/ws/rest/v1/obs';
             var url = obs.uuid ? url + '/' + obs.uuid : url;
 
