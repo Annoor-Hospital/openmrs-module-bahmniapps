@@ -2,8 +2,11 @@
 
 angular.module('bahmni.common.patientSearch')
 .controller('PatientsListController', ['$scope', '$window', 'patientService', '$rootScope', 'appService', 'spinner',
-    '$stateParams', '$bahmniCookieStore', 'offlineService', 'printer', 'configurationService', 'criteriaSearchService', 'messagingService',
-    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, offlineService, printer, configurationService, criteriaSearchService, messagingService) {
+    '$stateParams', '$bahmniCookieStore', 'printer', 'configurationService', 'criteriaSearchService', 'messagingService',
+    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, printer, configurationService, criteriaSearchService, messagingService) {
+        const DEFAULT_FETCH_DELAY = 2000;
+        var patientSearchConfig = appService.getAppDescriptor().getConfigValue("patientSearch");
+        var patientListSpinner;
         var initialize = function () {
             var searchTypes = appService.getAppDescriptor().getExtensions("org.bahmni.patient.search", "config").map(mapExtensionToSearchType);
 
@@ -12,9 +15,19 @@ angular.module('bahmni.common.patientSearch')
             $scope.$watch('search.searchType', function (currentSearchType) {
                 _.isEmpty(currentSearchType) || fetchPatients(currentSearchType);
             });
-            _.each($scope.search.searchTypes, function (searchType) {
-                _.isEmpty(searchType) || ($scope.search.searchType != searchType && getPatientCount(searchType));
+            $scope.$watch('search.activePatients', function (activePatientsList) {
+                if (activePatientsList.length > 0 && patientListSpinner) {
+                    hideSpinner(spinner, patientListSpinner, $(".tab-content"));
+                }
             });
+            if (patientSearchConfig && patientSearchConfig.serializeSearch) {
+                getPatientCountSeriallyBySearchIndex(0);
+            }
+            else {
+                _.each($scope.search.searchTypes, function (searchType) {
+                    _.isEmpty(searchType) || ($scope.search.searchType != searchType && getPatientCount(searchType, null));
+                });
+            }
             if ($rootScope.currentSearchType != null) {
                 $scope.search.switchSearchType($rootScope.currentSearchType);
             }
@@ -54,8 +67,7 @@ angular.module('bahmni.common.patientSearch')
                 $scope.forwardPatient($scope.search.searchResults[0]);
             }
         };
-
-        var getPatientCount = function (searchType) {
+        var getPatientCount = function (searchType, patientListSpinner) {
             if (searchType.handler) {
                 var params = { q: searchType.handler, v: "full",
                     location_uuid: $bahmniCookieStore.get(Bahmni.Common.Constants.locationCookieName).uuid,
@@ -68,8 +80,16 @@ angular.module('bahmni.common.patientSearch')
                     if ($scope.search.isSelectedSearch(searchType)) {
                         $scope.search.updatePatientList(response.data);
                     }
+                    if (patientListSpinner) {
+                        hideSpinner(spinner, patientListSpinner, $(".tab-content"));
+                    }
                 });
             }
+        };
+
+        var hideSpinner = function (spinnerObj, data, container) {
+            spinnerObj.hide(data, container);
+            $(container).children('div:first-child').hide();
         };
 
         $scope.getHeadings = function (patients) {
@@ -80,6 +100,7 @@ angular.module('bahmni.common.patientSearch')
                         return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
                     })
                     .value();
+                // MAF add heading order
                 if($scope.search.searchType.headingOrder) {
                     var new_headings = $scope.search.searchType.headingOrder.filter(header => headings.includes(header));
                     var missed_headings = headings.filter(header => !new_headings.includes(header));
@@ -89,15 +110,20 @@ angular.module('bahmni.common.patientSearch')
             }
             return [];
         };
-
-        $scope.isHeadingOfIdentifier = function (heading) {
-            return _.includes(Bahmni.Common.PatientSearch.Constants.identifierHeading, heading);
+        $scope.isHeadingOfLinkColumn = function (heading) {
+            var identifierHeading = _.includes(Bahmni.Common.PatientSearch.Constants.identifierHeading, heading);
+            if (identifierHeading) {
+                return identifierHeading;
+            } else if ($scope.search.searchType && $scope.search.searchType.links) {
+                return _.find($scope.search.searchType.links, {linkColumn: heading});
+            }
+            else if ($scope.search.searchType && $scope.search.searchType.linkColumn) {
+                return _.includes([$scope.search.searchType.linkColumn], heading);
+            }
         };
-
         $scope.isHeadingOfName = function (heading) {
             return _.includes(Bahmni.Common.PatientSearch.Constants.nameHeading, heading);
         };
-
         $scope.getPrintableHeadings = function (patients) {
             var headings = $scope.getHeadings(patients);
             var printableHeadings = headings.filter(function (heading) {
@@ -105,7 +131,6 @@ angular.module('bahmni.common.patientSearch')
             });
             return printableHeadings;
         };
-
         $scope.printPage = function () {
             if ($scope.search.searchType.printHtmlLocation != null) {
                 printer.printFromScope($scope.search.searchType.printHtmlLocation, $scope);
@@ -113,15 +138,11 @@ angular.module('bahmni.common.patientSearch')
         };
 
         var mapExtensionToSearchType = function (appExtn) {
-            if (offlineService.isOfflineApp() && appExtn.offline == false) {
-                return;
-            }
-
             return {
                 name: appExtn.label,
                 display: appExtn.extensionParams.display,
                 handler: appExtn.extensionParams.searchHandler,
-                customSearch: appExtn.extensionParams.customSearch,
+                customSearch: appExtn.extensionParams.customSearch, // MAF
                 forwardUrl: appExtn.extensionParams.forwardUrl,
                 id: appExtn.id,
                 params: appExtn.extensionParams.searchParams,
@@ -129,63 +150,88 @@ angular.module('bahmni.common.patientSearch')
                 view: appExtn.extensionParams.view || Bahmni.Common.PatientSearch.Constants.searchExtensionTileViewType,
                 showPrint: appExtn.extensionParams.showPrint || false,
                 printHtmlLocation: appExtn.extensionParams.printHtmlLocation || null,
-                headingOrder: appExtn.extensionParams.headingOrder,
-                sortBy: appExtn.extensionParams.defaultSortBy || "",
-                sortReverse: appExtn.extensionParams.defaultSortReverse || false,
+                headingOrder: appExtn.extensionParams.headingOrder, // MAF
+                sortBy: appExtn.extensionParams.defaultSortBy || "", // MAF
+                sortReverse: appExtn.extensionParams.defaultSortReverse || false, // MAF
                 additionalParams: appExtn.extensionParams.additionalParams,
                 searchColumns: appExtn.extensionParams.searchColumns,
-                translationKey: appExtn.extensionParams.translationKey
+                translationKey: appExtn.extensionParams.translationKey,
+                linkColumn: appExtn.extensionParams.linkColumn,
+                links: appExtn.extensionParams.links
             };
         };
 
+        var debounceGetPatientCount = _.debounce(function (currentSearchType, patientListSpinner) {
+            getPatientCount(currentSearchType, patientListSpinner);
+        }, (patientSearchConfig && patientSearchConfig.fetchDelay) || DEFAULT_FETCH_DELAY, {});
+
+        var showSpinner = function (spinnerObj, container) {
+            $(container).children('div:first-child').show();
+            return spinnerObj.show(container);
+        };
+
         var fetchPatients = function (currentSearchType) {
+            if (patientListSpinner !== undefined) {
+                hideSpinner(spinner, patientListSpinner, $(".tab-content"));
+            }
             $rootScope.currentSearchType = currentSearchType;
             if ($scope.search.isCurrentSearchLookUp()) {
-                getPatientCount(currentSearchType);
-            } else {
-                if (offlineService.isOfflineApp()) {
-                    var duration = appService.getAppDescriptor().getConfigValue('recentPatientsDuration');
-                    patientService.getRecentPatients(duration).then(function (response) {
-                        $scope.search.updatePatientList(response.data.pageOfResults);
-                    });
+                patientListSpinner = showSpinner(spinner, $(".tab-content"));
+                if (patientSearchConfig && patientSearchConfig.debounceSearch) {
+                    debounceGetPatientCount(currentSearchType, patientListSpinner);
+                }
+                else {
+                    getPatientCount(currentSearchType, patientListSpinner);
                 }
             }
         };
 
-        // MAF: added a function to get forwarding URL, so that the link can behave like a link
-        var hasPatientForwardUrl = function (patient) {
-            return ($stateParams.forwardUrl != null || patient.forwardUrl != null);
-        };
-
-        $scope.forwardPatientUrl = function (patient) {
+        $scope.forwardPatient = function (patient, heading) {
             var options = $.extend({}, $stateParams);
+            $rootScope.patientAdmitLocationStatus = patient.Status;
             $.extend(options, {
                 patientUuid: patient.uuid,
                 visitUuid: patient.activeVisitUuid || null,
                 encounterUuid: $stateParams.encounterUuid || 'active',
                 programUuid: patient.programUuid || null,
                 enrollment: patient.enrollment || null,
-                forwardUrl: patient.forwardUrl || null
+                forwardUrl: patient.forwardUrl || null,
+                dateEnrolled: patient.dateEnrolled || null
             });
-
-            if (options.forwardUrl !== null) {
-                return appService.getAppDescriptor().formatUrl(options.forwardUrl, options, true);
-            } else {
-                return appService.getAppDescriptor().formatUrl($scope.search.searchType.forwardUrl, options, true);
+            var link = options.forwardUrl ? {
+                url: options.forwardUrl,
+                newTab: true
+            } : {url: $scope.search.searchType.forwardUrl, newTab: false};
+            if ($scope.search.searchType.links) {
+                link = _.find($scope.search.searchType.links, {linkColumn: heading}) || link;
+            }
+            if (link.url && link.url !== null) {
+                $window.open(appService.getAppDescriptor().formatUrl(link.url, options, true), link.newTab ? "_blank" : "_self");
             }
         };
-
-        $scope.forwardPatientTarget = function (patient) {
-            return hasPatientForwardUrl(patient) ? '_blank' : '_self';
-        };
-
-        $scope.forwardPatient = function (patient) {
-            var url = $scope.forwardPatientUrl(patient);
-
-            if (hasPatientForwardUrl(patient)) {
-                $window.open(url, '_blank');
-            } else {
-                $window.location = url;
+        
+        var getPatientCountSeriallyBySearchIndex = function (index) {
+            if (index === $scope.search.searchTypes.length) {
+                return;
+            }
+            var searchType = $scope.search.searchTypes[index];
+            if (searchType.handler) {
+                var params = {
+                    q: searchType.handler,
+                    v: "full",
+                    location_uuid: $bahmniCookieStore.get(Bahmni.Common.Constants.locationCookieName).uuid,
+                    provider_uuid: $rootScope.currentProvider.uuid
+                };
+                if (searchType.additionalParams) {
+                    params["additionalParams"] = searchType.additionalParams;
+                }
+                patientService.findPatients(params).then(function (response) {
+                    searchType.patientCount = response.data.length;
+                    if ($scope.search.isSelectedSearch(searchType)) {
+                        $scope.search.updatePatientList(response.data);
+                    }
+                    return getPatientCountSeriallyBySearchIndex(index + 1);
+                });
             }
         };
 

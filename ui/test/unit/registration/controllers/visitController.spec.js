@@ -3,8 +3,10 @@
 describe('VisitController', function () {
     var scope, $controller, success, encounterService, patientService, patient, dateUtil, $timeout, spinner,
         getEncounterPromise, getPatientPromise, stateParams, patientMapper, q, state, appService, appDescriptor,
-        sessionService, messagingService, rootScope, visitService, visitController, location, window, bahmniCookieStore,
-        offlineService, auditLogService, messageParams;
+        sessionService, messagingService, rootScope, visitService, visitController, location, window, bahmniCookieStore, auditLogService, messageParams, formService;
+
+    var compile, provide;
+    var html = '<div class="submit-btn-container"><button type="button" class="cancel" tabindex="-1" ng-click="cancelFunction()"></button><div class="right"><button ng-click="back()"></button><button single-click="clickFunction()" class="confirm"></button></div></div>';
 
     var stubAllPromise = function () {
         return {
@@ -61,14 +63,43 @@ describe('VisitController', function () {
         "observations": []
     };
 
+    var observationForms = [
+        {
+            "name": "Nutritional Values",
+            "uuid": "f9041078-c6d7-4b9d-89a6-c97da2ce6164",
+            "version": "1",
+            "published": true
+        }
+    ];
+
+    var extensions = [{
+        "id": "bahmni.registration.conceptSetGroup.feeInformation",
+            "extensionPointId": "org.bahmni.registration.conceptSetGroup.observations",
+            "type": "forms",
+            "extensionParams": {
+            "formName": "Nutritional Values",
+                "conceptNames": ["Height", "Weight", "BMI Data", "BMI Status Data"],
+                "required":true,
+                "showLatest": true
+        },
+        "order": 2,
+        "requiredPrivilege": "Edit Visits"
+    }];
+
+    beforeEach(module('bahmni.common.uiHelper', function ($provide) {
+        provide = $provide;
+    }));
+
     beforeEach(module('bahmni.registration'));
-    beforeEach(module('bahmni.common.offline'));
     beforeEach(module('stateMock'));
     beforeEach(module('pascalprecht.translate'));
-    beforeEach(inject(['$injector', '$timeout', '$q', '$rootScope', '$state', '$translate', function ($injector, timeout, $q, $rootScope, $state) {
+    beforeEach(inject(['$compile', '$injector', '$timeout', '$q', '$rootScope', '$state', '$translate', function ($compile, $injector, timeout, $q, $rootScope, $state) {
         q = $q;
         location = jasmine.createSpyObj('$location', ['url']);
         rootScope = $rootScope;
+        compile = $compile;
+        provide.value('$rootScope', $rootScope);
+
         messagingService = jasmine.createSpyObj('messagingService', ['showMessage']);
         stateParams = {patientUuid: '21308498-2502-4495-b604-7b704a55522d'};
         patient = {
@@ -89,10 +120,11 @@ describe('VisitController', function () {
         visitService = jasmine.createSpyObj('visitService', ['search', 'endVisit', 'getVisitSummary', 'getVisitType']);
         appService = jasmine.createSpyObj('appService', ['getDescription', 'getAppDescriptor']);
         appDescriptor = jasmine.createSpyObj('appDescriptor', ['getConfigValue', 'getExtensions', 'formatUrl']);
-        offlineService = jasmine.createSpyObj('offlineService', ['isOfflineApp']);
-        offlineService.isOfflineApp.and.returnValue(false);
         appService.getAppDescriptor.and.returnValue(appDescriptor);
-        appDescriptor.getExtensions.and.returnValue([]);
+        appDescriptor.getExtensions.and.callFake(function(id, type){
+            if (type === "forms") return extensions;
+            return [];
+        });
         patientMapper = jasmine.createSpyObj('patientMapper', ['map']);
         dateUtil = Bahmni.Common.Util.DateUtil;
         $timeout = timeout;
@@ -112,21 +144,23 @@ describe('VisitController', function () {
         getPatientPromise = specUtil.createServicePromise('get');
         encounterService.find.and.returnValue(getEncounterPromise);
         patientService.get.and.returnValue(getPatientPromise);
+        formService = jasmine.createSpyObj('formService', ['getFormList']);
+        formService.getFormList.and.returnValue(specUtil.respondWithPromise(q, { data: observationForms }));
         scope.currentProvider = {uuid: ''};
         patientMapper.map.and.returnValue(patient);
 
-        rootScope.currentUser = {privileges: []};
+        rootScope.currentUser = { privileges: [], isFavouriteObsTemplate: function() { return false; } };
         visitService.search.and.returnValue(searchActiveVisits([]));
         auditLogService = jasmine.createSpyObj('auditLogService', ['log']);
         auditLogService.log.and.returnValue(specUtil.simplePromise({}));
     }]));
 
-    function createController () {
+    function createController (digestEnabled) {
         visitController = $controller('VisitController', {
             $window: window,
             $scope: scope,
             $bahmniCookieStore: bahmniCookieStore,
-            $q: Q,
+            $q: digestEnabled ? q : Q,
             encounterService: encounterService,
             patientService: patientService,
             spinner: spinner,
@@ -138,24 +172,32 @@ describe('VisitController', function () {
             messagingService: messagingService,
             visitService: visitService,
             $location: location,
-            offlineService: offlineService,
-            auditLogService: auditLogService
+            auditLogService: auditLogService,
+            formService: formService
         });
     }
 
     describe('initialization', function () {
+        afterEach(function () {
+            rootScope.$apply();
+        });
+
         it('should set the patient from patient data', function () {
-            createController();
+            createController(true);
             getPatientPromise.callThenCallBack(patient);
             getEncounterPromise.callThenCallBack({data: sampleEncounter });
-
+            rootScope.$digest();
             expect(scope.patient).toBe(patient);
+            expect(scope.observationForms.length).toBe(1);
+            expect(scope.observationForms[0].formName).toBe('Nutritional Values');
+            expect(scope.observationForms[0].formVersion).toBe('1');
+            expect(scope.observationForms[0].options.showLatest).toBe(true);
         });
     });
 
     describe("submit", function () {
         beforeEach(function () {
-            createController();
+            createController(false);
             visitController.visitUuid = 'visitUuid';
             getPatientPromise.callThenCallBack(patient);
             getEncounterPromise.callThenCallBack({data: sampleEncounter});
@@ -321,4 +363,59 @@ describe('VisitController', function () {
         scope.updatePatientImage(image);
         expect(patientService.updateImage).toHaveBeenCalled();
     });
+
+    it('should check if it is a form template', function() {
+       createController();
+       expect(scope.isFormTemplate({formUuid :'someUuid' })).toEqual('someUuid');
+       expect(scope.isFormTemplate({name :'someName' })).toEqual(undefined);
+    });
+
+    it("should not call save twice", function () {
+        var element = angular.element("<button single-click='clickFunction()'></button>");
+        var compiled = compile(element)(rootScope);
+        rootScope.$digest();
+
+        var deferred = q.defer();
+        rootScope.clickFunction = jasmine.createSpy('clickFunction');
+        rootScope.clickFunction.and.returnValue(deferred.promise);
+
+        expect(element).not.toBeUndefined();
+
+        compiled.triggerHandler('click');
+        expect(rootScope.clickFunction.calls.count()).toEqual(1);
+
+        compiled.triggerHandler('click');
+        deferred.resolve();
+        rootScope.$apply();
+        expect(rootScope.clickFunction.calls.count()).toEqual(1);
+
+        compiled.triggerHandler('click');
+        expect(rootScope.clickFunction.calls.count()).toEqual(2);
+    });
+
+    it("should not call save twice for a visit", function () {
+        var ele = angular.element(html);
+        var element = $(ele).find(".confirm");
+        var compiled = compile(element)(rootScope);
+        rootScope.$digest();
+
+        var deferred = q.defer();
+        rootScope.clickFunction = jasmine.createSpy('clickFunction');
+        rootScope.clickFunction.and.returnValue(deferred.promise);
+
+        expect(element).not.toBeUndefined();
+        expect(element.hasClass('confirm')).toBeTruthy();
+
+        compiled.triggerHandler('click');
+        expect(rootScope.clickFunction.calls.count()).toEqual(1);
+
+        compiled.triggerHandler('click');
+        deferred.resolve();
+        rootScope.$apply();
+        expect(rootScope.clickFunction.calls.count()).toEqual(1);
+
+        compiled.triggerHandler('click');
+        expect(rootScope.clickFunction.calls.count()).toEqual(2);
+    });
+
 });

@@ -1,9 +1,9 @@
-<div>
-<div style="width: 10%; float: left">
-    <h2>Filters</h2>
-</div>
-    <div style="width: 90%; float: left">
-        <day-calendar appointments = "providerAppointments"></day-calendar>
+<div ng-class="{'app-filter-open': isFilterOpen}">
+    <div class="app-calendar-container" ng-class="{'app-filter-open': isFilterOpen}">
+        <date-picker view-date="startDate" last-valid-date="lastValidDate" on-change="getAppointmentsForDate"></date-picker>
+        <p class="calendar-no-appointment" ng-if="hasNoAppointments()">{{::'NO_APPOINTMENT_CALENDAR_VIEW' | translate}}</p>
+        <day-calendar ng-if="shouldReload" date="startDate" appointments="providerAppointments"></day-calendar>
     </div>
+    <div ui-view="content@appointment"></div>
+    <div class="appointment-action-btn-container calendar-view-btn-container"></div>
 </div>
-<div ui-view="content@appointment"></div>
