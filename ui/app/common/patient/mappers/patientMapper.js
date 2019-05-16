@@ -12,9 +12,10 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
     this.mapBasic = function (openmrsPatient) {
         var patient = {};
         patient.uuid = openmrsPatient.uuid;
-        patient.givenName = openmrsPatient.person.preferredName.givenName;
+        patient.givenName  = openmrsPatient.person.preferredName.givenName;
+        patient.middleName = openmrsPatient.person.preferredName.middleName;
         patient.familyName = openmrsPatient.person.preferredName.familyName;
-        patient.name = patient.givenName + ' ' + patient.familyName;
+        patient.name = [patient.givenName, patient.middleName, patient.familyName].filter(x=>x!==null).join(' ');
         patient.age = openmrsPatient.person.age;
         patient.ageText = calculateAge(Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthdate));
         patient.gender = openmrsPatient.person.gender;
