@@ -14,6 +14,9 @@ angular.module('opd.documentupload')
             var activeEncounter = {};
             var locationUuid = sessionService.getLoginLocationUuid();
 
+            // default is first
+            $scope.fileConcepts = [];
+
             $scope.visits = [];
             $scope.toggleGallery = true;
             $scope.conceptNameInvalid = false;
@@ -145,6 +148,7 @@ angular.module('opd.documentupload')
                     var topLevelConcept = response.data.results[0];
                     topLevelConceptUuid = topLevelConcept ? topLevelConcept.uuid : null;
                     setDefaultConcept(topLevelConcept);
+                    $scope.fileConcepts = topLevelConcept.setMembers;
                 });
             };
 
@@ -230,7 +234,9 @@ angular.module('opd.documentupload')
 
             $scope.setConceptOnFile = function (file, selectedItem) {
                 if (selectedItem) {
+                    console.log("Setting Concept");
                     file.concept = Object.create(selectedItem.concept);
+                    file.conceptUuid = selectedItem.concept.uuid;
                     file.changed = true;
                     if (!$scope.$$phase) {
                         $scope.$apply();
@@ -294,14 +300,14 @@ angular.module('opd.documentupload')
                     var comment = _.isEmpty(file.comment) ? undefined : file.comment;
                     if (!visit.isSaved(file)) {
                         visitDocument.documents.push({
-                            testUuid: file.concept.uuid,
+                            testUuid: file.conceptUuid,
                             image: fileUrl,
                             obsDateTime: getEncounterStartDateTime(visit),
                             comment: comment
                         });
                     } else if (file.changed === true || file.voided === true) {
                         visitDocument.documents.push({
-                            testUuid: file.concept.uuid,
+                            testUuid: file.conceptUuid,
                             image: fileUrl,
                             voided: file.voided,
                             obsUuid: file.obsUuid,
@@ -354,6 +360,7 @@ angular.module('opd.documentupload')
                 if (isExistingVisit(visit) || $scope.isNewVisitDateValid()) {
                     visitDocument = createVisitDocument(visit);
                 }
+                console.log(visitDocument);
                 return spinner.forPromise(visitDocumentService.save(visitDocument).then(function (response) {
                     return encounterService.getEncountersForEncounterType($scope.patient.uuid, encounterTypeUuid).then(function (encounterResponse) {
                         var savedVisit = $scope.visits[$scope.visits.indexOf(visit)];
