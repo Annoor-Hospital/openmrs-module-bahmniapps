@@ -40,6 +40,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.updatePatientList = function (patientList) {
         self.activePatients = patientList.map(mapPatient);
         self.searchResults = self.activePatients;
+        self.searchResults = self.searchResults.sort(searchSort);
     };
 
     self.updateSearchResults = function (patientList) {
@@ -58,6 +59,12 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
             self.searchType.sortBy = heading;
             self.searchType.sortReverse = false;
         }
+        self.searchResults = self.searchResults.sort(searchSort);
+    }
+
+    let searchSort = function(a,b) {
+        let r = (a[self.searchType.sortBy] > b[self.searchType.sortBy]) ? 1 : -1;
+        return self.searchType.sortReverse ? -r : r;
     }
 
     self.hasSingleActivePatient = function () {
@@ -67,6 +74,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.filterPatients = function (matchingCriteria) {
         matchingCriteria = matchingCriteria ? matchingCriteria : matchesNameOrId;
         self.searchResults = self.searchParameter ? self.activePatients.filter(matchingCriteria) : self.activePatients;
+        self.searchResults = self.searchResults.sort(searchSort);
     };
 
     self.filterPatientsByIdentifier = function () {
