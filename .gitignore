@@ -1,3 +1,5 @@
+*.tar.gz
+*.sh
 .DS_Store
 nbproject
 manifest.mf
