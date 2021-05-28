@@ -176,7 +176,6 @@ category:  Layout - sections
     top: 46px;
     width: 220px;
     padding: 10px 10px 0;
-    right: 385px;
     li{
       display: block;
       padding-bottom: 10px;
@@ -344,12 +343,23 @@ category:  Layout - sections
       li{
         display: block;
         border-bottom: 1px $lightGray solid;
-        a{
+        a.link{
           display: inline-block;
           padding: 8px 10px 7px;
           line-height: 1;
           &:hover{
             text-decoration: underline;
+          }
+        }
+        .link{
+          display: inline-block;
+          padding: 8px 10px 7px;
+          line-height: 1;
+          .order-delete{
+            color:#000;
+            &:hover{
+              color:#d00;
+            }
           }
         }
         .order-sub-heading-container .order-sub-heading{

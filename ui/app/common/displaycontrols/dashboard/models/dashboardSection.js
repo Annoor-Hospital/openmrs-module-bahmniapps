@@ -16,6 +16,7 @@
         "observationGraph",
         "obsToObsFlowSheet",
         "pacsOrders",
+        "pacs",
         "patientInformation",
         "conditionsList"
     ];

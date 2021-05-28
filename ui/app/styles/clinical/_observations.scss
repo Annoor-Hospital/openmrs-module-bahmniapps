@@ -606,7 +606,7 @@ concept-set {
     display: none;
     @media screen and (max-width: 1024px){
       display: inline-block;
-      color: #669999;
+      color: $bahmniSecondaryColor;
       border: 1px solid;
       position: fixed;
       left: 10px;
@@ -796,7 +796,7 @@ concept-set {
     }
   }
   form .form-field textarea, .form .form-field textarea {
-    width: 500px;
+    width: 600px;
     @media screen and (max-width: 1200px) {
       width: 300px;
     }

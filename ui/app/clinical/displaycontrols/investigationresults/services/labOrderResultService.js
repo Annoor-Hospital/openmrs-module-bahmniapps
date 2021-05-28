@@ -62,6 +62,13 @@ angular.module('bahmni.clinical')
                 latestAccessionCount: latestAccessionCount
             };
 
+            // MATT filter test result dates that are empty
+            // remove empty values from results.tabularResult.values
+            results.tabularResult.values = results.tabularResult.values.filter(row => row.result);
+            // get a list of remaining dates from values
+            var dates = results.tabularResult.values.map(row => row.dateIndex);
+            results.tabularResult.dates = results.tabularResult.dates.filter(daterow => dates.indexOf(daterow.index) >= 0);
+
             var tabularResult = new Bahmni.Clinical.TabularLabOrderResults(results.tabularResult, accessionConfig);
             var accessions = _.groupBy(labOrderResults, function (labOrderResult) {
                 return labOrderResult.accessionUuid;
@@ -77,6 +84,7 @@ angular.module('bahmni.clinical')
                 accessions = _.union(initial, latest);
             }
             accessions.reverse();
+            tabularResult.tabularResult.dates.reverse();
             return {
                 accessions: groupByPanel(accessions),
                 tabularResult: tabularResult

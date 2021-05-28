@@ -76,7 +76,7 @@ Bahmni.Common.Util.DateUtil = {
     },
 
     getDateInMonthsAndYears: function (date, format) {
-        var format = format || "MMM YY";
+        var format = format || "MMM YYYY";
         var dateRepresentation = isNaN(Number(date)) ? date : Number(date);
         if (!moment(dateRepresentation).isValid()) {
             return date;
@@ -89,7 +89,7 @@ Bahmni.Common.Util.DateUtil = {
         if (!moment(dateRepresentation).isValid()) {
             return datetime;
         }
-        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YY h:mm a") : null;
+        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YYYY h:mm a") : null;
     },
 
     formatDateWithoutTime: function (date) {
@@ -97,16 +97,16 @@ Bahmni.Common.Util.DateUtil = {
         if (!moment(dateRepresentation).isValid()) {
             return date;
         }
-        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YY") : null;
+        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YYYY") : null;
     },
 
     formatDateInStrictMode: function (date) {
         var dateRepresentation = isNaN(Number(date)) ? date : Number(date);
         if (moment(dateRepresentation, 'YYYY-MM-DD', true).isValid()) {
-            return moment(dateRepresentation).format("DD MMM YY");
+            return moment(dateRepresentation).format("DD MMM YYYY");
         }
         if (moment(dateRepresentation, 'YYYY-MM-DDTHH:mm:ss.SSSZZ', true).isValid()) {
-            return moment(dateRepresentation).format("DD MMM YY");
+            return moment(dateRepresentation).format("DD MMM YYYY");
         }
         return date;
     },
@@ -171,6 +171,27 @@ Bahmni.Common.Util.DateUtil = {
         return dateOne.getFullYear() === dateTwo.getFullYear() &&
             dateOne.getMonth() === dateTwo.getMonth() &&
             dateOne.getDate() === dateTwo.getDate();
+    },
+
+    diffInYearsMonthsDays2: function (dateFrom, dateTo) {
+        dateFrom = moment(dateFrom);
+        dateTo = moment(dateTo);
+        dateFrom.local();
+        dateTo.local();
+
+        var age = {
+            days: 0,
+            months: 0,
+            years: 0
+        };
+
+        age.years = dateTo.diff(dateFrom, 'years');
+        dateFrom.add(age.years, 'years');
+        age.months = dateTo.diff(dateFrom, 'months');
+        dateFrom.add(age.months, 'months');
+        age.days = dateTo.diff(dateFrom, 'days');
+
+        return age;
     },
 
     diffInYearsMonthsDays: function (dateFrom, dateTo) {
