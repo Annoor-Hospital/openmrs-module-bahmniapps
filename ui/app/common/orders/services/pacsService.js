@@ -81,6 +81,7 @@ angular.module('bahmni.common.orders')
             fo.studyUid = getDcmValue(study, "0020000D", "");
             fo.seriesCount = getDcmValue(study, "00201206", "1");
             // use part of study uid to get orderNumber!!! (hack)
+            // (Technically this may violate dicom spec, see part 5 chapter 9 of Dicom 2013)
             /*  The 'proper' solution here is to have bahmni generate
              *  the accession number, such that the accession number IS
              *  the order number. Then tag 00080050 can be referenced to
