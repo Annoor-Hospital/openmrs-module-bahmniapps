@@ -41,7 +41,6 @@
         <link rel="stylesheet" href="../components/offline/themes/{{getLocaleCSS()}}.css">
 
         <script src='https://meet.jit.si/external_api.js'></script>
-
         <script src="../components/jquery/jquery.min.js"></script>
         <script src="../lib/jquery/jquery-ui-1.10.4.custom.min.js"></script>
         <script src="../lib/modernizr.custom.80690.js"></script>
@@ -142,6 +141,8 @@
         <script src="../common/patient-search/models/search.js"></script>
         <script src="../common/patient-search/directives/resize.js"></script>
         <script src="../common/patient-search/directives/scheduler.js"></script>
+        <script src="../common/patient-search/directives/criteriaSearch.js"></script>
+        <script src="../common/patient-search/services/criteriaSearchService.js"></script>
         <script src="../common/patient-search/controllers/patientsListController.js"></script>
 
         <script src="../common/domain/init.js"></script>
@@ -295,6 +296,9 @@
 
         <script src="../common/displaycontrols/pacsOrders/init.js"></script>
         <script src="../common/displaycontrols/pacsOrders/directives/pacsOrders.js"></script>
+
+        <script src="../common/displaycontrols/pacs/init.js"></script>
+        <script src="../common/displaycontrols/pacs/directives/pacs.js"></script>
 
         <script src="../common/displaycontrols/custom/init.js"></script>
         <script src="../common/displaycontrols/custom/directives/customDisplayControl.js"></script>
@@ -489,7 +493,13 @@
 
         <script src="../common/orders/init.js"></script>
         <script src="../common/orders/services/orderService.js"></script>
+        <script src="../common/orders/services/pacsOrderService.js"></script>
+        <script src="../common/orders/services/radiologyObsService.js"></script>
+        <script src="../common/orders/services/pacsService.js"></script>
         <script src="../common/orders/services/orderSetService.js"></script>
+        <script src="../common/orders/models/pendingOrder.js"></script>
+        <script src="../common/orders/models/fulfilledOrder.js"></script>
+        <script src="../common/orders/models/combinedOrderList.js"></script>
         <script src="../common/bacteriologyresults/init.js"></script>
         <script src="../common/bacteriologyresults/services/bacteriologyResultsService.js"></script>
 

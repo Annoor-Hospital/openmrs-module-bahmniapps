@@ -610,7 +610,7 @@ concept-set {
     display: none;
     @media screen and (max-width: 1024px) {
       display: inline-block;
-      color: #669999;
+      color: $bahmniSecondaryColor;
       border: 1px solid;
       position: fixed;
       left: 10px;
@@ -797,8 +797,12 @@ concept-set {
       }
     }
   }
+  /*MAF: Change width to 600, and 300 on smaller screen??? */
   form .form-field textarea, .form .form-field textarea {
-    width: 500px;
+    width: 600px;
+    @media screen and (max-width: 1200px) {
+      width: 300px;
+    }
   }
   table .field-value-buttonSelectType {
     width: 47%;

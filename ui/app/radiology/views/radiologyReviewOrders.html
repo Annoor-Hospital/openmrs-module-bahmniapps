@@ -1,0 +1,34 @@
+<div>
+    <div>
+        <button ng-if="refreshButton" ng-click="updateOrders()">Refresh</button>
+    </div>
+    <div>
+        <table class="radiology-review-table">
+            <tr>
+                <th></th>
+                <th>Patient Name</th>
+                <th>Patient ID</th>
+                <th>Accession #</th>
+                <th>Type</th>
+                <th>Provider</th>
+                <th>Date &amp; Time</th>
+            </tr>
+            <tr class="link" ng-repeat="bahmniOrder in bahmniOrders" ng-click="openObsDialog(bahmniOrder)">
+                <td>
+                    <span ng-if="!bahmniOrder.studyUid">
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                    </span>
+                    <span ng-if="bahmniOrder.studyUid">
+                        <i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obs && bahmniOrder.obs.length > 0"></i>
+                    </span>
+                </td>
+                <td>{{bahmniOrder.patientName}}</td>
+                <td>{{bahmniOrder.patientid}}</td>
+                <td>{{bahmniOrder.accessionNumber}}</td>
+                <td>{{bahmniOrder.label}}</td>
+                <td><span class="provider-name fl">{{bahmniOrder.provider}}</span></td>
+                <td><span class="provider-date fr">{{bahmniOrder.orderDate | bahmniDateTime }}</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
