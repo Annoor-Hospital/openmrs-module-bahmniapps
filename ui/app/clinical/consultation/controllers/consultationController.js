@@ -1,14 +1,14 @@
 'use strict';
 
 angular.module('bahmni.clinical').controller('ConsultationController',
-    ['$scope', '$rootScope', '$state', '$location', 'clinicalAppConfigService', 'diagnosisService', 'urlHelper', 'contextChangeHandler',
+    ['$scope', '$rootScope', '$state', '$location', '$translate', 'clinicalAppConfigService', 'diagnosisService', 'urlHelper', 'contextChangeHandler',
         'spinner', 'encounterService', 'messagingService', 'sessionService', 'retrospectiveEntryService', 'patientContext', '$q',
         'patientVisitHistoryService', '$stateParams', '$window', 'visitHistory', 'clinicalDashboardConfig', 'appService',
-        'ngDialog', '$filter', 'configurations', 'offlineService', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService',
-        function ($scope, $rootScope, $state, $location, clinicalAppConfigService, diagnosisService, urlHelper, contextChangeHandler,
+        'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService',
+        function ($scope, $rootScope, $state, $location, $translate, clinicalAppConfigService, diagnosisService, urlHelper, contextChangeHandler,
                   spinner, encounterService, messagingService, sessionService, retrospectiveEntryService, patientContext, $q,
                   patientVisitHistoryService, $stateParams, $window, visitHistory, clinicalDashboardConfig, appService,
-                  ngDialog, $filter, configurations, offlineService, visitConfig, conditionsService, configurationService, auditLogService) {
+                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService) {
             var DateUtil = Bahmni.Common.Util.DateUtil;
             var getPreviousActiveCondition = Bahmni.Common.Domain.Conditions.getPreviousActiveCondition;
             $scope.togglePrintList = false;
@@ -18,6 +18,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 return $state.current.name === 'patient.dashboard.show';
             };
             $scope.showComment = true;
+            $scope.showSaveAndContinueButton = true;
 
             $scope.visitHistory = visitHistory;
             $scope.consultationBoardLink = clinicalAppConfigService.getConsultationBoardLink();
@@ -74,9 +75,6 @@ angular.module('bahmni.clinical').controller('ConsultationController',
             };
 
             $scope.allowConsultation = function () {
-                if (offlineService.isOfflineApp()) {
-                    return true;
-                }
                 return appService.getAppDescriptor().getConfigValue('allowConsultationWhenNoOpenVisit');
             };
 
@@ -151,8 +149,11 @@ angular.module('bahmni.clinical').controller('ConsultationController',
 
             var initialize = function () {
                 var appExtensions = clinicalAppConfigService.getAllConsultationBoards();
+                $scope.adtNavigationConfig = {forwardUrl: Bahmni.Clinical.Constants.adtForwardUrl, title: $translate.instant("CLINICAL_GO_TO_DASHBOARD_LABEL"), privilege: Bahmni.Clinical.Constants.adtPrivilege };
                 $scope.availableBoards = $scope.availableBoards.concat(appExtensions);
                 $scope.showSaveConfirmDialogConfig = appService.getAppDescriptor().getConfigValue('showSaveConfirmDialog');
+                var adtNavigationConfig = appService.getAppDescriptor().getConfigValue('adtNavigationConfig');
+                Object.assign($scope.adtNavigationConfig, adtNavigationConfig);
                 setCurrentBoardBasedOnPath();
             };
 
@@ -178,6 +179,10 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 setCurrentBoardBasedOnPath();
             });
 
+            $scope.adtNavigationURL = function (visitUuid) {
+                return appService.getAppDescriptor().formatUrl($scope.adtNavigationConfig.forwardUrl, {'patientUuid': $scope.patient.uuid, 'visitUuid': visitUuid});
+            };
+
             var cleanUpListenerErrorsOnForm = $scope.$on("event:errorsOnForm", function () {
                 $scope.showConfirmationPopUp = true;
             });
@@ -188,7 +193,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                         event.preventDefault();
                         $scope.targetUrl = event.currentTarget.getAttribute('href');
                     }
-                    ngDialog.openConfirm({template: 'consultation/views/saveConfirmation.html', scope: $scope});
+                    ngDialog.openConfirm({template: '../common/ui-helper/views/saveConfirmation.html', scope: $scope});
                 }
             };
 

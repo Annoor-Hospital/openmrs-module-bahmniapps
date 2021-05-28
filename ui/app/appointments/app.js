@@ -47,21 +47,42 @@ angular
                 }
             }).state('home.manage.summary', {
                 url: '/summary',
+                tabName: 'summary',
+                params: {
+                    viewDate: null
+                },
                 views: {
                     'content@manage': {
-                        templateUrl: 'views/manage/appointmentsSummary.html'
+                        templateUrl: 'views/manage/appointmentsSummary.html',
+                        controller: 'AppointmentsSummaryController'
                     }
                 }
             }).state('home.manage.appointments', {
                 url: '/appointments',
+                params: {
+                    filterParams: {},
+                    isFilterOpen: true,
+                    isSearchEnabled: false
+                },
                 views: {
+                    'filter': {
+                        templateUrl: 'views/manage/appointmentFilter.html',
+                        controller: 'AppointmentsFilterController'
+                    },
                     'content@manage': {
                         templateUrl: 'views/manage/allAppointments.html',
                         controller: 'AllAppointmentsController'
                     }
+
                 }
             }).state('home.manage.appointments.calendar', {
                 url: '/calendar',
+                tabName: 'calendar',
+                params: {
+                    viewDate: null,
+                    doFetchAppointmentsData: true,
+                    appointmentsData: null
+                },
                 views: {
                     'content@viewAppointments': {
                         templateUrl: 'views/manage/calendar/calendarView.html',
@@ -70,38 +91,84 @@ angular
                 }
             }).state('home.manage.appointments.calendar.new', {
                 url: '/new',
+                params: {
+                    appointment: null
+                },
                 views: {
                     'content@appointment': {
                         templateUrl: 'views/manage/newAppointment.html',
                         controller: 'AppointmentsCreateController'
+                    }
+                },
+                resolve: {
+                    appointmentContext: function (appointmentInitialization, $stateParams) {
+                        return appointmentInitialization($stateParams);
+                    },
+                    appointmentCreateConfig: function (initializeConfig, appointmentConfigInitialization, appointmentContext) {
+                        return appointmentConfigInitialization(appointmentContext);
                     }
                 }
             }).state('home.manage.appointments.calendar.edit', {
                 url: '/:uuid',
                 views: {
                     'content@appointment': {
-                        templateUrl: 'views/manage/editAppointment.html'
+                        templateUrl: 'views/manage/newAppointment.html',
+                        controller: 'AppointmentsCreateController'
+                    }
+                },
+                resolve: {
+                    appointmentContext: function (appointmentInitialization, $stateParams) {
+                        return appointmentInitialization($stateParams);
+                    },
+                    appointmentCreateConfig: function (initializeConfig, appointmentConfigInitialization, appointmentContext) {
+                        return appointmentConfigInitialization(appointmentContext);
                     }
                 }
             }).state('home.manage.appointments.list', {
                 url: '/list',
+                tabName: 'list',
+                params: {
+                    viewDate: null,
+                    patient: null,
+                    doFetchAppointmentsData: true,
+                    appointmentsData: null
+                },
                 views: {
                     'content@viewAppointments': {
-                        templateUrl: 'views/manage/list/listView.html'
+                        templateUrl: 'views/manage/list/listView.html',
+                        controller: 'AppointmentsListViewController'
                     }
                 }
             }).state('home.manage.appointments.list.new', {
                 url: '/new',
                 views: {
                     'content@appointment': {
-                        templateUrl: 'views/manage/newAppointment.html'
+                        templateUrl: 'views/manage/newAppointment.html',
+                        controller: 'AppointmentsCreateController'
+                    }
+                },
+                resolve: {
+                    appointmentContext: function (appointmentInitialization, $stateParams) {
+                        return appointmentInitialization($stateParams);
+                    },
+                    appointmentCreateConfig: function (initializeConfig, appointmentConfigInitialization, appointmentContext) {
+                        return appointmentConfigInitialization(appointmentContext);
                     }
                 }
             }).state('home.manage.appointments.list.edit', {
                 url: '/:uuid',
                 views: {
                     'content@appointment': {
-                        templateUrl: 'views/manage/editAppointment.html'
+                        templateUrl: 'views/manage/newAppointment.html',
+                        controller: 'AppointmentsCreateController'
+                    }
+                },
+                resolve: {
+                    appointmentContext: function (appointmentInitialization, $stateParams) {
+                        return appointmentInitialization($stateParams);
+                    },
+                    appointmentCreateConfig: function (initializeConfig, appointmentConfigInitialization, appointmentContext) {
+                        return appointmentConfigInitialization(appointmentContext);
                     }
                 }
             }).state('home.admin', {
@@ -127,13 +194,15 @@ angular
                         templateUrl: 'views/admin/appointmentService.html',
                         controller: 'AppointmentServiceController'
                     }
+                },
+                resolve: {
+                    appointmentServiceContext: function (appointmentServiceInitialization, $stateParams) {
+                        return appointmentServiceInitialization($stateParams.uuid);
+                    }
                 }
             });
 
             $bahmniTranslateProvider.init({app: 'appointments', shouldMerge: true});
-        }]).run(['$rootScope', '$templateCache', function ($rootScope, $templateCache) {
-            $rootScope.$on('$viewContentLoaded', function () {
-                $templateCache.removeAll();
-            }
-        );
+        }]).run(['$window', function ($window) {
+            moment.locale($window.localStorage["NG_TRANSLATE_LANG_KEY"] || "en");
         }]);

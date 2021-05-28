@@ -9,9 +9,13 @@
         <link rel="stylesheet" href="../components/ngDialog/css/ngDialog-theme-default.min.css"/>
         <link rel="stylesheet" href="../components/ngDialog/css/ngDialog-theme-plain.min.css"/>
         <!-- build:css appointments.min.css -->
-        <link rel="stylesheet" href="../styles/clinical.css"/>
+        <link rel="stylesheet" href="../styles/appointmentScheduling.css">
         <link rel="stylesheet" href="../components/fullcalendar/dist/fullcalendar.min.css"/>
         <link rel="stylesheet" href="../components/fullcalendar-scheduler/dist/scheduler.min.css"/>
+        <link rel="stylesheet" href="../components/angular-ivh-treeview/dist/ivh-treeview.css"/>
+        <link rel="stylesheet" href="../components/angular-ivh-treeview/dist/ivh-treeview-theme-basic.css"/>
+        <link rel="stylesheet" href="../components/ng-tags-input/ng-tags-input.bootstrap.min.css"/>
+        <link rel="stylesheet" href="../components/ng-tags-input/ng-tags-input.min.css"/>
         <!-- endbuild -->
     </head>
     <body>
@@ -25,11 +29,11 @@
         <script src="../components/jquery.cookie/jquery.cookie.js"></script>
         <script src="../lib/jquery/jquery-ui-1.10.4.custom.min.js"></script>
         <script src="../lib/modernizr.custom.80690.js"></script>
-        
+
         <script src="../components/angular/angular.min.js"></script>
         <script src="../components/ng-tags-input/ng-tags-input.min.js"></script>
         <script src="../components/angular-sanitize/angular-sanitize.min.js"></script>
-        <script src="../components/moment/min/moment.min.js"></script>
+        <script src="../components/moment/min/moment-with-locales.min.js"></script>
         <script src="../components/ngInfiniteScroll/build/ng-infinite-scroll.min.js"></script>
         <script src="../components/angular-bindonce/bindonce.min.js"></script>
         <script src="../components/select2/select2.min.js"></script>
@@ -45,6 +49,8 @@
         <script src="../components/angular-translate-storage-local/angular-translate-storage-local.min.js"></script>
         <script src="../components/angular-translate-handler-log/angular-translate-handler-log.min.js"></script>
         <script src="../components/ngDialog/js/ngDialog.min.js"></script>
+        <script src="../components/angular-elastic/elastic.js"></script>
+        <script src="../components/angular-ivh-treeview/dist/ivh-treeview.min.js"></script>
         <script src="../lib/angular-workers/dist/angular-workers.js"></script>
 
         <!-- build:js appointments.min.js -->
@@ -58,9 +64,6 @@
         <script src="../common/util/modernizr.tests.js"></script>
         <script src="../common/util/iosLabelFix.js"></script>
         <script src="../common/util/dateTimeFormatter.js"></script>
-
-        <script src="../common/offline/init.js"></script>
-        <script src="../common/offline/offlineService.js"></script>
         <script src="../common/models/init.js"></script>
 
         <script src="../common/auth/init.js"></script>
@@ -75,6 +78,9 @@
         <script src="../common/app-framework/models/appDescriptor.js"></script>
         <script src="../common/app-framework/services/loadConfigService.js"></script>
 
+        <script src="../common/displaycontrols/patientprofile/init.js"></script>
+        <script src="../common/displaycontrols/patientprofile/filters/titleCase.js"></script>
+
         <script src="../common/config/init.js"></script>
         <script src="../common/config/services/configurations.js"></script>
         <script src="../common/config/directives/showIfPrivilege.js"></script>
@@ -86,12 +92,15 @@
 
         <script src="../common/ui-helper/init.js"></script>
         <script src="../common/ui-helper/spinner.js"></script>
+        <script src="../common/ui-helper/printer.js"></script>
         <script src="../common/ui-helper/services/backlinkService.js"></script>
         <script src="../common/ui-helper/services/stateChangeSpinner.js"></script>
         <script src="../common/ui-helper/directives/backLinks.js"></script>
         <script src="../common/ui-helper/controllers/messageController.js"></script>
         <script src="../common/ui-helper/services/messagingService.js"></script>
+        <script src="../common/ui-helper/services/confirmBoxService.js"></script>
         <script src="../common/ui-helper/directives/bahmniAutocomplete.js"></script>
+        <script src="../common/ui-helper/filters/dateFilters.js"></script>
 
         <script src="../common/patient/init.js"></script>
         <script src="../common/patient/mappers/patientMapper.js"></script>
@@ -119,31 +128,46 @@
         <script  src="../components/fullcalendar/dist/fullcalendar.min.js"></script>
         <script  src="../components/fullcalendar-scheduler/dist/scheduler.min.js"></script>
 
-        <script src="../registration/init.js"></script>
-
         <script src="init.js"></script>
+        <script src="app.js"></script>
         <script src="initialization.js"></script>
+        <script src="appointmentServiceInitialization.js"></script>
+        <script src="appointmentInitialization.js"></script>
+        <script src="appointmentConfigInitialization.js"></script>
         <script src="constants.js"></script>
+        <script src="models/appointment.js"></script>
         <script src="models/appointmentService.js"></script>
         <script src="models/appointmentServiceViewModel.js"></script>
+        <script src="models/appointmentViewModel.js"></script>
         <script src="directives/timeValidator.js"></script>
         <script src="directives/dayCalendar.js"></script>
         <script src="directives/weekdaySelector.js"></script>
         <script src="directives/serviceAvailability.js"></script>
+        <script src="directives/serviceTypes.js"></script>
+        <script src="directives/colorPicker.js"></script>
+        <script src="directives/datePicker.js"></script>
+        <script src="directives/weekPicker.js"></script>
+        <script src="directives/multiSelectAutocomplete.js"></script>
+        <script src="directives/patientSearch.js"></script>
         <script src="services/appointmentsServiceService.js"></script>
         <script src="services/specialityService.js"></script>
         <script src="services/appointmentsService.js"></script>
+        <script src="services/calendarViewPopUp.js"></script>
+        <script src="services/checkinPopUp.js"></script>
+        <script src="controllers/admin/deleteAppointmentServiceController.js" ></script>
         <script src="controllers/appointmentsHeaderController.js"></script>
-        <script src="controllers/appointmentsManageController.js"></script>
-        <script src="controllers/allAppointmentServicesController.js"></script>
-        <script src="controllers/appointmentsCreateController.js"></script>
-        <script src="controllers/appointmentServiceController.js"></script>
-        <script src="controllers/appointmentsDayCalendarController.js"></script>
-        <script src="controllers/allAppointmentServicesController.js"></script>
-        <script src="controllers/allAppointmentsController.js" ></script>
-        <script src="controllers/appointmentsCalendarViewController.js" ></script>
-        <script src="app.js"></script>
-
+        <script src="controllers/manage/appointmentsManageController.js"></script>
+        <script src="controllers/admin/allAppointmentServicesController.js"></script>
+        <script src="controllers/manage/appointmentsCreateController.js"></script>
+        <script src="controllers/admin/appointmentServiceController.js"></script>
+        <script src="controllers/manage/calendar/appointmentsDayCalendarController.js"></script>
+        <script src="controllers/admin/allAppointmentServicesController.js"></script>
+        <script src="controllers/manage/allAppointmentsController.js" ></script>
+        <script src="controllers/manage/calendar/appointmentsCalendarViewController.js" ></script>
+        <script src="controllers/manage/list/appointmentsListViewController.js" ></script>
+        <script src="controllers/manage/appointmentsSummaryController.js" ></script>
+        <script src="controllers/manage/appointmentsFilterController.js"></script>
+        <script src="filters/appointmentsFilter.js"></script>
         <!-- endbuild -->
     </body>
 </html>

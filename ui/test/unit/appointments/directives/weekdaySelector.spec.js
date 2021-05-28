@@ -14,7 +14,7 @@ describe('WeekdaySelector', function () {
     }));
 
     var createElement = function () {
-        var html = '<weekday-selector ng-model="days" week-starts-index="startOfWeek" ng-change="toggleChanged()"></weekday-selector>';
+        var html = '<weekday-selector ng-model="days" week-starts-index="startOfWeek" ng-disabled="disabled" ng-change="toggleChanged()"></weekday-selector>';
 
         var element = compile(angular.element(html))(scope);
         scope.$digest();
@@ -23,35 +23,41 @@ describe('WeekdaySelector', function () {
     };
 
     it('should assign days to ngmodel', function () {
+        expect(scope.days).toBeUndefined();
         var element = createElement();
-        var compiledElementScope = element.isolateScope();
+        var compiledScope = element.isolateScope();
 
         expect(scope.days).not.toBeUndefined();
-        expect(scope.days.length).toBe(7);
-        expect(scope.days).toEqual(compiledElementScope.constDays);
-    });
-
-    it('should take 1 as weekStartsIndex by default', function () {
-        scope.startOfWeek = undefined;
-        var element = createElement();
-        var compiledElementScope = element.isolateScope();
-
-        expect(compiledElementScope.weekStartsIndex).toBe(1);
+        expect(scope.days).toEqual(compiledScope.constDays);
     });
 
     it('should display first two letters of day name', function () {
+        scope.startOfWeek = 2;
         var element = createElement();
-        expect($(element).find('#day-0').text()).toEqual('Su');
-        expect($(element).find('#day-1').text()).toEqual('Mo');
-        expect($(element).find('#day-6').text()).toEqual('Sa');
+        expect($(element).find('#day-0').text()).toEqual('MONDAY');
+        expect($(element).find('#day-1').text()).toEqual('TUESDAY');
+        expect($(element).find('#day-6').text()).toEqual('SUNDAY');
     });
 
     it('should toggle isSelected of a day when clicked', function () {
+        scope.startOfWeek = 1;
+        var element = createElement();
+        var monDay = $(element).find('#day-1');
+        expect(monDay.hasClass('is-selected')).toBeFalsy();
+        expect(scope.days[1].isSelected).toBeFalsy();
+        monDay.click();
+        expect(monDay.hasClass('is-selected')).toBeTruthy();
+        expect(scope.days[1].isSelected).toBeTruthy();
+        monDay.click();
+        expect(monDay.hasClass('is-selected')).toBeFalsy();
+        expect(scope.days[1].isSelected).toBeFalsy();
+    });
+
+    it('should not toggle isSelected of a day if ngDisabled is true', function () {
+        scope.disabled = true;
         var element = createElement();
         var monDay = $(element).find('#day-1');
         expect(scope.days[1].isSelected).toBeFalsy();
-        monDay.click();
-        expect(scope.days[1].isSelected).toBeTruthy();
         monDay.click();
         expect(scope.days[1].isSelected).toBeFalsy();
     });

@@ -45,6 +45,10 @@
 @import "adt/adt";
 @import "adt/wardLayout";
 
+@import "ot/ot";
+@import "ot/otSurgical";
+@import "ot/otCalendar";
+
 @import "admin/admin";
 
 @import "common/noTouch";
@@ -58,6 +62,5 @@
 
 @import "reports/reports";
 
-@import "appointments/appointments";
-@import "appointments/manageAppointments";
-@import "appointments/serviceAppointment";
+@import "bedmanagement/bedmanagement";
+@import "bedmanagement/wardLayout";
