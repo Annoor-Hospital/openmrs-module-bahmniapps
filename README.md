@@ -1,3 +1,11 @@
+# Annoor Hospital Bahmniapps
+
+The *MAF-rebase-new* branch is an attempt to update *MAF* using changes in upstream master. The idea is that this will replace *MAF*.
+
+In the future, additional updates/changes could be made as follows:
+- Make changes to MAF branch, creating commits as needed
+- Often merge in upstream commits from master, creating merge commits along the way.
+
 # Bahmni Apps
 
 [![Build Status](https://travis-ci.org/Bahmni/openmrs-module-bahmniapps.svg?branch=master)](https://travis-ci.org/Bahmni/openmrs-module-bahmniapps)
