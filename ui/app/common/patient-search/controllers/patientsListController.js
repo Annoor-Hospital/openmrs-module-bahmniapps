@@ -40,7 +40,7 @@ angular.module('bahmni.common.patientSearch')
             return spinner.forPromise(patientService.search($scope.search.searchParameter)).then(function (response) {
                 $scope.search.updateSearchResults(response.data.pageOfResults);
                 if ($scope.search.hasSingleActivePatient()) {
-                    forwardPatient($scope.search.activePatients[0]);
+                    $scope.forwardPatient($scope.search.activePatients[0]);
                 }
             });
         };
@@ -51,7 +51,7 @@ angular.module('bahmni.common.patientSearch')
               if(response.data && response.data.pageOfResults) {
                 $scope.search.updateSearchResults(response.data.pageOfResults);
                 if ($scope.search.hasSingleActivePatient()) {
-                    forwardPatient($scope.search.activePatients[0]);
+                    $scope.forwardPatient($scope.search.activePatients[0]);
                 }
               }else {
                 if(response.data && response.data.error)
@@ -64,7 +64,7 @@ angular.module('bahmni.common.patientSearch')
 
         $scope.filterPatientsAndSubmit = function () {
             if ($scope.search.searchResults.length == 1) {
-                forwardPatient($scope.search.searchResults[0]);
+                $scope.forwardPatient($scope.search.searchResults[0]);
             }
         };
         var getPatientCount = function (searchType, patientListSpinner) {
@@ -204,25 +204,26 @@ angular.module('bahmni.common.patientSearch')
             if ($scope.search.searchType.links) {
                 link = _.find($scope.search.searchType.links, {linkColumn: heading}) || link;
             }
+            link.url = appService.getAppDescriptor().formatUrl(link.url, options, true);
             return link;
         };
 
-        var forwardPatient = function(patient, heading) {
+        $scope.forwardPatient = function (patient, heading) {
             var link = forwardPatientLink(patient, heading);
             if (link.url && link.url !== null) {
-                $window.open(appService.getAppDescriptor().formatUrl(link.url, options, true), link.newTab ? "_blank" : "_self");
+                $window.open(link.url, link.newTab ? "_blank" : "_self");
             }
-        }
+        };
 
-        $scope.forwardPatientUrl = function(patient, heading) {
+        $scope.forwardPatientUrl = function (patient, heading) {
             var link = forwardPatientLink(patient, heading);
             return appService.getAppDescriptor().formatUrl(link.url, options, true);
-        }
+        };
 
-        $scope.forwardPatientTarget = function(patient, heading) {
+        $scope.forwardPatientTarget = function (patient, heading) {
             var link = forwardPatientLink(patient, heading);
             return link.newTab ? "_blank" : "_self";
-        }
+        };
 
         var getPatientCountSeriallyBySearchIndex = function (index) {
             if (index === $scope.search.searchTypes.length) {
