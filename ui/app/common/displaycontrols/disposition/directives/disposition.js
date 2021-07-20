@@ -54,8 +54,9 @@ angular.module('bahmni.common.displaycontrol.disposition')
 
                 if ($scope.visitUuid) {
                     $scope.fetchDispositionPromise = fetchDispositionsByVisit($scope.visitUuid);
-                } else if ($scope.params.numberOfVisits && $scope.patientUuid) {
-                    $scope.fetchDispositionPromise = fetchDispositionByPatient($scope.patientUuid, $scope.params.numberOfVisits);
+                } else if ($scope.patientUuid) {
+                    var numVisits = $scope.params.numberOfVisits || 10;
+                    $scope.fetchDispositionPromise = fetchDispositionByPatient($scope.patientUuid, numVisits);
                 }
             };
 
