@@ -5,16 +5,14 @@ angular.module('bahmni.common.uiHelper')
         function ($rootScope, $compile, $http, $timeout, $q, spinner) {
             var printHtml = function (html) {
                 var deferred = $q.defer();
-                //var hiddenFrame = $('<div style="border:thin black;border-style:solid;padding-left:50px;padding-right:50px;padding-top: 50px;background:#fff;position: absolute;top: 50px;left: 0;right: 0;margin-left: auto;margin-right: auto;width: 680px; height:1200px;z-index: 9999;"><iframe width="100%" height="100%" style="border:0;"></iframe></div>').appendTo('body')[0].firstChild;
                 var hiddenFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
-                hiddenFrame.contentWindow.printAndRemove = function () {
-                    hiddenFrame.contentWindow.print();
+                hiddenFrame.contentWindow.removeIframe = function () {
                     $(hiddenFrame).remove();
                     deferred.resolve();
                 };
                 var htmlContent = "<!doctype html>" +
                         "<html>" +
-                            '<body onload="printAndRemove();">' +
+                            '<body onload="print();" onafterprint="removeIframe();">' +
                                 html +
                             '</body>' +
                         "</html>";
