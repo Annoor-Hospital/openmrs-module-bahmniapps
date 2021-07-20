@@ -58,6 +58,7 @@ angular.module('bahmni.common.uiHelper')
         };
 
         var forPromise = function (promise, element) {
+            if (angular.isUndefined(promise) || angular.isUndefined(promise.finally)) throw TypeError('not a promise');
             return $timeout(function () {
                 // Added timeout to push a new event into event queue. So that its callback will be invoked once DOM is completely rendered
                 var spinner = show(element);                      // Don't inline this element
