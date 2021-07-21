@@ -11,9 +11,37 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.navigated = false;
     self.links = self.searchType && self.searchType.links ? self.searchType.links : [];
     self.searchColumns = self.searchType && self.searchType.searchColumns ? self.searchType.searchColumns : ["identifier", "name"];
+    self.sortReverse = self.searchType && self.searchType.sortReverse ? self.searchType.sortReverse : true;
+    self.sortBy = self.searchType && self.searchType.sortBy ? self.searchType.sortBy : "visit_date";
     angular.forEach(searchTypes, function (searchType) {
         searchType.patientCount = "...";
     });
+
+    self.searchSort = function (a, b) {
+        if (self.sortBy in a && self.sortBy in b) {
+            if (self.sortReverse) {
+                return (a[self.sortBy] >= b[self.sortBy]) ? 1 : -1;
+            } else {
+                return (a[self.sortBy] < b[self.sortBy]) ? 1 : -1;
+            }
+        } else {
+            return 0;
+        }
+    };
+
+    self.setSort = function (heading) {
+        if (self.sortBy === heading) {
+            self.sortReverse = !self.sortReverse;
+        } else {
+            self.sortBy = heading;
+            self.sortReverse = false;
+        }
+        self.searchResults = self.activePatients.sort(self.searchSort).slice(0);
+    };
+
+    self.isCurrentSearchCustom = function (type) {
+        return self.searchType && self.searchType.customSearch === type;
+    };
 
     self.switchSearchType = function (searchType) {
         self.noResultsMessage = null;
@@ -25,6 +53,8 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
             self.searchResults = [];
             self.links = self.searchType && self.searchType.links ? self.searchType.links : [];
             self.searchColumns = self.searchType && self.searchType.searchColumns ? self.searchType.searchColumns : ["identifier", "name"];
+            self.sortReverse = self.searchType && self.searchType.sortReverse ? self.searchType.sortReverse : true;
+            self.sortBy = self.searchType && self.searchType.sortBy ? self.searchType.sortBy : "visit_date";
         }
         self.markPatientEntry();
     };
@@ -42,7 +72,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     self.updatePatientList = function (patientList) {
         self.activePatients = patientList.map(mapPatient);
-        self.searchResults = self.activePatients.sort(searchSort);
+        self.searchResults = self.activePatients.sort(self.searchSort);
     };
 
     self.updateSearchResults = function (patientList) {
@@ -54,30 +84,12 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         }
     };
 
-    self.setSort = function (heading) {
-        if (self.searchType.sortBy == heading){
-            self.searchType.sortReverse = !self.searchType.sortReverse;
-        }else{
-            self.searchType.sortBy = heading;
-            self.searchType.sortReverse = false;
-        }
-        self.searchResults = self.activePatients.sort(searchSort).slice(0);
-    }
-
-    let searchSort = function(a,b) {
-        if(self.searchType.sortReverse){
-            return (a[self.searchType.sortBy] >= b[self.searchType.sortBy]) ? 1 : -1;
-        }else{
-            return (a[self.searchType.sortBy] < b[self.searchType.sortBy]) ? 1 : -1;
-        }
-    }
-
     self.hasSingleActivePatient = function () {
         return self.activePatients.length === 1;
     };
 
     self.filterPatients = function (matchingCriteria) {
-        matchingCriteria = matchingCriteria ? matchingCriteria : matchesNameOrId;
+        matchingCriteria = matchingCriteria || matchesNameOrId;
         self.searchResults = self.searchParameter ? self.activePatients.filter(matchingCriteria) : self.activePatients;
     };
 
@@ -91,10 +103,6 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     self.isCurrentSearchLookUp = function () {
         return self.searchType && self.searchType.handler;
-    };
-
-    self.isCurrentSearchCustom = function (type) {
-        return self.searchType && self.searchType.customSearch == type;
     };
 
     self.isTileView = function () {
