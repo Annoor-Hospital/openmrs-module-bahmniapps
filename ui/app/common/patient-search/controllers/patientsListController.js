@@ -216,8 +216,7 @@ angular.module('bahmni.common.patientSearch')
         };
 
         $scope.forwardPatientUrl = function (patient, heading) {
-            var link = forwardPatientLink(patient, heading);
-            return appService.getAppDescriptor().formatUrl(link.url, options, true);
+            return forwardPatientLink(patient, heading).url;
         };
 
         $scope.forwardPatientTarget = function (patient, heading) {
