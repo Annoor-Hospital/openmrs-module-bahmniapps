@@ -22,8 +22,7 @@ angular.module('bahmni.common.patientSearch')
             });
             if (patientSearchConfig && patientSearchConfig.serializeSearch) {
                 getPatientCountSeriallyBySearchIndex(0);
-            }
-            else {
+            } else {
                 _.each($scope.search.searchTypes, function (searchType) {
                     _.isEmpty(searchType) || ($scope.search.searchType != searchType && getPatientCount(searchType, null));
                 });
@@ -47,20 +46,21 @@ angular.module('bahmni.common.patientSearch')
 
         // MAF search for patients by criteria
         $scope.criteria_search_submit = function (params) {
-          return spinner.forPromise(criteriaSearchService.search(params)).then(function (response) {
-              if(response.data && response.data.pageOfResults) {
-                $scope.search.updateSearchResults(response.data.pageOfResults);
-                if ($scope.search.hasSingleActivePatient()) {
-                    $scope.forwardPatient($scope.search.activePatients[0]);
+            return spinner.forPromise(criteriaSearchService.search(params)).then(function (response) {
+                if (response.data && response.data.pageOfResults) {
+                    $scope.search.updateSearchResults(response.data.pageOfResults);
+                    if ($scope.search.hasSingleActivePatient()) {
+                        $scope.forwardPatient($scope.search.activePatients[0]);
+                    }
+                } else {
+                    if (response.data && response.data.error) {
+                        messagingService.showMessage("error", "Search failed: " + response.data.error);
+                    } else {
+                        messagingService.showMessage("error", "Search failed");
+                    }
                 }
-              }else {
-                if(response.data && response.data.error)
-                  messagingService.showMessage("error", "Search failed: " + response.data.error);
-                else
-                  messagingService.showMessage("error", "Search failed");
-              }
-          });
-        }
+            });
+        };
 
         $scope.filterPatientsAndSubmit = function () {
             if ($scope.search.searchResults.length == 1) {
@@ -100,10 +100,10 @@ angular.module('bahmni.common.patientSearch')
                         return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
                     })
                     .value();
-                if($scope.search.searchType.headingOrder) {
-                    var new_headings = $scope.search.searchType.headingOrder.filter(header => headings.includes(header));
-                    var missed_headings = headings.filter(header => !new_headings.includes(header));
-                    headings = new_headings.concat(missed_headings);
+                if ($scope.search.searchType.headingOrder) {
+                    var newHeadings = $scope.search.searchType.headingOrder.filter(header => headings.includes(header));
+                    var missedHeadings = headings.filter(header => !newHeadings.includes(header));
+                    headings = newHeadings.concat(missedHeadings);
                 }
                 return headings;
             }
@@ -115,8 +115,7 @@ angular.module('bahmni.common.patientSearch')
                 return identifierHeading;
             } else if ($scope.search.searchType && $scope.search.searchType.links) {
                 return _.find($scope.search.searchType.links, {linkColumn: heading});
-            }
-            else if ($scope.search.searchType && $scope.search.searchType.linkColumn) {
+            } else if ($scope.search.searchType && $scope.search.searchType.linkColumn) {
                 return _.includes([$scope.search.searchType.linkColumn], heading);
             }
         };
