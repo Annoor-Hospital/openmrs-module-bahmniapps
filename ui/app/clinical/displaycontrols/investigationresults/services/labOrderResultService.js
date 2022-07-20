@@ -62,7 +62,7 @@ angular.module('bahmni.clinical')
                 latestAccessionCount: latestAccessionCount
             };
 
-            // MATT filter test result dates that are empty
+            // MAF filter test result dates that are empty
             // remove empty values from results.tabularResult.values
             results.tabularResult.values = results.tabularResult.values.filter(row => row.result);
             // get a list of remaining dates from values
@@ -104,6 +104,12 @@ angular.module('bahmni.clinical')
                     paramsToBeSent.numberOfVisits = params.numberOfVisits;
                 }
             }
+            // MAF: backend supports limitting quiery by number of lab orders ("accessions")
+            // Adding support to this service module, so that display controller can also support this
+            if (params.numberOfAccessions !== 0) {
+                paramsToBeSent.numberOfAccessions = params.numberOfAccessions;
+            }
+            // END MAF
 
             $http.get(Bahmni.Common.Constants.bahmniLabOrderResultsUrl, {
                 method: "GET",

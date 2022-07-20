@@ -14,6 +14,7 @@ angular.module('bahmni.clinical')
                 patientUuid: $scope.params.patientUuid,
                 numberOfVisits: $scope.params.numberOfVisits,
                 visitUuids: $scope.params.visitUuids,
+                numberOfAccessions: $scope.params.numberOfAccessions, // MAF added number of accessions to params
                 initialAccessionCount: $scope.params.initialAccessionCount,
                 latestAccessionCount: $scope.params.latestAccessionCount
             };
