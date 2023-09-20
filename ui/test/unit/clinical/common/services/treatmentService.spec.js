@@ -15,9 +15,11 @@ describe("TreamentService", function () {
         var appDescriptor = jasmine.createSpyObj('appDescriptor', ['getConfigValue']);
         appDescriptor.getConfigValue.and.returnValue({showDetailsWithinDateRange: false});
         appService.getAppDescriptor.and.returnValue(appDescriptor);
+        var transmissionService = jasmine.createSpyObj('transmissionService', ['sendEmail']);
         $provide.value('$http', _$http);
         $provide.value('$q', Q);
         $provide.value('appService',appService);
+        $provide.value('transmissionService',transmissionService);
     }));
 
 
@@ -148,6 +150,9 @@ describe("TreamentService", function () {
               "orderReasonConcept": null,
               "orderReasonText": null,
               "duration": 10,
+              "concept": {
+                  "shortName": "Ipratropium Pressurised"
+              },
               "provider": {
                 "uuid": "35ba3170-cf80-4749-9672-b3b678c77b6a",
                 "name": "superman"

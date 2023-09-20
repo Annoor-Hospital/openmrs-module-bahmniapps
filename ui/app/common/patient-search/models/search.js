@@ -9,6 +9,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.searchResults = [];
     self.activePatients = [];
     self.navigated = false;
+    self.links = self.searchType && self.searchType.links ? self.searchType.links : [];
     self.searchColumns = self.searchType && self.searchType.searchColumns ? self.searchType.searchColumns : ["identifier", "name"];
     angular.forEach(searchTypes, function (searchType) {
         searchType.patientCount = "...";
@@ -22,6 +23,8 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
             self.searchType = searchType;
             self.activePatients = [];
             self.searchResults = [];
+            self.links = self.searchType && self.searchType.links ? self.searchType.links : [];
+            self.searchColumns = self.searchType && self.searchType.searchColumns ? self.searchType.searchColumns : ["identifier", "name"];
         }
         self.markPatientEntry();
     };
@@ -39,35 +42,17 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     self.updatePatientList = function (patientList) {
         self.activePatients = patientList.map(mapPatient);
-        self.searchResults = self.activePatients.sort(searchSort);
+        self.searchResults = self.activePatients;
     };
 
     self.updateSearchResults = function (patientList) {
         self.updatePatientList(patientList);
         if (self.activePatients.length === 0 && self.searchParameter != '') {
-            self.noResultsMessage = "No results found";
+            self.noResultsMessage = "NO_RESULTS_FOUND";
         } else {
             self.noResultsMessage = null;
         }
     };
-
-    self.setSort = function (heading) {
-        if (self.searchType.sortBy == heading){
-            self.searchType.sortReverse = !self.searchType.sortReverse;
-        }else{
-            self.searchType.sortBy = heading;
-            self.searchType.sortReverse = false;
-        }
-        self.searchResults = self.activePatients.sort(searchSort).slice(0);
-    }
-
-    let searchSort = function(a,b) {
-        if(self.searchType.sortReverse){
-            return (a[self.searchType.sortBy] >= b[self.searchType.sortBy]) ? 1 : -1;
-        }else{
-            return (a[self.searchType.sortBy] < b[self.searchType.sortBy]) ? 1 : -1;
-        }
-    }
 
     self.hasSingleActivePatient = function () {
         return self.activePatients.length === 1;
@@ -90,10 +75,6 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         return self.searchType && self.searchType.handler;
     };
 
-    self.isCurrentSearchCustom = function (type) {
-        return self.searchType && self.searchType.customSearch == type;
-    };
-
     self.isTileView = function () {
         return self.searchType && self.searchType.view === Bahmni.Common.PatientSearch.Constants.searchExtensionTileViewType;
     };
@@ -108,12 +89,23 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     function mapPatient (patient) {
         if (patient.name || patient.givenName || patient.familyName) {
-            patient.name = patient.name || (patient.givenName + ' ' + patient.familyName);
+            patient.name = patient.name || (patient.givenName + (patient.familyName ? ' ' + patient.familyName : ""));
         }
         patient.display = _.map(self.searchColumns, function (column) {
             return patient[column];
         }).join(" - ");
 
+        var extraIdentifier = null;
+        if (patient.extraIdentifiers) {
+            var objIdentifiers = JSON.parse(patient.extraIdentifiers);
+            for (var key in objIdentifiers) {
+                extraIdentifier = objIdentifiers[key];
+                break;
+            }
+        } else if (patient.extraIdentifierVal) {
+            extraIdentifier = patient.extraIdentifierVal;
+        }
+        patient.extraIdentifier = patient.extraIdentifier ? patient.extraIdentifier : (extraIdentifier ? extraIdentifier : patient.identifier);
         patient.image = Bahmni.Common.Constants.patientImageUrlByPatientUuid + patient.uuid;
         return patient;
     }

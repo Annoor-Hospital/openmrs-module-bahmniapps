@@ -5,12 +5,14 @@ describe('EditPatientController', function () {
     var $aController, patient = {};
     var scopeMock = jasmine.createSpyObj('scopeMock', ['actions']);
     var rootScopeMock = jasmine.createSpyObj('rootScopeMock', ['patientConfiguration']);
-    var patientServiceMock = jasmine.createSpyObj('patientServiceMock', ['get', 'update']);
+    var patientServiceMock = jasmine.createSpyObj('patientServiceMock', ['get', 'update','getAllPatientIdentifiers']);
     var patientModelMock = jasmine.createSpyObj('patientModelMock', ['']);
     var spinnerMock = jasmine.createSpyObj('spinnerMock', ['forPromise']);
     var appServiceMock = jasmine.createSpyObj('appServiceMock', ['getAppDescriptor']);
     var openmrsPatientMapperMock = jasmine.createSpyObj('openmrsPatientMapper', ['map']);
     var encounterServiceMock = jasmine.createSpyObj('encounterService', ['getDigitized']);
+    var auditLogService = jasmine.createSpyObj('auditLogService', ['log']);
+    auditLogService.log.and.returnValue(specUtil.simplePromise({}));
 
     beforeEach(module('bahmni.registration'));
 
@@ -33,6 +35,14 @@ describe('EditPatientController', function () {
             return {
                 then: function (successFn) {
                     successFn({data: "uuid"});
+                }
+            }
+        };
+
+        patientServiceMock.getAllPatientIdentifiers = function (uuid) {
+            return {
+                then: function (successFn) {
+                    successFn({data: {results:[] }});
                 }
             }
         };
@@ -64,7 +74,8 @@ describe('EditPatientController', function () {
             openmrsPatientMapper: openmrsPatientMapperMock,
             encounterService: encounterServiceMock,
             spinner: spinnerMock,
-            appService: appServiceMock
+            appService: appServiceMock,
+            auditLogService: auditLogService
         });
 
         expect(scopeMock.readOnlyFields["caste"]).toBeFalsy()
@@ -106,7 +117,8 @@ describe('EditPatientController', function () {
             encounterService: encounterServiceMock,
             spinner: spinnerMock,
             appService: appServiceMock,
-            $rootScope: rootScopeMock
+            $rootScope: rootScopeMock,
+            auditLogService: auditLogService
         });
 
         expect(sections["additionalPatientInformation"].expand).toBeTruthy();
@@ -136,7 +148,8 @@ describe('EditPatientController', function () {
             encounterService: encounterServiceMock,
             spinner: spinnerMock,
             appService: appServiceMock,
-            $rootScope: rootScopeMock
+            $rootScope: rootScopeMock,
+            auditLogService: auditLogService
         });
 
         expect(sections["additionalPatientInformation"].expand).toBeTruthy();
@@ -159,7 +172,8 @@ describe('EditPatientController', function () {
             openmrsPatientMapper: openmrsPatientMapperMock,
             encounterService: encounterServiceMock,
             spinner: spinnerMock,
-            appService: appServiceMock
+            appService: appServiceMock,
+            auditLogService: auditLogService
         });
 
         expect(scopeMock.disablePhotoCapture).toBeTruthy();

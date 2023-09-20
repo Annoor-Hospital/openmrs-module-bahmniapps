@@ -1,5 +1,14 @@
 'use strict';
 
+var constructDrugNameDisplayWithConcept = function (drug, concept) {
+    if (!_.isEmpty(drug)) {
+        if (drug.name) {
+            return drug.name + " (" + drug.form + ")";
+        } else if (concept) {
+            return (concept.shortName || concept.name) + " (" + drug.form + ")";
+        }
+    }
+};
 var constructDrugNameDisplay = function (drug) {
     if (!_.isEmpty(drug)) {
         return drug.name + " (" + drug.form + ")";
@@ -187,7 +196,7 @@ Bahmni.Clinical.DrugOrderViewModel = function (config, proto, encounterDate) {
         return (!variableDosingType.morningDose && !variableDosingType.afternoonDose && !variableDosingType.eveningDose);
     };
 
-    var asNeeded = function (asNeeded) {
+    this.getAsNeededText = function (asNeeded) {
         if (asNeeded && config.translate) {
             return config.translate(null, 'MEDICATION_AS_NEEDED');
         } else if (asNeeded) {
@@ -218,7 +227,7 @@ Bahmni.Clinical.DrugOrderViewModel = function (config, proto, encounterDate) {
 
     var getOtherDescription = function (withRoute, withDuration) {
         var otherDescription = addDelimiter(blankIfFalsy(getInstructions()), ", ") +
-            addDelimiter(blankIfFalsy(asNeeded(self.asNeeded)), ', ');
+            addDelimiter(blankIfFalsy(self.getAsNeededText(self.asNeeded)), ', ');
         if (withRoute) {
             otherDescription = otherDescription + addDelimiter(blankIfFalsy(self.route), " - ");
         } else {
@@ -698,6 +707,7 @@ Bahmni.Clinical.DrugOrderViewModel.createFromContract = function (drugOrderRespo
         };
     }
     viewModel.instructions = administrationInstructions.instructions;
+    viewModel.audit = drugOrderResponse.audit;
     viewModel.additionalInstructions = administrationInstructions.additionalInstructions;
     viewModel.quantity = drugOrderResponse.dosingInstructions.quantity;
     viewModel.quantityUnit = drugOrderResponse.dosingInstructions.quantityUnits;
@@ -718,8 +728,7 @@ Bahmni.Clinical.DrugOrderViewModel.createFromContract = function (drugOrderRespo
     viewModel.orderNumber = drugOrderResponse.orderNumber && parseInt(drugOrderResponse.orderNumber.replace("ORD-", ""));
     viewModel.drugNonCoded = drugOrderResponse.drugNonCoded;
     viewModel.isNonCodedDrug = drugOrderResponse.drugNonCoded ? true : false;
-    viewModel.drugNameDisplay = viewModel.drugNonCoded || constructDrugNameDisplay(viewModel.drug)
-        || _.get(viewModel, 'concept.name');
+    viewModel.drugNameDisplay = viewModel.drugNonCoded || constructDrugNameDisplayWithConcept(viewModel.drug, viewModel.concept) || _.get(viewModel, 'concept.name');
     if (config) {
         viewModel.loadOrderAttributes(drugOrderResponse);
     } else {

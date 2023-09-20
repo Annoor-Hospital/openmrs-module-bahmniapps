@@ -3,12 +3,12 @@
 Bahmni.Common.Obs.ObservationMapper = function () {
     var conceptMapper = new Bahmni.Common.Domain.ConceptMapper();
 
-    this.map = function (bahmniObservations, allConceptsConfig, dontSortByObsDateTime) {
-        var mappedObservations = mapObservations(bahmniObservations, allConceptsConfig, dontSortByObsDateTime);
+    this.map = function (bahmniObservations, allConceptsConfig, dontSortByObsDateTime, $translate) {
+        var mappedObservations = mapObservations(bahmniObservations, allConceptsConfig, dontSortByObsDateTime, $translate);
         return mapUIObservations(mappedObservations, allConceptsConfig);
     };
 
-    var mapObservations = function (bahmniObservations, allConceptsConfig, dontSortByObsDateTime) {
+    var mapObservations = function (bahmniObservations, allConceptsConfig, dontSortByObsDateTime, $translate) {
         var mappedObservations = [];
         if (dontSortByObsDateTime) {
             bahmniObservations = _.flatten(bahmniObservations);
@@ -16,10 +16,10 @@ Bahmni.Common.Obs.ObservationMapper = function () {
             bahmniObservations = Bahmni.Common.Obs.ObservationUtil.sortSameConceptsWithObsDateTime(bahmniObservations);
         }
         $.each(bahmniObservations, function (i, bahmniObservation) {
-            var conceptConfig = allConceptsConfig[bahmniObservation.concept.name] || [];
-            var observation = new Bahmni.Common.Obs.Observation(bahmniObservation, conceptConfig);
+            var conceptConfig = bahmniObservation.formFieldPath ? [] : allConceptsConfig[bahmniObservation.concept.name] || [];
+            var observation = new Bahmni.Common.Obs.Observation(bahmniObservation, conceptConfig, $translate);
             if (observation.groupMembers && observation.groupMembers.length >= 0) {
-                observation.groupMembers = mapObservations(observation.groupMembers, allConceptsConfig, dontSortByObsDateTime);
+                observation.groupMembers = mapObservations(observation.groupMembers, allConceptsConfig, dontSortByObsDateTime, $translate);
             }
             mappedObservations.push(observation);
         });
@@ -28,11 +28,11 @@ Bahmni.Common.Obs.ObservationMapper = function () {
 
     var mapUIObservations = function (observations, allConceptsConfig) {
         var groupedObservations = _.groupBy(observations, function (observation) {
-            return observation.concept.name;
+            return observation.formFieldPath + "#" + observation.concept.name;
         });
         var mappedObservations = [];
         $.each(groupedObservations, function (i, obsGroup) {
-            var conceptConfig = allConceptsConfig[obsGroup[0].concept.name] || [];
+            var conceptConfig = obsGroup[0].formFieldPath ? [] : allConceptsConfig[obsGroup[0].concept.name] || [];
             if (conceptConfig.multiSelect) {
                 var multiSelectObservations = {};
                 $.each(obsGroup, function (i, observation) {

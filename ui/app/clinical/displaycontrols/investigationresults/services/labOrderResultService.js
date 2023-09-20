@@ -9,7 +9,7 @@ angular.module('bahmni.clinical')
         var sanitizeData = function (labOrderResults) {
             labOrderResults.forEach(function (result) {
                 result.accessionDateTime = Bahmni.Common.Util.DateUtil.parse(result.accessionDateTime);
-                result.hasRange = result.minNormal && result.maxNormal;
+                result.hasRange = result.minNormal || result.maxNormal;
             });
         };
 
@@ -62,13 +62,6 @@ angular.module('bahmni.clinical')
                 latestAccessionCount: latestAccessionCount
             };
 
-            // MAF filter test result dates that are empty
-            // remove empty values from results.tabularResult.values
-            results.tabularResult.values = results.tabularResult.values.filter(row => row.result);
-            // get a list of remaining dates from values
-            var dates = results.tabularResult.values.map(row => row.dateIndex);
-            results.tabularResult.dates = results.tabularResult.dates.filter(daterow => dates.indexOf(daterow.index) >= 0);
-
             var tabularResult = new Bahmni.Clinical.TabularLabOrderResults(results.tabularResult, accessionConfig);
             var accessions = _.groupBy(labOrderResults, function (labOrderResult) {
                 return labOrderResult.accessionUuid;
@@ -84,7 +77,6 @@ angular.module('bahmni.clinical')
                 accessions = _.union(initial, latest);
             }
             accessions.reverse();
-            tabularResult.tabularResult.dates.reverse();
             return {
                 accessions: groupByPanel(accessions),
                 tabularResult: tabularResult
@@ -104,12 +96,6 @@ angular.module('bahmni.clinical')
                     paramsToBeSent.numberOfVisits = params.numberOfVisits;
                 }
             }
-            // MAF: backend supports limitting quiery by number of lab orders ("accessions")
-            // Adding support to this service module, so that display controller can also support this
-            if (params.numberOfAccessions !== 0) {
-                paramsToBeSent.numberOfAccessions = params.numberOfAccessions;
-            }
-            // END MAF
 
             $http.get(Bahmni.Common.Constants.bahmniLabOrderResultsUrl, {
                 method: "GET",

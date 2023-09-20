@@ -3,10 +3,10 @@
 angular.module('bahmni.adt')
     .controller('AdtController', ['$scope', '$q', '$rootScope', 'spinner', 'dispositionService',
         'encounterService', 'bedService', 'appService', 'visitService', '$location', '$window', 'sessionService',
-        'messagingService', '$anchorScroll', '$stateParams', 'ngDialog', '$filter', 'auditLogService',
+        'messagingService', '$anchorScroll', '$stateParams', 'ngDialog', '$filter', 'auditLogService', '$translate',
         function ($scope, $q, $rootScope, spinner, dispositionService, encounterService, bedService,
                   appService, visitService, $location, $window, sessionService, messagingService, $anchorScroll,
-                  $stateParams, ngDialog, $filter, auditLogService) {
+                  $stateParams, ngDialog, $filter, auditLogService, $translate) {
             var actionConfigs = {};
             var encounterConfig = $rootScope.encounterConfig;
             var locationUuid = sessionService.getLoginLocationUuid();
@@ -28,6 +28,10 @@ angular.module('bahmni.adt')
                     return getVisitTypeUuid($scope.visitSummary.visitType);
                 }
                 return defaultVisitTypeUuid;
+            };
+            $scope.translateDispositionForBedManagement = function (attribute) {
+                var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(attribute, Bahmni.Common.Constants.bedmanagementDisposition, $translate);
+                return translatedName;
             };
 
             var getActionCode = function (concept) {
@@ -71,7 +75,7 @@ angular.module('bahmni.adt')
 
             var filterAction = function (actions, actionTypes) {
                 return _.filter(actions, function (action) {
-                    return actionTypes.indexOf(action.name.name) >= 0;
+                    return actionTypes.indexOf(action.mappings[0].display.split(':')[1].trim()) >= 0;
                 });
             };
 
@@ -80,17 +84,17 @@ angular.module('bahmni.adt')
                 var stopDate = visitSummary && visitSummary.stopDateTime;
                 var isVisitOpen = (stopDate === null);
                 if (visitSummary && visitSummary.isDischarged() && isVisitOpen) {
-                    return filterAction(actions, ["Undo Discharge"]);
+                    return filterAction(actions, ["UNDO_DISCHARGE"]);
                 } else if (visitSummary && visitSummary.isAdmitted() && isVisitOpen) {
-                    return filterAction(actions, ["Transfer Patient", "Discharge Patient"]);
+                    return filterAction(actions, ["TRANSFER", "DISCHARGE"]);
                 } else {
-                    return filterAction(actions, ["Admit Patient"]);
+                    return filterAction(actions, ["ADMIT"]);
                 }
             };
 
             var getVisit = function () {
                 var visitUuid = $stateParams.visitUuid;
-                if (visitUuid !== 'null' && visitUuid !== '') {
+                if (visitUuid !== 'undefined' && visitUuid !== 'null' && visitUuid !== '') {
                     return visitService.getVisitSummary(visitUuid).then(function (response) {
                         $scope.visitSummary = new Bahmni.Common.VisitSummary(response.data);
                     });

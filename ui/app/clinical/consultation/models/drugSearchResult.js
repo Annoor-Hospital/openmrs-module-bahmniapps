@@ -18,7 +18,9 @@ Bahmni.Clinical.DrugSearchResult = (function () {
     var getMatcher = function (searchString) {
         return function (value) {
             // return value.search(new RegExp(searchString, "i")) !== -1
-            return _.includes(value.toLowerCase(), searchString.toLowerCase());
+            return _.every(searchString.split(" "), function (word) {
+                return _.includes(value.toLowerCase(), word.toLowerCase());
+            });
         };
     };
     var getSynonymCreator = function (drug) {
@@ -31,7 +33,9 @@ Bahmni.Clinical.DrugSearchResult = (function () {
         var doesMatchSearchString = getMatcher(searchString);
         var createSynonym = getSynonymCreator(drug);
 
-        if (doesMatchSearchString(drug.name)) {
+        var drugName = drug.name || drug.concept.name.name;
+
+        if (doesMatchSearchString(drugName)) {
             return [createSynonym()];
         }
 

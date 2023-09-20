@@ -3,7 +3,7 @@
     "SEARCH_KEY": "ابحث",
     "NO_ADMISSION_DETAILS_MESSAGE": "لا يوجد بيانات دخول للمريض",
     "NO_DIAGNOSIS_MESSAGE": "لا يوجد تشخيص للمريض",
-    "CLINICAL_YEARS_TRANSLATION_KEY": "سنوات",
+    "CLINICAL_YEARS_TRANSLATION_KEY": "السنة",
     "CLINICAL_MONTHS_TRANSLATION_KEY": "شهور",
     "CLINICAL_DAYS_TRANSLATION_KEY": "أيام",
     "CONCEPT_SET_GROUP_EXPAND_ALL_KEY": "اعرض الكل",
@@ -45,6 +45,7 @@
     "MEDICATIONS_ACTIONS_LABEL": "اجراءات",
     "MEDICATIONS_STOP_LABEL": "توقف",
     "MEDICATIONS_REFILL_LABEL": "اعادة ملء",
+    "MEDICATION_LABEL_START_DATE": "Start Date",
     "DRUG_DETAILS_STOP_DATE": "تاريخ التوقف",
     "TIME_OF_BIRTH_LABEL": "وقت الولادة",
     "PATIENT_PROFILE_RELATIONSHIPS_LABEL": "العلاقات العائلية",
@@ -61,5 +62,8 @@
     "BED_LABEL": "سرير",
     "ASSIGN_BED_LABEL": "خصص",
     "TRANSFER_BED_LABEL": "انقل",
-    "EMPTY_WARD_MESSAGE": "لا يوجد مرضي بهذا الجناح"
+    "EMPTY_WARD_MESSAGE": "لا يوجد مرضي بهذا الجناح",
+    "BEDMANAGEMENT_DISPOSITION_ADMIT_PATIENT": "Admit Patient",
+    "BEDMANAGEMENT_DISPOSITION_DISCHARGE_PATIENT": "Discharge Patient",
+    "BEDMANAGEMENT_DISPOSITION_TRANSFER_PATIENT": "Transfer Patient"
 }

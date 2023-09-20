@@ -1,10 +1,10 @@
 <section class="block">
     <h2 class="section-title">{{::config | titleTranslate}}</h2>
     <div>
-        <!--<ul>
+        <ul>
             <li ng-repeat="recordGroup in recordGroups" class="radiology-doc-item"
                 bm-gallery patient="patient" access-impression="true">
-                <a class="document-link" bm-image-observation-gallery-items style="display:inline;" list=recordGroup.records>
+                <a class="document-link" bm-image-observation-gallery-items list=recordGroup.records>
                     {{::recordGroup.conceptName}}
                 </a>
                 <i ng-show="shouldShowActiveVisitStar(recordGroup.records)"
@@ -12,33 +12,6 @@
                 <span ng-show="recordGroup.records.length > 1">({{recordGroup.records.length}})</span>
             </li>
         </ul>
-        -->
-        <table class="dashboard-table pacs" ng-hide="!isDataPresent()">
-            <tbody ng-repeat="record in records | orderBy:'-imageObservation.observationDateTime'" class="row" bm-gallery patient="patient" access-impression="true">
-                 <tr class="view-past">
-                    <td class="actions pacs-shrink">
-                        <i ng-show="shouldShowActiveVisitStar(recordGroup.records)"
-                            class="fa fa-star current-visit-icon fr"></i>
-                    </td>
-                    <td class="name pacs-expand">
-                        <a bm-image-observation-gallery-item observation="record">
-                            {{::record.concept.name}}
-                        </a>
-                    </td>
-                    <td class="provider-name pacs-shrink">
-                        {{record.provider.name}}
-                    </td>
-                    <td class="provider-date pacs-shrink">
-                        {{record.imageObservation.observationDateTime | bahmniDateTime }}
-                    </td>
-                </tr>
-                <tr class="notes-open pacs-note" ng-if="record.comment">
-                    <td colspan="4">
-                        <div><pre>{{record.comment}}</pre></div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
         <div ng-hide="isDataPresent()">
             <div class="placeholder-text">{{'NO_DOCUMENTS_MESSAGE' | translate}}</div>
         </div>

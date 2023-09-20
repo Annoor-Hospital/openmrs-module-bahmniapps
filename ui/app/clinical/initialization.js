@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.clinical').factory('initialization',
-    ['$rootScope', 'authenticator', 'appService', 'spinner', 'configurations', 'orderTypeService', 'offlineService', 'offlineDbService', 'androidDbService', 'mergeService', '$q', 'messagingService',
-        function ($rootScope, authenticator, appService, spinner, configurations, orderTypeService, offlineService, offlineDbService, androidDbService, mergeService, $q, messagingService) {
+    ['$rootScope', 'authenticator', 'appService', 'spinner', 'configurations', 'orderTypeService', 'mergeService', '$q', 'messagingService', 'locationService',
+        function ($rootScope, authenticator, appService, spinner, configurations, orderTypeService, mergeService, $q, messagingService, locationService) {
             return function (config) {
                 var loadConfigPromise = function () {
                     return configurations.load([
@@ -17,11 +17,13 @@ angular.module('bahmni.clinical').factory('initialization',
                         'stoppedOrderReasonConfig',
                         'genderMap',
                         'relationshipTypeMap',
-                        'defaultEncounterType'
+                        'defaultEncounterType',
+                        'prescriptionEmailToggle'
                     ]).then(function () {
                         $rootScope.genderMap = configurations.genderMap();
                         $rootScope.relationshipTypeMap = configurations.relationshipTypeMap();
                         $rootScope.diagnosisStatus = (appService.getAppDescriptor().getConfig("diagnosisStatus") && appService.getAppDescriptor().getConfig("diagnosisStatus").value || "RULED OUT");
+                        $rootScope.prescriptionEmailToggle = configurations.prescriptionEmailToggle();
                     });
                 };
 
@@ -36,17 +38,18 @@ angular.module('bahmni.clinical').factory('initialization',
                     }, config, ["dashboard", "visit", "medication"]);
                 };
 
-                var loadFormConditionsIfOffline = function () {
-                    var isOfflineApp = offlineService.isOfflineApp();
-                    if (isOfflineApp) {
-                        if (offlineService.isAndroidApp()) {
-                            offlineDbService = androidDbService;
+                var facilityLocation = function () {
+                    return locationService.getFacilityVisitLocation().then(function (response) {
+                        if (response.uuid) {
+                            locationService.getByUuid(response.uuid).then(function (location) {
+                                $rootScope.facilityLocation = location;
+                            });
+                        } else {
+                            locationService.getLoggedInLocation().then(function (location) {
+                                $rootScope.facilityLocation = location;
+                            });
                         }
-                        return offlineDbService.getConfig("clinical").then(function (config) {
-                            var script = config.value['formConditions.js'];
-                            eval(script); // eslint-disable-line no-eval
-                        });
-                    }
+                    });
                 };
 
                 var mergeFormConditions = function () {
@@ -60,7 +63,7 @@ angular.module('bahmni.clinical').factory('initialization',
                     .then(initApp)
                     .then(checkPrivilege)
                     .then(loadConfigPromise)
-                    .then(loadFormConditionsIfOffline)
+                    .then(facilityLocation)
                     .then(mergeFormConditions)
                     .then(orderTypeService.loadAll));
             };

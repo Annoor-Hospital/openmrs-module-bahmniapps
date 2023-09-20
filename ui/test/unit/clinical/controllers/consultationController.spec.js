@@ -4,7 +4,7 @@ describe("ConsultationController", function () {
     var scope, rootScope, state, contextChangeHandler, urlHelper, location, clinicalAppConfigService,
         stateParams, appService, ngDialog, q, appDescriptor, controller, visitConfig, _window_, clinicalDashboardConfig,
         sessionService, conditionsService, encounterService, configurations, diagnosisService, messagingService, spinnerMock,
-        auditLogService;
+        auditLogService,  confirmBox, virtualConsultService, adhocTeleconsultationService;
 
     var encounterData = {
         "bahmniDiagnoses": [],
@@ -88,6 +88,8 @@ describe("ConsultationController", function () {
         }
     };
     clinicalDashboardConfig = jasmine.createSpyObj('clinicalDashboardConfig', ['isCurrentTab']);
+    var translate = jasmine.createSpyObj('$translate', ['instant']);
+    appService = jasmine.createSpyObj('appService', ['getAppDescriptor', 'getConfigValue']);
     var boards = [
         {
             default: true,
@@ -121,6 +123,7 @@ describe("ConsultationController", function () {
             $rootScope: rootScope,
             $state: state,
             $location: location,
+            $translate: translate,
             clinicalAppConfigService: clinicalAppConfigService,
             urlHelper: urlHelper,
             contextChangeHandler: contextChangeHandler,
@@ -140,7 +143,10 @@ describe("ConsultationController", function () {
             diagnosisService: diagnosisService,
             messagingService: messagingService,
             spinner: spinnerMock,
-            auditLogService: auditLogService
+            auditLogService: auditLogService,
+            confirmBox: confirmBox,
+            virtualConsultService: virtualConsultService,
+            adhocTeleconsultationService: adhocTeleconsultationService
         });
     };
     var setUpServiceMocks = function () {
@@ -202,11 +208,6 @@ describe("ConsultationController", function () {
         };
         rootScope.currentProvider = { uuid: 'providerUuid' };
         scope.lastConsultationTabUrl = {url: {}};
-        appService = jasmine.createSpyObj('appService', ['getAppDescriptor']);
-        appDescriptor = jasmine.createSpyObj('appDescriptor', ['getConfigValue']);
-        appService.getAppDescriptor.and.returnValue(appDescriptor);
-        appDescriptor.getConfigValue.and.returnValue(true);
-
         q = jasmine.createSpyObj('q', ['all', 'defer']);
         visitConfig = {};
         configurations = {
@@ -224,21 +225,35 @@ describe("ConsultationController", function () {
             },
             stoppedOrderReasonConfig: function () {
                 return {};
+            },
+            encounterConfig: function () {
+                return configurations;
+            },
+            getPatientDocumentEncounterTypeUuid: function () {
+                return "patientDocumentEncounterTypeUuid";
             }
         };
         conditionsService = jasmine.createSpyObj('conditionalService', ['save', 'getConditions']);
         conditionsService.save.and.returnValue(specUtil.simplePromise({}));
         conditionsService.getConditions.and.returnValue([{uuid: "condition-uuid", conditionNonCoded: "fever"}]);
-        encounterService = jasmine.createSpyObj('encounterService', ['getEncounterType', 'create']);
+        encounterService = jasmine.createSpyObj('encounterService', ['getEncounterType', 'create', 'getEncountersForEncounterType', 'then']);
         encounterService.getEncounterType.and.returnValue(specUtil.simplePromise({}));
+        encounterService.getEncountersForEncounterType.and.callFake(function () {
+            var deferred = Q.defer();
+            deferred.resolve({data: {results: []}});
+            return deferred.promise;
+        });
         messagingService = jasmine.createSpyObj('messagingService', ['showMessage']);
         diagnosisService = jasmine.createSpyObj('diagnosisService', ['populateDiagnosisInformation']);
+        adhocTeleconsultationService = jasmine.createSpyObj('adhocTeleconsultationService', ['generateAdhocTeleconsultationLink']);
+        virtualConsultService = jasmine.createSpyObj('virtualConsultService', ['launchMeeting']);
         encounterService.create.and.returnValue(specUtil.createFakePromise(encounterData));
         encounterService.create.and.callFake(function () {
             var deferred = Q.defer();
             deferred.resolve({data: encounterData});
             return deferred.promise;
         });
+        encounterService.then.and.returnValue({data: {results: []}});
         spinnerMock = {
             forPromise: function (promise, element) {
                 return promise;
@@ -247,8 +262,8 @@ describe("ConsultationController", function () {
         auditLogService = jasmine.createSpyObj('auditLogService', ['log']);
         auditLogService.log.and.returnValue({});
     };
+    beforeEach(module('bahmni.common.util'));
     beforeEach(module('bahmni.clinical'));
-    beforeEach(module('bahmni.common.offline'));
     beforeEach(function () {
         inject(function ($controller, $rootScope, _$window_) {
             _window_ = _$window_;
@@ -256,6 +271,18 @@ describe("ConsultationController", function () {
             rootScope = $rootScope;
             controller = $controller;
         });
+        appDescriptor = {
+            formatUrl: function (url) {
+                return url;
+            },
+            getConfigValue: function (value) {
+                if(value === 'adtNavigationConfig') {
+                    return {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}", "privilege": "app:adt"};
+                }
+                return true;
+            }
+        };
+        appService.getAppDescriptor.and.returnValue(appDescriptor);
     });
     beforeEach(setUpServiceMocks);
     beforeEach(createController);
@@ -265,6 +292,7 @@ describe("ConsultationController", function () {
             expect(scope.togglePrintList).toBeFalsy();
             expect(scope.patient).toEqual({});
             expect(scope.showDashboardMenu).toBeFalsy();
+            expect(scope.showMobileMenu).toBeFalsy();
             expect(scope.showComment).toBeTruthy();
             expect(scope.consultationBoardLink).toEqual([]);
             expect(scope.showControlPanel).toBeFalsy();
@@ -299,6 +327,24 @@ describe("ConsultationController", function () {
             expect(scope.isInEditEncounterMode()).toBeFalsy();
             stateParams.encounterUuid = "abdk-k1j2k3j2k-skfhsjfs";
             expect(scope.isInEditEncounterMode()).toBeTruthy();
+        });
+
+        it("should get ipd configuration from config", function () {
+            appDescriptor = {
+                formatUrl: function (url) {
+                    return url;
+                },
+                getConfigValue: function (value) {
+                    if(value === 'adtNavigationConfig') {
+                        return {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}", "privilege": "app:adt"};
+                    }
+                    return true;
+                }
+            };
+            scope.adtNavigationConfig = {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}"};
+            appService.getAppDescriptor.and.returnValue(appDescriptor);
+            createController();
+            expect(scope.adtNavigationConfig.forwardUrl).toEqual("../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}");
         });
     });
 
@@ -336,7 +382,7 @@ describe("ConsultationController", function () {
                 }
             };
             createController();
-
+            expect(scope.availableBoards[0].isSelectedTab).toBeFalsy();
             expect(scope.currentBoard).toEqual({
                 extensionPointId: "org.bahmni.clinical.consultation.board",
                 icon: "icon-user-md",
@@ -351,8 +397,7 @@ describe("ConsultationController", function () {
                 type: "link",
                 url: "treatment",
                 isSelectedTab: true
-            }
-            );
+            });
         });
 
         it("should set current tab based on the tab config provided", function () {
@@ -488,7 +533,10 @@ describe("ConsultationController", function () {
     describe("open consultation", function () {
         it("should not broadcast page unload event if not configured to prompt", function () {
             appService.getAppDescriptor.and.returnValue({
-                getConfigValue: function () {
+                getConfigValue: function (value) {
+                    if(value === 'adtNavigationConfig') {
+                        return {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}", "privilege": "app:adt"};
+                    }
                     return false;
                 }
             });
@@ -501,7 +549,10 @@ describe("ConsultationController", function () {
 
         it("should broadcast page unload event if configured to prompt", function () {
             appService.getAppDescriptor.and.returnValue({
-                getConfigValue: function () {
+                getConfigValue: function (value) {
+                    if(value === 'adtNavigationConfig') {
+                        return {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}", "privilege": "app:adt"};
+                    }
                     return true;
                 }
             });
@@ -516,6 +567,12 @@ describe("ConsultationController", function () {
             scope.toggleDashboardMenu();
 
             expect(scope.showDashboardMenu).toBeTruthy();
+        });
+
+        it("should toggle mobile menu", function () {
+            scope.toggleMobileMenu();
+
+            expect(scope.showMobileMenu).toBeTruthy();
         });
 
         it("should show dashboard menu", function () {
@@ -673,5 +730,159 @@ describe("ConsultationController", function () {
                 done();
             });
         });
+
+        it("should not make api calls and call showMessage of messagingService when there is error in form save " +
+            "event when there is a single error", function (done) {
+            scope.consultation = {
+                discontinuedDrugs: [{dateStopped: new Date()}],
+                preSaveHandler: new Bahmni.Clinical.Notifier(),
+                postSaveHandler: new Bahmni.Clinical.Notifier(),
+                observations: [],
+                observationForms: [{
+                    isAdded: true,
+                    component: {
+                        getValue: function () {
+                            return {}
+                        },
+                        state: {data: {}},
+                        props: {patient: {}},
+                    },
+                    events: {
+                        onFormSave: 'Save event'
+                    }
+                }],
+                conditions: [{uuid: undefined, conditionNonCoded: "fever"}]
+            };
+            window.runEventScript = function() {
+                throw {message: 'Error'};
+            };
+
+            scope.save({toState: {}}).then(function () {
+                expect(encounterService.getEncounterType).not.toHaveBeenCalled();
+                expect(encounterService.create).not.toHaveBeenCalled();
+                expect(conditionsService.save).not.toHaveBeenCalled();
+                expect(messagingService.showMessage).toHaveBeenCalledWith('error', 'Error');
+                done();
+            });
+        });
+
+        it("should call messagingService n times for n number of errors and api calls aren't made on FormSave event ", function (done) {
+            scope.consultation = {
+                discontinuedDrugs: [{dateStopped: new Date()}],
+                preSaveHandler: new Bahmni.Clinical.Notifier(),
+                postSaveHandler: new Bahmni.Clinical.Notifier(),
+                observations: [],
+                observationForms: [{
+                    isAdded: true,
+                    component: {
+                        getValue: function () {
+                            return {}
+                        },
+                        state: {data: {}},
+                        props: {patient: {}},
+                    },
+                    events: {
+                        onFormSave: 'Save event'
+                    }
+                }],
+                conditions: [{uuid: undefined, conditionNonCoded: "fever"}]
+            };
+            window.runEventScript = function () {
+                throw [{message: 'Error1'}, {message: ''}, {mesage: 'Error3'}];
+            };
+
+            scope.save({toState: {}}).then(function () {
+                expect(encounterService.getEncounterType).not.toHaveBeenCalled();
+                expect(encounterService.create).not.toHaveBeenCalled();
+                expect(conditionsService.save).not.toHaveBeenCalled();
+                expect(messagingService.showMessage.calls.count()).toBe(3);
+                expect(messagingService.showMessage).toHaveBeenCalledWith('error', 'Error1');
+                expect(messagingService.showMessage).toHaveBeenCalledWith('error', '[ERROR]');
+                expect(messagingService.showMessage).toHaveBeenCalledWith('error', '[ERROR]');
+                done();
+            });
+        });
+    });
+
+    describe("startAdhocTeleconsultationLink", function ()  {
+        it("should get ad-hoc teleconsultation link", function () {
+            scope.patient = {
+                uuid: "patient-uuid"
+            };
+            rootScope.currentUser = {
+                username: "username"
+            };
+            scope.adhocTeleconsultationData = {
+                uuid:"GAN203006",
+                link:"https://meet.jit.si/GAN203006",
+                notificationResults:[
+                    {
+                        uuid:"",
+                        medium:"EMAIL",
+                        status:1,
+                        message:"Unable to send tele-consultation appointment information through EMAIL"}
+                ]
+            };
+            console.log(adhocTeleconsultationService)
+            adhocTeleconsultationService.generateAdhocTeleconsultationLink.and.returnValue(specUtil.createFakePromise(scope.adhocTeleconsultationData));
+            scope.startAdhocTeleconsultationLink();
+            expect(adhocTeleconsultationService.generateAdhocTeleconsultationLink).toHaveBeenCalled();
+            expect(adhocTeleconsultationService.generateAdhocTeleconsultationLink).toHaveBeenCalledWith({
+                patientUuid: scope.patient.uuid,
+                provider: rootScope.currentUser.username
+            });
+            expect(virtualConsultService.launchMeeting).toHaveBeenCalledWith(
+                scope.adhocTeleconsultationData.uuid,
+                scope.adhocTeleconsultationData.link);
+            expect(messagingService.showMessage).toHaveBeenCalled();
+        });
+    });
+
+    it("should generate the URL as mentioned in the config", function () {
+        appDescriptor = {
+            formatUrl: function (url) {
+                return url;
+            },
+            getConfigValue: function () {
+                return true;
+            }
+        };
+        scope.adtNavigationConfig = {forwardUrl: "../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}"};
+        appService.getAppDescriptor.and.returnValue(appDescriptor);
+
+        expect(scope.adtNavigationURL()).toEqual("../bedmanagement/#/bedManagement/patient/{{patientUuid}}/visit/{{visitUuid}}");
+    });
+
+    it("should initialize with default adtNavigationConfig if we are not mentioning anything in config", function () {
+        appService.getAppDescriptor.and.returnValue({
+            getConfigValue: function (value) {
+                if(value === 'adtNavigationConfig') {
+                    return {};
+                }
+                return true;
+            }
+        });
+        translate.instant.and.returnValue("Go to IPD Dashboard");
+        createController();
+
+        expect(scope.adtNavigationConfig.privilege).toBe("app:adt");
+        expect(scope.adtNavigationConfig.title).toBe("Go to IPD Dashboard");
+        expect(scope.adtNavigationConfig.forwardUrl).toBe("../adt/#/patient/{{patientUuid}}/visit/{{visitUuid}}/");
+    });
+
+    it("should initialize with adtNavigationConfig if we mention in config", function () {
+        appService.getAppDescriptor.and.returnValue({
+            getConfigValue: function (value) {
+                if(value === 'adtNavigationConfig') {
+                    return {privilege: "app:ipd", title: "Go to ADT Dashboard"};
+                }
+                return true;
+            }
+        });
+        createController();
+
+        expect(scope.adtNavigationConfig.privilege).toBe("app:ipd");
+        expect(scope.adtNavigationConfig.title).toBe("Go to ADT Dashboard");
+        expect(scope.adtNavigationConfig.forwardUrl).toBe("../adt/#/patient/{{patientUuid}}/visit/{{visitUuid}}/");
     });
 });

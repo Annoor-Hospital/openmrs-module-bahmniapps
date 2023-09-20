@@ -49,6 +49,13 @@ Bahmni.Common.Util.DateUtil = {
     subtractDays: function (date, days) {
         return this.addDays(date, -1 * days);
     },
+    subtractISOWeekDays: function (date, days) {
+        if (days == null) {
+            return moment(date).isoWeekday();
+        }
+        return moment(date).isoWeekday() >= days ? moment(date).isoWeekday() - days
+            : 7 + moment(date).isoWeekday() - days;
+    },
     subtractMonths: function (date, months) {
         return this.addMonths(date, -1 * months);
     },
@@ -76,7 +83,7 @@ Bahmni.Common.Util.DateUtil = {
     },
 
     getDateInMonthsAndYears: function (date, format) {
-        var format = format || "MMM YYYY";
+        var format = format || "MMM YY";
         var dateRepresentation = isNaN(Number(date)) ? date : Number(date);
         if (!moment(dateRepresentation).isValid()) {
             return date;
@@ -89,7 +96,7 @@ Bahmni.Common.Util.DateUtil = {
         if (!moment(dateRepresentation).isValid()) {
             return datetime;
         }
-        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YYYY h:mm a") : null;
+        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YY h:mm a") : null;
     },
 
     formatDateWithoutTime: function (date) {
@@ -97,16 +104,16 @@ Bahmni.Common.Util.DateUtil = {
         if (!moment(dateRepresentation).isValid()) {
             return date;
         }
-        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YYYY") : null;
+        return dateRepresentation ? moment(dateRepresentation).format("DD MMM YY") : null;
     },
 
     formatDateInStrictMode: function (date) {
         var dateRepresentation = isNaN(Number(date)) ? date : Number(date);
         if (moment(dateRepresentation, 'YYYY-MM-DD', true).isValid()) {
-            return moment(dateRepresentation).format("DD MMM YYYY");
+            return moment(dateRepresentation).format("DD MMM YY");
         }
         if (moment(dateRepresentation, 'YYYY-MM-DDTHH:mm:ss.SSSZZ', true).isValid()) {
-            return moment(dateRepresentation).format("DD MMM YYYY");
+            return moment(dateRepresentation).format("DD MMM YY");
         }
         return date;
     },
@@ -173,27 +180,6 @@ Bahmni.Common.Util.DateUtil = {
             dateOne.getDate() === dateTwo.getDate();
     },
 
-    diffInYearsMonthsDays2: function (dateFrom, dateTo) {
-        dateFrom = moment(dateFrom);
-        dateTo = moment(dateTo);
-        dateFrom.local();
-        dateTo.local();
-
-        var age = {
-            days: 0,
-            months: 0,
-            years: 0
-        };
-
-        age.years = dateTo.diff(dateFrom, 'years');
-        dateFrom.add(age.years, 'years');
-        age.months = dateTo.diff(dateFrom, 'months');
-        dateFrom.add(age.months, 'months');
-        age.days = dateTo.diff(dateFrom, 'days');
-
-        return age;
-    },
-
     diffInYearsMonthsDays: function (dateFrom, dateTo) {
         dateFrom = this.parse(dateFrom);
         dateTo = this.parse(dateTo);
@@ -216,7 +202,7 @@ Bahmni.Common.Util.DateUtil = {
             y: 0
         };
 
-        var daysFebruary = to.y % 4 != 0 || (to.y % 100 == 0 && to.y % 400 != 0) ? 28 : 29;
+        var daysFebruary = (from.y % 4 === 0 && from.y % 100 !== 0) || from.y % 400 === 0 ? 29 : 28;
         var daysInMonths = [31, daysFebruary, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         age.y = to.y - from.y;
         age.m = to.m - from.m;
@@ -295,5 +281,15 @@ Bahmni.Common.Util.DateUtil = {
     },
     getISOString: function (date) {
         return date ? moment(date).toDate().toISOString() : null;
+    },
+    isBeforeTime: function (time, otherTime) {
+        return moment(time, 'hh:mm a').format('YYYY-MM-DD');
+    },
+    getWeekStartDate: function (date, startOfWeek) {
+        var daysToBeSubtracted = this.subtractISOWeekDays(date, startOfWeek);
+        return moment(date).subtract(daysToBeSubtracted, 'days').toDate();
+    },
+    getWeekEndDate: function (weekStartDate) {
+        return moment(weekStartDate).add(6, 'days').toDate();
     }
 };

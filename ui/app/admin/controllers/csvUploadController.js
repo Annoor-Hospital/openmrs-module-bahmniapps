@@ -11,9 +11,14 @@ angular.module('bahmni.admin')
                 "program": {name: "Program", url: Bahmni.Common.Constants.programImportUrl},
                 "patient": {name: "Patient", url: Bahmni.Common.Constants.patientImportUrl},
                 "encounter": {name: "Encounter", url: Bahmni.Common.Constants.encounterImportUrl},
+                "form2encounter": {name: "Form2 Encounter (With Validations)", url: Bahmni.Common.Constants.form2encounterImportUrl},
                 "drug": {name: "Drug", url: Bahmni.Common.Constants.drugImportUrl},
                 "labResults": {name: "Lab Results", url: Bahmni.Common.Constants.labResultsImportUrl},
                 "referenceterms": {name: "Reference Terms", url: Bahmni.Common.Constants.referenceTermsImportUrl},
+                "updateReferenceTerms": {
+                    name: "Add new Reference Terms to Existing Concepts",
+                    url: Bahmni.Common.Constants.updateReferenceTermsImportUrl
+                },
                 "relationship": {name: "Relationship Information", url: Bahmni.Common.Constants.relationshipImportUrl}
             };
             var fileUploaderOptions = {

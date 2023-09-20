@@ -123,6 +123,7 @@ angular.module('bahmni.common.conceptSet')
                     $scope.allTemplates.splice(index, 1);
                 }
                 else {
+                    $scope.allTemplates[index].isAdded = false;
                     var clonedObj = $scope.allTemplates[index].clone();
                     $scope.allTemplates[index] = clonedObj;
                     $scope.allTemplates[index].isAdded = false;
@@ -168,6 +169,9 @@ angular.module('bahmni.common.conceptSet')
                 $scope.leftPanelConceptSet.atLeastOneValueIsSet = selectedConceptSet.hasSomeValue();
                 $scope.leftPanelConceptSet.isAdded = true;
                 $scope.consultation.lastvisited = selectedConceptSet.id || selectedConceptSet.formUuid;
+                if ($rootScope.showLeftpanelToggle) {
+                    $rootScope.showLeftpanelToggle = false;
+                }
                 $(window).scrollTop(0);
             };
 

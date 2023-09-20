@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.forms')
-    .directive('formsTable', ['conceptSetService', 'spinner', '$q', 'visitFormService', 'appService', '$state',
-        function (conceptSetService, spinner, $q, visitFormService, appService, $state) {
-            var controller = function ($scope) {
+    .directive('formsTable', ['conceptSetService', 'spinner', '$q', 'visitFormService', 'appService', '$state', '$rootScope',
+        function (conceptSetService, spinner, $q, visitFormService, appService, $state, $rootScope) {
+            var defaultController = function ($scope) {
                 $scope.shouldPromptBrowserReload = true;
                 $scope.showFormsDate = appService.getAppDescriptor().getConfigValue("showFormsDate");
                 var getAllObservationTemplates = function () {
@@ -12,7 +12,6 @@ angular.module('bahmni.common.displaycontrol.forms')
                         v: "custom:(setMembers:(display))"
                     });
                 };
-
                 var obsFormData = function () {
                     return visitFormService.formData($scope.patient.uuid, $scope.section.dashboardConfig.maximumNoOfVisits, $scope.section.formGroup, $state.params.enrollment);
                 };
@@ -33,10 +32,34 @@ angular.module('bahmni.common.displaycontrol.forms')
                 var sortedFormDataByLatestDate = function (formData) {
                     return _.sortBy(formData, "obsDatetime").reverse();
                 };
-
+                $scope.doesUserHaveAccessToTheForm = function (data, action) {
+                    if ((data.privileges != null) && (typeof data.privileges != undefined) && (data.privileges > 0)) {
+                        var editable = [];
+                        var viewable = [];
+                        data.privileges.forEach(function (formPrivilege) {
+                            _.find($rootScope.currentUser.privileges, function (privilege) {
+                                if (formPrivilege.privilegeName === privilege.name) {
+                                    if (action === 'edit') {
+                                        editable.push(formPrivilege.editable);
+                                    } else {
+                                        viewable.push(formPrivilege.viewable);
+                                    }
+                                }
+                            });
+                        });
+                        if (action === 'edit') {
+                            if (editable.includes(true)) {
+                                return true;
+                            }
+                        } else {
+                            if (viewable.includes(true)) {
+                                return true;
+                            }
+                        }
+                    } else { return true; }
+                };
                 var init = function () {
-                    $scope.noFormFoundMessage = "No Form found for this patient";
-                    $scope.isFormFound = false;
+                    $scope.formsNotFound = false;
                     return $q.all([getAllObservationTemplates(), obsFormData()]).then(function (results) {
                         $scope.observationTemplates = results[0].data.results[0].setMembers;
                         var sortedFormDataByDate = sortedFormDataByLatestDate(results[1].data.results);
@@ -46,8 +69,8 @@ angular.module('bahmni.common.displaycontrol.forms')
                             $scope.formData = sortedFormDataByDate;
                         }
 
-                        if ($scope.formData.length == 0) {
-                            $scope.isFormFound = true;
+                        if ($scope.formData.length === 0) {
+                            $scope.formsNotFound = true;
                             $scope.$emit("no-data-present-event");
                         }
                     });
@@ -55,14 +78,19 @@ angular.module('bahmni.common.displaycontrol.forms')
 
                 $scope.getDisplayName = function (data) {
                     var concept = data.concept;
-                    var displayName = data.concept.displayString;
-                    if (concept.names && concept.names.length === 1 && concept.names[0].name != "") {
-                        displayName = concept.names[0].name;
-                    } else if (concept.names && concept.names.length === 2) {
-                        var shortName = _.find(concept.names, {conceptNameType: "SHORT"});
-                        displayName = shortName && shortName.name ? shortName.name : displayName;
-                    }
+                    var defaultLocale = $rootScope.currentUser.userProperties.defaultLocale;
+                    var displayName = getLocaleSpecificConceptName(concept, defaultLocale, "FULLY_SPECIFIED");
                     return displayName;
+                };
+                var getLocaleSpecificConceptName = function (concept, locale, conceptNameType) {
+                    conceptNameType = conceptNameType ? conceptNameType : "SHORT";
+                    var localeSpecificName = _.filter(concept.names, function (name) {
+                        return ((name.locale === locale) && (name.conceptNameType === conceptNameType));
+                    });
+                    if (localeSpecificName && localeSpecificName[0]) {
+                        return localeSpecificName[0].display;
+                    }
+                    return concept.name.name;
                 };
 
                 $scope.initialization = init();
@@ -103,7 +131,12 @@ angular.module('bahmni.common.displaycontrol.forms')
 
             return {
                 restrict: 'E',
-                controller: controller,
+                controller: function ($scope, $controller) {
+                    if ($scope.section.type && $scope.section.type === Bahmni.Common.Constants.formBuilderDisplayControlType) {
+                        return $controller("versionedFormController", {$scope: $scope});
+                    }
+                    return defaultController($scope);
+                },
                 link: link,
                 templateUrl: "../common/displaycontrols/forms/views/formsTable.html",
                 scope: {

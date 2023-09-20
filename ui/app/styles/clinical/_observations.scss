@@ -265,6 +265,10 @@ concept-set {
   }
 }
 
+.form-controls-container {
+  padding-top: 10px;
+}
+
 .vitals {
   &.form-horizontal {
     padding: 5px;
@@ -323,9 +327,9 @@ concept-set {
         top: 50%;
         height: 100%;
         width: auto;
-        -webkit-transform: translate(-50%,-50%);
-        -ms-transform: translate(-50%,-50%);
-        transform: translate(-50%,-50%);
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
       }
     }
     .placeholder {
@@ -604,9 +608,9 @@ concept-set {
   position: relative;
   .left-panel-toggle {
     display: none;
-    @media screen and (max-width: 1024px){
+    @media screen and (max-width: 1024px) {
       display: inline-block;
-      color: $bahmniSecondaryColor;
+      color: #669999;
       border: 1px solid;
       position: fixed;
       left: 10px;
@@ -642,12 +646,16 @@ concept-set {
       position: fixed;
       width: inherit;
       height: auto;
-      top: 138px;
+      top: 188px;
       bottom: 50px;
       background: $white;
       overflow-y: auto;
       overflow-x: hidden;
       z-index: 10000;
+
+      @media screen and (min-width: 769px) {
+        top: 138px;
+      }
     }
     .multi-select-lab-tests {
       width: 100% !important;
@@ -675,7 +683,7 @@ concept-set {
             display: block;
             width: auto;
             margin-right: 25px;
-            word-break: break-all;
+            word-break: break-word;
             &.concept-set-name-extra {
               margin-right: 52px;
             }
@@ -775,10 +783,8 @@ concept-set {
         margin-left: 193px;
       }
       @media screen and (max-width: 1024px) {
-        margin-left: 163px;
-      }
-      @media screen and (max-width: 850px) {
-        margin-left: 150px;
+        margin-left: 10px;
+        margin-top: -10px;
       }
       .input.duration-value {
         @media screen and (max-width: 1200px) {
@@ -796,10 +802,7 @@ concept-set {
     }
   }
   form .form-field textarea, .form .form-field textarea {
-    width: 600px;
-    @media screen and (max-width: 1200px) {
-      width: 300px;
-    }
+    width: 500px;
   }
   table .field-value-buttonSelectType {
     width: 47%;
@@ -817,4 +820,15 @@ concept-set {
   width: auto;
   vertical-align: top;
   margin-left: 34px;
+}
+
+.ngdialog .ngdialog-content .video-dialog {
+  width: 100%;
+  height: auto;
+}
+
+.observation-image {
+  margin: 2px;
+  width: 100px;
+  height: 80px;
 }

@@ -1,8 +1,44 @@
 'use strict';
 
 angular.module('bahmni.clinical').controller('ClinicalController',
-    ['$scope', 'retrospectiveEntryService', '$rootScope', 'appService',
-        function ($scope, retrospectiveEntryService, $rootScope, appService) {
+    ['$scope', 'retrospectiveEntryService', '$rootScope', 'appService', '$document',
+        function ($scope, retrospectiveEntryService, $rootScope, appService, $document) {
+            $scope.showTeleConsultationWindow = false;
+            var api = null;
+
+            // eslint-disable-next-line angular/on-watch
+            $rootScope.$on("event:launchVirtualConsult", function (event, params) {
+                $scope.showTeleConsultationWindow = true;
+                var teleConsultationWindow = angular.element(document.getElementById('tele-consultation-meet'));
+                teleConsultationWindow.empty();
+                var meetId = params.uuid;
+                var domain = appService.getAppDescriptor().getConfigValue('teleConsultationDomain');
+
+                if (params.link && params.link.trim().length > 0) {
+                    var meetingUrl = new URL(params.link.trim());
+                    domain = meetingUrl.host;
+                    var roomDetails = meetingUrl.pathname;
+                    meetId = roomDetails.substring(roomDetails.indexOf("/") + 1, roomDetails.length);
+                }
+
+                var options = {
+                    roomName: meetId || "",
+                    parentNode: document.querySelector('#tele-consultation-meet')
+                };
+                api = new JitsiMeetExternalAPI(domain, options);
+            });
+
+            $scope.closeTeleConsultation = function () {
+                api.executeCommand('hangup');
+                $scope.showTeleConsultationWindow = false;
+                var teleConsultationWindow = angular.element(document.getElementById('tele-consultation'));
+                teleConsultationWindow.css({
+                    position: 'fixed',
+                    top: '',
+                    left: ''
+                });
+            };
+
             $scope.retrospectiveClass = function () {
                 return !_.isEmpty(retrospectiveEntryService.getRetrospectiveEntry());
             };

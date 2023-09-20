@@ -1,12 +1,11 @@
 'use strict';
 
 angular.module('bahmni.home')
-    .controller('LoginController', ['$rootScope', '$scope', '$window', '$location', 'sessionService', 'initialData', 'spinner', '$q', '$stateParams', '$bahmniCookieStore', 'localeService', '$translate', 'userService', 'offlineService', 'auditLogService',
-        function ($rootScope, $scope, $window, $location, sessionService, initialData, spinner, $q, $stateParams, $bahmniCookieStore, localeService, $translate, userService, offlineService, auditLogService) {
+    .controller('LoginController', ['$rootScope', '$scope', '$window', '$location', 'sessionService', 'initialData', 'spinner', '$q', '$stateParams', '$bahmniCookieStore', 'localeService', '$translate', 'userService', 'auditLogService', '$state',
+        function ($rootScope, $scope, $window, $location, sessionService, initialData, spinner, $q, $stateParams, $bahmniCookieStore, localeService, $translate, userService, auditLogService, $state) {
             var redirectUrl = $location.search()['from'];
             var landingPagePath = "/dashboard";
             var loginPagePath = "/login";
-            var isOfflineApp = offlineService.isOfflineApp();
             $scope.locations = initialData.locations;
             $scope.loginInfo = {};
             var localeLanguages = [];
@@ -28,20 +27,19 @@ angular.module('bahmni.home')
             var logAuditForLoginAttempts = function (eventType, isFailedEvent) {
                 if ($scope.loginInfo.username) {
                     var messageParams = isFailedEvent ? {userName: $scope.loginInfo.username} : undefined;
-                    auditLogService.log(undefined, eventType, messageParams, 'login');
+                    auditLogService.log(undefined, eventType, messageParams, 'MODULE_LABEL_LOGIN_KEY');
                 }
             };
 
             var promise = localeService.allowedLocalesList();
             localeService.serverDateTime().then(function (response) {
                 var serverTime = response.data.date;
-                var list = serverTime.split(" ");
-                var serverTimeZone = list[list.length - 1];
+                var offset = response.data.offset;
                 var localTime = new Date().toLocaleString();
                 var localtimeZone = getLocalTimeZone();
                 var localeTimeZone = localTime + " " + localtimeZone;
                 $scope.timeZoneObject = { serverTime: serverTime, localeTimeZone: localeTimeZone};
-                if (localtimeZone !== serverTimeZone) {
+                if (offset && !new Date().toString().includes(offset)) {
                     $scope.warning = "Warning";
                     $scope.warningMessage = "WARNING_SERVER_TIME_ZONE_MISMATCH";
                 }
@@ -49,6 +47,7 @@ angular.module('bahmni.home')
 
             localeService.getLoginText().then(function (response) {
                 $scope.logo = response.data.loginPage.logo;
+                $scope.bottomLogos = response.data.loginPage.bottomLogos;
                 $scope.headerText = response.data.loginPage.showHeaderText;
                 $scope.titleText = response.data.loginPage.showTitleText;
                 $scope.helpLink = response.data.helpLink.url;
@@ -72,8 +71,9 @@ angular.module('bahmni.home')
                 });
             });
 
-            $scope.isChrome = function () {
-                if ($window.navigator.userAgent.indexOf("Chrome") != -1) {
+            $scope.isSupportedBrowser = function () {
+                var userAgent = $window.navigator.userAgent;
+                if (userAgent.indexOf("Chrome") !== -1 || userAgent.indexOf("Firefox") !== -1) {
                     return true;
                 }
                 return false;
@@ -110,17 +110,32 @@ angular.module('bahmni.home')
                 redirectToLandingPageIfAlreadyAuthenticated();
             }
             var onSuccessfulAuthentication = function () {
-                if (isOfflineApp) {
-                    var encryptedPassword = offlineService.encrypt($scope.loginInfo.password, Bahmni.Common.Constants.encryptionType.SHA3);
-                    $scope.loginInfo.password = encryptedPassword;
-                    offlineService.setItem(Bahmni.Common.Constants.LoginInformation, $scope.loginInfo);
-                }
                 $bahmniCookieStore.remove(Bahmni.Common.Constants.retrospectiveEntryEncounterDateCookieName, {
                     path: '/',
                     expires: 1
                 });
                 $rootScope.$broadcast('event:auth-loggedin');
                 $scope.loginInfo.currentLocation = getLastLoggedinLocation();
+            };
+
+            var checkIfUserHasProviderAttributes = function () {
+                return $rootScope.currentUser.provider && $rootScope.currentUser.provider.attributes && $rootScope.currentUser.provider.attributes.length > 0;
+            };
+
+            var saveUserAssignedLocationsToLocalStorage = function () {
+                var userAssignedLocations = $rootScope.currentUser.provider.attributes
+                  .filter(function (attribute) {
+                      return attribute.attributeType.display === "Login Locations";
+                  })
+                  .map(function (attribute) {
+                      return { display: attribute.value.name, uuid: attribute.value.uuid };
+                  });
+
+                if (userAssignedLocations.length > 0) {
+                    localStorage.setItem("loginLocations", JSON.stringify(userAssignedLocations));
+                } else {
+                    localStorage.removeItem("loginLocations");
+                }
             };
 
             $scope.login = function () {
@@ -149,16 +164,15 @@ angular.module('bahmni.home')
                             onSuccessfulAuthentication();
                             $rootScope.currentUser.addDefaultLocale($scope.selectedLocale);
                             userService.savePreferences().then(
-                                function () { deferrable.resolve(); },
-                                function (error) { deferrable.reject(error); }
-                            );
+                                    function () { deferrable.resolve(); },
+                                    function (error) { deferrable.reject(error); }
+                                );
                             logAuditForLoginAttempts("USER_LOGIN_SUCCESS");
                         }, function (error) {
                             $scope.errorMessageTranslateKey = error;
                             deferrable.reject(error);
                             logAuditForLoginAttempts("USER_LOGIN_FAILED", true);
-                        }
-                        );
+                        });
                     },
                     function (error) {
                         $scope.errorMessageTranslateKey = error;
@@ -192,14 +206,35 @@ angular.module('bahmni.home')
                     });
                 };
 
+                var urlMatches = function (domain, url) {
+                    if (!domain.trim().endsWith("/")) {
+                        return url.startsWith(domain.trim().concat("/"));
+                    } else {
+                        return url.startsWith(domain.trim());
+                    }
+                };
+
                 spinner.forPromise(deferrable.promise).then(
                     function (data) {
                         if (data) return;
                         if (redirectUrl) {
-                            $window.location = redirectUrl;
+                            userService.allowedDomains(redirectUrl).then(function (wlDomains) {
+                                var domains = wlDomains || [];
+                                domains = domains.concat($window.location.origin);
+                                var res = domains.find(function (dUrl) { return urlMatches(dUrl, redirectUrl); });
+                                if (res) {
+                                    $window.location.replace(redirectUrl);
+                                } else {
+                                    $location.url(landingPagePath);
+                                }
+                            });
                         } else {
-                            landingPagePath = offlineService.isOfflineApp() ? $window.location = '../offline/index.html#/scheduler' : landingPagePath;
-                            $location.path(landingPagePath);
+                            if (checkIfUserHasProviderAttributes()) {
+                                saveUserAssignedLocationsToLocalStorage();
+                            } else {
+                                localStorage.removeItem("loginLocations");
+                            }
+                            $state.go('loginLocation', {});
                         }
                     }
                 );

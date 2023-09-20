@@ -13,10 +13,10 @@
         "disposition",
         "drugOrderDetails",
         "forms",
+        "formsV2",
         "observationGraph",
         "obsToObsFlowSheet",
         "pacsOrders",
-        "pacs",
         "patientInformation",
         "conditionsList"
     ];

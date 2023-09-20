@@ -2,10 +2,13 @@
 
 angular.module('bahmni.common.patient')
     .service('patientService', ['$http', 'sessionService', function ($http, sessionService) {
-        this.getPatient = function (uuid) {
+        this.getPatient = function (uuid, rep) {
+            if (!rep) {
+                rep = "full";
+            }
             var patient = $http.get(Bahmni.Common.Constants.openmrsUrl + "/ws/rest/v1/patient/" + uuid, {
                 method: "GET",
-                params: {v: "full"},
+                params: {v: rep},
                 withCredentials: true
             });
             return patient;
@@ -29,9 +32,11 @@ angular.module('bahmni.common.patient')
 
         this.search = function (query, offset, identifier) {
             offset = offset || 0;
-            return $http.get(Bahmni.Common.Constants.bahmniSearchUrl + "/patient", {
+            identifier = identifier || query;
+            return $http.get(Bahmni.Common.Constants.bahmniCommonsSearchUrl + "/patient/lucene", {
                 method: "GET",
                 params: {
+                    filterOnAllIdentifiers: true,
                     q: query,
                     startIndex: offset,
                     identifier: identifier,

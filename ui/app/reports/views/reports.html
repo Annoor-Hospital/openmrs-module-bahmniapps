@@ -5,12 +5,22 @@
         <table class="alt-row form">
             <thead>
             <tr>
-                <th>{{::'REPORTS_NAME_HEADER_KEY' | translate}}</th>
+                <th style="display: flex; justify-content: space-between;">
+                    <div>{{::'REPORTS_NAME_HEADER_KEY' | translate}}</div>
+                    <div style="width: 170px; margin-right: 25px;">
+                        {{::'REPORT_DATE_RANGE' | translate}}
+                        <span class="asterick">*</span>
+                        <select ng-model="default.reportsRequiringDateRange.dateRangeType"
+                                ng-options="type as label for (label , type) in ::dateRange"
+                                ng-change="setDefault('dateRangeType', 'reportsRequiringDateRange')">
+                        </select>
+                    </div>
+                </th>    
                 <th class="reports-start-date">{{::'REPORTS_START_DATE_HEADER_KEY ' |translate}}
                     <span class="asterick">*</span>
                     <input ng-model="default.reportsRequiringDateRange.startDate" date-converter
                            class="form-field start-date" type="date" max="{{default.reportsRequiringDateRange.stopDate | date:'yyyy-MM-dd'}}"
-                           ng-change="setDefault('startDate', 'reportsRequiringDateRange')">
+                           ng-change="setDefault('startDate', 'reportsRequiringDateRange')"> 
                 </th>
                 <th class="reports-stop-date">{{::'REPORTS_END_DATE_HEADER_KEY' |translate}}
                     <span class="asterick">*</span>
@@ -24,7 +34,7 @@
                     <select ng-model="default.reportsRequiringDateRange.responseType"
                             ng-options="type as label for (label , type) in ::formats"
                             ng-change="setDefault('responseType', 'reportsRequiringDateRange')">
-                        <option value="">Choose Format</option>
+                        <option value="">{{'CHOOSE_REPORT_FORMAT'|translate}}</option>
                     </select>
                 </th>
                 <th class="reports-action">
@@ -32,10 +42,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="report in ::reportsRequiringDateRange">
-                <td>{{:: report.name }}</td>
+            <tr ng-repeat="report in ::reportsRequiringDateRange" show-if-privilege="{{:: report.requiredPrivilege}}">
+                <td>{{:: report.name |translate }}</td>
                 <td class="reports-start-date">
-                    <input date-converter class="form-field start-date" type="date" max="{{report.stopDate | date:'yyyy-MM-dd'}}"
+                    <input date-converter class="form-field start-date" type="date" max="{{report.stopDate + 1 | date:'yyyy-MM-dd'}}"
                            ng-model="report.startDate">
                 </td>
                 <td class="reports-stop-date">
@@ -44,7 +54,7 @@
                 </td>
                 <td class="reports-format">
                     <select ng-model="report.responseType" ng-options="type as label for (label , type) in ::formats">
-                        <option value="">Choose Format</option>
+                        <option value="">{{'CHOOSE_REPORT_FORMAT'|translate}}</option>
                     </select>
                     <input ng-if="report.responseType=='application/vnd.ms-excel-custom' && !report.config.macroTemplatePath"
                            class="input-file-upload custom-file"
@@ -76,7 +86,7 @@
                     <select ng-model="default.reportsNotRequiringDateRange.responseType"
                             ng-change="setDefault('responseType', 'reportsNotRequiringDateRange')"
                             ng-options="type as label for (label , type) in ::formats">
-                        <option value="">Choose Format</option>
+                        <option value="">{{'CHOOSE_REPORT_FORMAT'|translate}}</option>
                     </select>
                 </th>
                 <th class="reports-action">
@@ -84,11 +94,11 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="report in ::reportsNotRequiringDateRange">
-                <td>{{:: report.name }}</td>
+            <tr ng-repeat="report in ::reportsNotRequiringDateRange" show-if-privilege="{{:: report.requiredPrivilege}}">
+                <td>{{:: report.name |translate }}</td>
                 <td class="reports-format">
                     <select ng-model="report.responseType" ng-options="type as label for (label , type) in ::formats">
-                        <option value="">Choose Format</option>
+                        <option value="">{{'CHOOSE_REPORT_FORMAT'|translate}}</option>
 
                     </select>
                 </td>

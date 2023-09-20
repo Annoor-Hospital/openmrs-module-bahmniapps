@@ -5,15 +5,15 @@ angular.module('bahmni.clinical')
         var controller = function ($scope, $rootScope) {
             var patientContextConfig = appService.getAppDescriptor().getConfigValue('patientContext') || {};
             $scope.initPromise = patientService.getPatientContext($scope.patient.uuid, $state.params.enrollment, patientContextConfig.personAttributes, patientContextConfig.programAttributes, patientContextConfig.additionalPatientIdentifiers);
-
+            $scope.allowNavigation = angular.isDefined($scope.isConsultation);
             $scope.initPromise.then(function (response) {
                 $scope.patientContext = response.data;
                 var programAttributes = $scope.patientContext.programAttributes;
                 var personAttributes = $scope.patientContext.personAttributes;
-
                 convertBooleanValuesToEnglish(personAttributes);
                 convertBooleanValuesToEnglish(programAttributes);
-
+                translateAttributes(personAttributes);
+                translateAttributes(programAttributes);
                 var preferredIdentifier = patientContextConfig.preferredIdentifier;
                 if (preferredIdentifier) {
                     if (programAttributes[preferredIdentifier]) {
@@ -30,11 +30,15 @@ angular.module('bahmni.clinical')
                     $scope.patientContext.image = Bahmni.Common.Constants.patientImageUrlByPatientUuid + $scope.patientContext.uuid;
                 }
                 $scope.patientContext.gender = $rootScope.genderMap[$scope.patientContext.gender];
-                $scope.patientContext.name = [
-                    $scope.patientContext.givenName,
-                    $scope.patientContext.middleName,
-                    $scope.patientContext.familyName].filter(x=>x!==null).join(' ');
             });
+
+            $scope.navigate = function () {
+                if ($scope.isConsultation) {
+                    $scope.$parent.$parent.$broadcast("patientContext:goToPatientDashboard");
+                } else {
+                    $state.go("search.patientsearch");
+                }
+            };
         };
 
         var link = function ($scope, element) {
@@ -48,12 +52,20 @@ angular.module('bahmni.clinical')
             });
         };
 
+        var translateAttributes = function (attributes) {
+            _.forEach(attributes, function (attribute, key) {
+                var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(key, Bahmni.Common.Constants.clinical, $translate);
+                attribute.description = translatedName;
+            });
+        };
+
         return {
             restrict: 'E',
             templateUrl: "displaycontrols/patientContext/views/patientContext.html",
             scope: {
                 patient: "=",
-                showNameAndImage: "=?"
+                showNameAndImage: "=?",
+                isConsultation: "=?"
             },
             controller: controller,
             link: link

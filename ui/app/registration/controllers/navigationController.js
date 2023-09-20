@@ -1,10 +1,11 @@
 'use strict';
 
 angular.module('bahmni.registration')
-    .controller('NavigationController', ['$scope', '$rootScope', '$location', 'sessionService', '$window', 'appService', '$sce', 'offlineService', 'schedulerService',
-        function ($scope, $rootScope, $location, sessionService, $window, appService, $sce, offlineService, schedulerService) {
+    .controller('NavigationController', ['$scope', '$rootScope', '$location', 'sessionService', '$window', 'appService', '$sce',
+        function ($scope, $rootScope, $location, sessionService, $window, appService, $sce) {
             $scope.extensions = appService.getAppDescriptor().getExtensions("org.bahmni.registration.navigation", "link");
-            $scope.isOfflineApp = offlineService.isOfflineApp();
+            var path = $location.path();
+            $scope.hasPrint = !(path === "/search" || path === "/patient/new");
             $scope.goTo = function (url) {
                 $location.url(url);
             };
@@ -23,16 +24,5 @@ angular.module('bahmni.registration')
             };
 
             $scope.sync = function () {
-                schedulerService.sync(Bahmni.Common.Constants.syncButtonConfiguration);
             };
-
-            var cleanUpListenerSchedulerStage = $scope.$on("schedulerStage", function (event, stage, restartSync) {
-                $scope.isSyncing = (stage !== null);
-                if (restartSync) {
-                    schedulerService.stopSync();
-                    schedulerService.sync();
-                }
-            });
-
-            $scope.$on("$destroy", cleanUpListenerSchedulerStage);
         }]);

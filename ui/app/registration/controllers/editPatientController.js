@@ -1,15 +1,16 @@
 'use strict';
 
 angular.module('bahmni.registration')
-    .controller('EditPatientController', ['$scope', 'patientService', 'encounterService', '$stateParams', 'openmrsPatientMapper', '$window', '$q', 'spinner', 'appService', 'messagingService', '$rootScope',
-        function ($scope, patientService, encounterService, $stateParams, openmrsPatientMapper, $window, $q, spinner, appService, messagingService, $rootScope) {
+    .controller('EditPatientController', ['$scope', 'patientService', 'encounterService', '$stateParams', 'openmrsPatientMapper',
+        '$window', '$q', 'spinner', 'appService', 'messagingService', '$rootScope', 'auditLogService',
+        function ($scope, patientService, encounterService, $stateParams, openmrsPatientMapper, $window, $q, spinner,
+                  appService, messagingService, $rootScope, auditLogService) {
             var dateUtil = Bahmni.Common.Util.DateUtil;
             var uuid = $stateParams.patientUuid;
             $scope.patient = {};
             $scope.actions = {};
             $scope.addressHierarchyConfigs = appService.getAppDescriptor().getConfigValue("addressHierarchy");
             $scope.disablePhotoCapture = appService.getAppDescriptor().getConfigValue("disablePhotoCapture");
-
             $scope.today = dateUtil.getDateWithoutTime(dateUtil.now());
 
             var setReadOnlyFields = function () {
@@ -28,6 +29,7 @@ angular.module('bahmni.registration')
                 setReadOnlyFields();
                 expandDataFilledSections();
                 $scope.patientLoaded = true;
+                $scope.enableWhatsAppButton = (appService.getAppDescriptor().getConfigValue("enableWhatsAppButton") || Bahmni.Registration.Constants.enableWhatsAppButton) && ($scope.patient.phoneNumber != undefined);
             };
 
             var expandDataFilledSections = function () {
@@ -43,6 +45,13 @@ angular.module('bahmni.registration')
                 var getPatientPromise = patientService.get(uuid).then(successCallBack);
 
                 var isDigitized = encounterService.getDigitized(uuid);
+
+                var identifiers = patientService.getAllPatientIdentifiers(uuid);
+
+                identifiers.then(function (response) {
+                    $rootScope.patientIdentifiers = response.data.results;
+                });
+
                 isDigitized.then(function (data) {
                     var encountersWithObservations = data.data.results.filter(function (encounter) {
                         return encounter.obs.length > 0;
@@ -50,7 +59,7 @@ angular.module('bahmni.registration')
                     $scope.isDigitized = encountersWithObservations.length > 0;
                 });
 
-                spinner.forPromise($q.all([getPatientPromise, isDigitized]));
+                spinner.forPromise($q.all([getPatientPromise, isDigitized, identifiers]));
             })();
 
             $scope.update = function () {
@@ -88,7 +97,17 @@ angular.module('bahmni.registration')
                 return $scope.readOnlyFields ? ($scope.readOnlyFields[field] ? true : false) : undefined;
             };
 
+            $scope.notifyOnWhatsAapp = function () {
+                var name = $scope.patient.givenName + " " + $scope.patient.familyName;
+                var whatsAppMessage = patientService.getRegistrationMessage($scope.patient.primaryIdentifier.identifier, name, $scope.patient.age.years, $scope.patient.gender);
+                var phoneNumber = $scope.patient.phoneNumber.replace("+", "");
+                var url = "https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" + encodeURIComponent(whatsAppMessage);
+                window.open(url);
+            };
+
             $scope.afterSave = function () {
+                auditLogService.log($scope.patient.uuid, Bahmni.Registration.StateNameEvenTypeMap['patient.edit'], undefined, "MODULE_LABEL_REGISTRATION_KEY");
                 messagingService.showMessage("info", "REGISTRATION_LABEL_SAVED");
             };
         }]);
+

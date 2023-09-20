@@ -1,16 +1,21 @@
 'use strict';
 
 angular.module('bahmni.common.domain')
-    .service('encounterService', ['$http', '$q', '$rootScope', 'configurations', '$bahmniCookieStore', 'offlineService',
-        function ($http, $q, $rootScope, configurations, $bahmniCookieStore, offlineService) {
+    .service('encounterService', ['$http', '$q', '$rootScope', 'configurations', '$bahmniCookieStore',
+        function ($http, $q, $rootScope, configurations, $bahmniCookieStore) {
             this.buildEncounter = function (encounter) {
                 encounter.observations = encounter.observations || [];
                 encounter.observations.forEach(function (obs) {
                     stripExtraConceptInfo(obs);
                 });
-
+                var bacterilogyMembers = getBacteriologyGroupMembers(encounter);
+                bacterilogyMembers = bacterilogyMembers.reduce(function (mem1, mem2) {
+                    return mem1.concat(mem2);
+                }, []);
+                bacterilogyMembers.forEach(function (mem) {
+                    deleteIfImageOrVideoObsIsVoided(mem);
+                });
                 encounter.providers = encounter.providers || [];
-
                 var providerData = $bahmniCookieStore.get(Bahmni.Common.Constants.grantProviderAccessDataCookieName);
                 if (_.isEmpty(encounter.providers)) {
                     if (providerData && providerData.uuid) {
@@ -20,6 +25,25 @@ angular.module('bahmni.common.domain')
                     }
                 }
                 return encounter;
+            };
+
+            var getBacteriologyGroupMembers = function (encounter) {
+                var addBacteriologyMember = function (bacteriologyGroupMembers, member) {
+                    bacteriologyGroupMembers = member.groupMembers.length ? bacteriologyGroupMembers.concat(member.groupMembers) :
+                        bacteriologyGroupMembers.concat(member);
+                    return bacteriologyGroupMembers;
+                };
+                return encounter.extensions && encounter.extensions.mdrtbSpecimen ? encounter.extensions.mdrtbSpecimen.map(function (observation) {
+                    var bacteriologyGroupMembers = [];
+                    observation.sample.additionalAttributes && observation.sample.additionalAttributes.groupMembers.forEach(function (member) {
+                        bacteriologyGroupMembers = addBacteriologyMember(bacteriologyGroupMembers, member);
+                    });
+
+                    observation.report.results && observation.report.results.groupMembers.forEach(function (member) {
+                        bacteriologyGroupMembers = addBacteriologyMember(bacteriologyGroupMembers, member);
+                    });
+                    return bacteriologyGroupMembers;
+                }) : [];
             };
 
             var getDefaultEncounterType = function () {
@@ -87,15 +111,20 @@ angular.module('bahmni.common.domain')
                 });
             };
 
-            var deleteIfVoided = function (obs) {
-                if (obs.voided && obs.groupMembers && !obs.groupMembers.length) {
+            function isObsConceptClassVideoOrImage (obs) {
+                return (obs.concept.conceptClass === 'Video' || obs.concept.conceptClass === 'Image');
+            }
+
+            var deleteIfImageOrVideoObsIsVoided = function (obs) {
+                if (obs.voided && obs.groupMembers && !obs.groupMembers.length && obs.value
+                    && isObsConceptClassVideoOrImage(obs)) {
                     var url = Bahmni.Common.Constants.RESTWS_V1 + "/bahmnicore/visitDocument?filename=" + obs.value;
                     $http.delete(url, {withCredentials: true});
                 }
             };
 
             var stripExtraConceptInfo = function (obs) {
-                deleteIfVoided(obs);
+                deleteIfImageOrVideoObsIsVoided(obs);
                 obs.concept = {uuid: obs.concept.uuid, name: obs.concept.name, dataType: obs.concept.dataType};
                 obs.groupMembers = obs.groupMembers || [];
                 obs.groupMembers.forEach(function (groupMember) {
@@ -132,22 +161,11 @@ angular.module('bahmni.common.domain')
                     withCredentials: true
                 });
             };
-            this.findByEncounterUuid = function (encounterUuid) {
+            this.findByEncounterUuid = function (encounterUuid, params) {
+                params = params || {includeAll: true};
                 return $http.get(Bahmni.Common.Constants.bahmniEncounterUrl + '/' + encounterUuid, {
-                    params: {includeAll: true},
+                    params: params,
                     withCredentials: true
-                });
-            };
-
-            this.findByOrderUuid = function (orderUuid) {
-                return $http.get(Bahmni.Common.Constants.ordersUrl + '/' + orderUuid, {
-                    params: {},
-                    withCredentials: true
-                }).then(function (order) {
-                    return $http.get(
-                        Bahmni.Common.Constants.bahmniEncounterUrl + '/' + order.data.encounter.uuid,
-                        {params: {includeAll: true}, withCredentials: true}
-                    );
                 });
             };
 
@@ -163,9 +181,6 @@ angular.module('bahmni.common.domain')
             };
 
             this.getDigitized = function (patientUuid) {
-                if (offlineService.isOfflineApp()) {
-                    return $q.when({"data": {"results": []}});
-                }
                 var patientDocumentEncounterTypeUuid = configurations.encounterConfig().getPatientDocumentEncounterTypeUuid();
                 return $http.get(Bahmni.Common.Constants.encounterUrl, {
                     params: {

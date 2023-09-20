@@ -198,7 +198,7 @@ angular.module('bahmni.common.conceptSet')
                                 conceptSetValueMap[conceptName.split('|')[0]] = obsValue;
                                 return conceptSetValueMap;
                             }, {});
-                            var conditions = formCondition(formName, valueMap);
+                            var conditions = formCondition(formName, valueMap, $scope.patient);
                             if (!_.isUndefined(conditions)) {
                                 if (conditions.error && !_.isEmpty(conditions.error)) {
                                     messagingService.showMessage('error', conditions.error);
@@ -219,6 +219,22 @@ angular.module('bahmni.common.conceptSet')
                                 _.each(conditions.disable, function (subConditionConceptName) {
                                     var conditionFn = Bahmni.ConceptSet.FormConditions.rules && Bahmni.ConceptSet.FormConditions.rules[subConditionConceptName];
                                     if (conditionFn != null) {
+                                        _.each(flattenedObs, function (obs) {
+                                            if (obs.concept.name == subConditionConceptName) {
+                                                runFormConditionForObs(false, formName, conditionFn, subConditionConceptName, flattenedObs);
+                                            }
+                                        });
+                                    }
+                                });
+                                _.each(conditions.show, function (subConditionConceptName) {
+                                    var conditionFn = Bahmni.ConceptSet.FormConditions.rules && Bahmni.ConceptSet.FormConditions.rules[subConditionConceptName];
+                                    if (conditionFn) {
+                                        runFormConditionForObs(true, formName, conditionFn, subConditionConceptName, flattenedObs);
+                                    }
+                                });
+                                _.each(conditions.hide, function (subConditionConceptName) {
+                                    var conditionFn = Bahmni.ConceptSet.FormConditions.rules && Bahmni.ConceptSet.FormConditions.rules[subConditionConceptName];
+                                    if (conditionFn) {
                                         _.each(flattenedObs, function (obs) {
                                             if (obs.concept.name == subConditionConceptName) {
                                                 runFormConditionForObs(false, formName, conditionFn, subConditionConceptName, flattenedObs);

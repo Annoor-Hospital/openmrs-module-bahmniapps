@@ -1,20 +1,26 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('OrderController', ['$scope', '$rootScope', 'allOrderables', 'providerService', 'ngDialog', 'retrospectiveEntryService', 'appService', '$translate',
-        function ($scope, $rootScope, allOrderables, providerService, ngDialog, retrospectiveEntryService, appService, $translate) {
+    .controller('OrderController', ['$scope', '$state', 'allOrderables', 'ngDialog', 'retrospectiveEntryService', 'appService', '$translate',
+        function ($scope, $state, allOrderables, ngDialog, retrospectiveEntryService, appService, $translate) {
             $scope.consultation.orders = $scope.consultation.orders || [];
             $scope.consultation.childOrders = $scope.consultation.childOrders || [];
             $scope.allOrdersTemplates = allOrderables;
             var RadiologyOrderOptionsConfig = appService.getAppDescriptor().getConfig("enableRadiologyOrderOptions");
+            var LabOrderOptionsConfig = appService.getAppDescriptor().getConfig("enableLabOrderOptions");
             $scope.enableRadiologyOrderOptions = RadiologyOrderOptionsConfig ? RadiologyOrderOptionsConfig.value : null;
-
+            $scope.enableLabOrderOptions = LabOrderOptionsConfig ? LabOrderOptionsConfig.value : null;
             var testConceptToParentsMapping = {}; // A child concept could be part of multiple parent panels
+            $scope.hideLabTests = true;
 
             var collapseExistingActiveSection = function (section) {
                 if (section) {
                     section.klass = "";
                 }
+            };
+
+            $scope.toggleLabTests = function () {
+                $scope.hideLabTests = !$scope.hideLabTests;
             };
 
             var showFirstLeftCategoryByDefault = function () {
@@ -62,13 +68,6 @@ angular.module('bahmni.clinical')
                     discontinuedOrder.isDiscontinued = false;
                 } else {
                     var createdOrder = Bahmni.Clinical.Order.create(test);
-                    // MAF get provider display name and use it as the default commentToFulfiller
-                    providerService.list().then(function (response){
-                        if(response.data) {
-                            var currentProvider = response.data.results.find(provider => (provider.uuid == $rootScope.currentProvider.uuid));
-                            createdOrder.commentToFulfiller = currentProvider.display;
-                        }
-                    });
                     $scope.consultation.orders.push(createdOrder);
                 }
             };
@@ -120,6 +119,9 @@ angular.module('bahmni.clinical')
             };
 
             $scope.updateSelectedOrdersForActiveTab = function () {
+                if (!$scope.activeTab) {
+                    return;
+                }
                 var activeTabTestConcepts = _.map(_.flatten(_.map($scope.getOrderTemplate($scope.activeTab.name).setMembers, 'setMembers')), 'uuid');
                 $scope.selectedOrders = _.filter($scope.consultation.orders, function (testOrder) {
                     return _.indexOf(activeTabTestConcepts, testOrder.concept.uuid) !== -1;
@@ -129,6 +131,12 @@ angular.module('bahmni.clinical')
                     order.isUrgent = order.urgency == "STAT" ? true : order.isUrgent;
                 });
             };
+
+            $scope.$on('$stateChangeStart', function () {
+                if ($scope.consultation.orders.length !== $scope.consultation.investigations.length) {
+                    $state.dirtyConsultationForm = true;
+                }
+            });
 
             $scope.getOrderTemplate = function (templateName) {
                 var key = '\'' + templateName + '\'';
@@ -227,18 +235,26 @@ angular.module('bahmni.clinical')
             };
 
             $scope.isPrintShown = function (isOrderSaved) {
-                return _.some($scope.enableRadiologyOrderOptions, function (option) {
+                var configuredOptions = getConfiguredOptions();
+                return _.some(configuredOptions, function (option) {
                     return option.toLowerCase() === 'needsprint';
                 })
-                &&
-                $scope.activeTab.name == 'Radiology' && !isOrderSaved;
+                && !isOrderSaved;
             };
             $scope.isUrgent = function () {
-                return _.some($scope.enableRadiologyOrderOptions, function (option) {
+                var configuredOptions = getConfiguredOptions();
+                return _.some(configuredOptions, function (option) {
                     return option.toLowerCase() === 'urgent';
-                })
-                &&
-                $scope.activeTab.name == 'Radiology';
+                });
+            };
+            var getConfiguredOptions = function () {
+                var configuredOptions = null;
+                if ($scope.activeTab.name == 'Radiology') {
+                    configuredOptions = $scope.enableRadiologyOrderOptions;
+                } else {
+                    configuredOptions = $scope.enableLabOrderOptions;
+                }
+                return configuredOptions;
             };
             $scope.setEditedFlag = function (order, orderNoteText) {
                 if (order.previousNote !== orderNoteText) {

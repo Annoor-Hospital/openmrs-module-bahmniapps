@@ -4,7 +4,7 @@ angular.module('bahmni.common.domain')
     .service('visitDocumentService', ['$http', 'auditLogService', 'configurations', '$q', function ($http, auditLogService, configurations, $q) {
         var removeVoidedDocuments = function (documents) {
             documents.forEach(function (document) {
-                if (document.voided) {
+                if (document.voided && document.image) {
                     var url = Bahmni.Common.Constants.RESTWS_V1 + "/bahmnicore/visitDocument?filename=" + document.image;
                     $http.delete(url, {withCredentials: true});
                 }
@@ -45,7 +45,8 @@ angular.module('bahmni.common.domain')
                 format: format,
                 patientUuid: patientUuid,
                 encounterTypeName: encounterTypeName,
-                fileType: fileType || "file"
+                fileType: fileType || "file",
+                fileName: fileName.substring(0, fileName.lastIndexOf('.'))
             }, {
                 withCredentials: true,
                 headers: {"Accept": "application/json", "Content-Type": "application/json"}

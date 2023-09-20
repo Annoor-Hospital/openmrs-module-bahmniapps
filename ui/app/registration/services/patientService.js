@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('bahmni.registration')
-    .factory('patientService', ['$http', '$rootScope', '$bahmniCookieStore', '$q', 'patientServiceStrategy', 'sessionService', function ($http, $rootScope, $bahmniCookieStore, $q, patientServiceStrategy, sessionService) {
+    .factory('patientService', ['$http', '$rootScope', '$bahmniCookieStore', '$q', 'patientServiceStrategy', 'sessionService', '$translate', 'appService', function ($http, $rootScope, $bahmniCookieStore, $q, patientServiceStrategy, sessionService, $translate, appService) {
         var openmrsUrl = Bahmni.Registration.Constants.openmrsUrl;
         var baseOpenMRSRESTURL = Bahmni.Registration.Constants.baseOpenMRSRESTURL;
 
@@ -15,7 +15,7 @@ angular.module('bahmni.registration')
                     s: "byIdOrNameOrVillage",
                     addressFieldName: addressFieldName,
                     addressFieldValue: addressFieldValue,
-                    customAttribute: customAttributeValue ? customAttributeValue.split(" ") : null, // MATT: try repeated parameter using split
+                    customAttribute: customAttributeValue,
                     startIndex: offset || 0,
                     patientAttributes: customAttributeFields,
                     programAttributeFieldName: programAttributeFieldName,
@@ -41,6 +41,19 @@ angular.module('bahmni.registration')
             });
         };
 
+        var searchByNameOrIdentifier = function (query, limit) {
+            return $http.get(Bahmni.Common.Constants.bahmniSearchUrl + "/patient", {
+                method: "GET",
+                params: {
+                    q: query,
+                    s: "byIdOrName",
+                    limit: limit,
+                    loginLocationUuid: sessionService.getLoginLocationUuid()
+                },
+                withCredentials: true
+            });
+        };
+
         var get = function (uuid) {
             return patientServiceStrategy.get(uuid);
         };
@@ -51,6 +64,17 @@ angular.module('bahmni.registration')
 
         var update = function (patient, openMRSPatient) {
             return patientServiceStrategy.update(patient, openMRSPatient, $rootScope.patientConfiguration.attributeTypes);
+        };
+
+        var getAllPatientIdentifiers = function (uuid) {
+            var url = Bahmni.Registration.Constants.basePatientUrl + uuid + "/identifier";
+            return $http.get(url, {
+                method: "GET",
+                params: {
+                    includeAll: true
+                },
+                withCredentials: true
+            });
         };
 
         var updateImage = function (uuid, image) {
@@ -66,12 +90,27 @@ angular.module('bahmni.registration')
             return $http.post(url, data, config);
         };
 
+        var getRegistrationMessage = function (patientId, name, age, gender) {
+            var locationName = $rootScope.facilityVisitLocation ? $rootScope.facilityVisitLocation.name : $rootScope.loggedInLocation.name;
+            var message = $translate.instant(appService.getAppDescriptor().getConfigValue("registrationMessage") || Bahmni.Registration.Constants.registrationMessage);
+            message = message.replace("#clinicName", locationName);
+            message = message.replace("#patientId", patientId);
+            message = message.replace("#name", name);
+            message = message.replace("#age", age);
+            message = message.replace("#gender", gender);
+            message = message.replace("#helpDeskNumber", $rootScope.helpDeskNumber);
+            return message;
+        };
+
         return {
             search: search,
             searchByIdentifier: searchByIdentifier,
             create: create,
             update: update,
             get: get,
-            updateImage: updateImage
+            updateImage: updateImage,
+            searchByNameOrIdentifier: searchByNameOrIdentifier,
+            getAllPatientIdentifiers: getAllPatientIdentifiers,
+            getRegistrationMessage: getRegistrationMessage
         };
     }]);

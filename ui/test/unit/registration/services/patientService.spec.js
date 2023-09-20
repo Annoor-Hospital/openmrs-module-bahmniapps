@@ -4,6 +4,7 @@ describe('Patient resource', function () {
     var patientService;
     var patient;
     var sessionService;
+    var appService;
 
 
     var openmrsUrl = "http://blah";
@@ -12,7 +13,7 @@ describe('Patient resource', function () {
     var mockHttp = {
         defaults: {headers: {common: {'X-Requested-With': 'present'}}},
         get: jasmine.createSpy('Http get').and.returnValue({
-            'success': function(onSuccess){
+            'success': function (onSuccess) {
                 onSuccess({name: "john"});
                 return {
                     'error': function (onError) {
@@ -32,13 +33,13 @@ describe('Patient resource', function () {
                         onError()
                     }
                 }
-            }})
+            }
+        })
     };
 
 
     beforeEach(function () {
         module('bahmni.common.models');
-        module('bahmni.common.offline');
         module('bahmni.registration');
 
         module(function ($provide) {
@@ -73,16 +74,31 @@ describe('Patient resource', function () {
         module(function ($provide) {
             Bahmni.Registration.Constants.openmrsUrl = openmrsUrl;
             sessionService = jasmine.createSpyObj('sessionService', ['getLoginLocationUuid']);
+            appService = jasmine.createSpyObj('appService', ['getAppDescriptor']);
             $provide.value('$http', mockHttp);
             $provide.value('sessionService', sessionService);
+            $provide.value('appService', appService);
         });
 
         patientConfiguration = new Bahmni.Registration.PatientConfig([
-            {"uuid": "d3d93ab0-e796-11e2-852f-0800271c1b75", "sortWeight": 2.0, "name": "caste", "description": "Caste", "format": "java.lang.String", "answers": []},
-            {"uuid": "d3e6dc74-e796-11e2-852f-0800271c1b75", "sortWeight": 2.0, "name": "class", "description": "Class", "format": "org.openmrs.Concept",
+            {
+                "uuid": "d3d93ab0-e796-11e2-852f-0800271c1b75",
+                "sortWeight": 2.0,
+                "name": "caste",
+                "description": "Caste",
+                "format": "java.lang.String",
+                "answers": []
+            },
+            {
+                "uuid": "d3e6dc74-e796-11e2-852f-0800271c1b75",
+                "sortWeight": 2.0,
+                "name": "class",
+                "description": "Class",
+                "format": "org.openmrs.Concept",
                 "answers": [
                     {"description": "OBC", "conceptId": "10"}
-                ]}
+                ]
+            }
         ]);
 
         inject(['patientService', '$rootScope', 'patient', '$q', function (patientServiceInjectted, $rootScope, patientFactory) {
@@ -100,14 +116,14 @@ describe('Patient resource', function () {
         var addressFieldName = 'address2';
         var addressFieldValue = 'kaliganj';
         var customAttributeValue = 'Student';
-        var customAttributeFields = ['occupation','education'];
+        var customAttributeFields = ['occupation', 'education'];
         var programAttributeFieldName = 'REGISTRATION NO';
         var programAttributeFieldValue = '1234';
         var results = patientService.search(query, identifier, addressFieldName, addressFieldValue, customAttributeValue, 0,
             customAttributeFields, programAttributeFieldName, programAttributeFieldValue);
 
         expect(mockHttp.get).toHaveBeenCalled();
-        expect(mockHttp.get.calls.mostRecent().args[0]).toBe(Bahmni.Common.Constants.bahmniSearchUrl + "/patient/lucene");
+        expect(mockHttp.get.calls.mostRecent().args[0]).toBe(Bahmni.Common.Constants.bahmniCommonsSearchUrl + "/patient/lucene");
         expect(mockHttp.get.calls.mostRecent().args[1].params.q).toBe(query);
         expect(mockHttp.get.calls.mostRecent().args[1].params.identifier).toBe(identifier);
         expect(mockHttp.get.calls.mostRecent().args[1].params.addressFieldName).toBe(addressFieldName);
@@ -119,6 +135,16 @@ describe('Patient resource', function () {
         expect(mockHttp.get.calls.mostRecent().args[1].params.programAttributeFieldValue).toBe(programAttributeFieldValue);
         expect(results.$$state.value.name).toBe('john');
 
+    });
+
+    it('should make network call to serach by patient name or identifier for given query string and limit', function () {
+        var query = "demo";
+        patientService.searchByNameOrIdentifier(query, 100);
+        expect(mockHttp.get).toHaveBeenCalled();
+        expect(mockHttp.get.calls.mostRecent().args[0]).toBe(Bahmni.Common.Constants.bahmniSearchUrl + "/patient");
+        expect(mockHttp.get.calls.mostRecent().args[1].params.q).toBe(query);
+        expect(mockHttp.get.calls.mostRecent().args[1].params.limit).toBe(100);
+        expect(mockHttp.get.calls.mostRecent().args[1].params.s).toBe("byIdOrName");
     });
 
     it('Should create a patient', function () {
@@ -149,7 +175,7 @@ describe('Patient resource', function () {
         expect(mockHttp.post.calls.mostRecent().args[2].headers['Accept']).toBe('application/json');
     });
 
-    it("should get patients by uuid", function() {
+    it("should get patients by uuid", function () {
         patientService.get("someUuid");
 
         expect(mockHttp.get).toHaveBeenCalled();

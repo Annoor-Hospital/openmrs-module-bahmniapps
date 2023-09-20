@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.registration')
-    .controller('CreatePatientController', ['$scope', '$rootScope', '$state', 'patientService', 'patient', 'spinner', 'appService', 'messagingService', 'ngDialog', '$q', 'offlineService',
-        function ($scope, $rootScope, $state, patientService, patient, spinner, appService, messagingService, ngDialog, $q, offlineService) {
+    .controller('CreatePatientController', ['$scope', '$rootScope', '$state', 'patientService', 'smsService', 'patient', 'spinner', 'appService', 'messagingService', 'ngDialog', '$q', '$translate',
+        function ($scope, $rootScope, $state, patientService, smsService, patient, spinner, appService, messagingService, ngDialog, $q, $translate) {
             var dateUtil = Bahmni.Common.Util.DateUtil;
             $scope.actions = {};
             var errorMessage;
@@ -11,11 +11,15 @@ angular.module('bahmni.registration')
             $scope.disablePhotoCapture = appService.getAppDescriptor().getConfigValue("disablePhotoCapture");
             $scope.showEnterID = configValueForEnterId === null ? true : configValueForEnterId;
             $scope.today = Bahmni.Common.Util.DateTimeFormatter.getDateWithoutTime(dateUtil.now());
-
+            $scope.moduleName = appService.getAppDescriptor().getConfigValue('registrationModuleName');
+            var patientId;
             var getPersonAttributeTypes = function () {
                 return $rootScope.patientConfiguration.attributeTypes;
             };
-
+            $scope.getTranslatedPatientIdentifier = function (patientIdentifier) {
+                var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(patientIdentifier, Bahmni.Common.Constants.registration, $translate);
+                return translatedName;
+            };
             var prepopulateDefaultsInFields = function () {
                 var personAttributeTypes = getPersonAttributeTypes();
                 var patientInformation = appService.getAppDescriptor().getConfigValue("patientInformation");
@@ -51,9 +55,32 @@ angular.module('bahmni.registration')
                     }).value();
                 };
 
-                _.chain(personAttributeTypes)
+                var isDateType = function (personAttributeType) {
+                    return personAttributeType.format === "org.openmrs.util.AttributableDate";
+                };
+
+                var isDefaultValueToday = function (personAttributeType) {
+                    if (defaults[personAttributeType.name].toLowerCase() === "today") {
+                        return true;
+                    }
+                    return false;
+                };
+
+                var setDefaultValue = function (personAttributeType) {
+                    if (isDefaultValueToday(personAttributeType)) {
+                        $scope.patient[personAttributeType.name] = new Date();
+                    }
+                    else {
+                        $scope.patient[personAttributeType.name] = '';
+                    }
+                };
+
+                var defaultsWithAnswers = _.chain(personAttributeTypes)
                     .filter(hasDefaultAnswer)
-                    .each(setDefaultAnswer).filter(isConcept).each(setDefaultConcept).value();
+                    .each(setDefaultAnswer).value();
+
+                _.chain(defaultsWithAnswers).filter(isConcept).each(setDefaultConcept).value();
+                _.chain(defaultsWithAnswers).filter(isDateType).each(setDefaultValue).value();
             };
 
             var expandSectionsWithDefaultValue = function () {
@@ -70,6 +97,7 @@ angular.module('bahmni.registration')
                 prepopulateDefaultsInFields();
                 expandSectionsWithDefaultValue();
                 $scope.patientLoaded = true;
+                $scope.createPatient = true;
             };
 
             init();
@@ -125,6 +153,7 @@ angular.module('bahmni.registration')
                 $scope.patient.registrationDate = dateUtil.now();
                 $scope.patient.newlyAddedRelationships = [{}];
                 $scope.actions.followUpAction(patientProfileData);
+                patientId = patientProfileData.patient.identifiers[0].identifier;
             };
 
             var createPatient = function (jumpAccepted) {
@@ -161,10 +190,6 @@ angular.module('bahmni.registration')
                 return deferred.promise;
             };
 
-            $scope.isOffline = function () {
-                return offlineService.isOfflineApp();
-            };
-
             $scope.create = function () {
                 addNewRelationships();
                 var errorMessages = Bahmni.Common.Util.ValidationUtil.validate($scope.patient, $scope.patientConfiguration.attributeTypes);
@@ -178,6 +203,12 @@ angular.module('bahmni.registration')
                     if (errorMessage) {
                         messagingService.showMessage("error", errorMessage);
                         errorMessage = undefined;
+                    } else {
+                        if ($rootScope.registrationSMSToggle == "true" && ($scope.patient.phoneNumber != undefined)) {
+                            var name = $scope.patient.givenName + " " + $scope.patient.familyName;
+                            var message = patientService.getRegistrationMessage(patientId, name, $scope.patient.age.years, $scope.patient.gender);
+                            smsService.sendSMS($scope.patient.phoneNumber, message);
+                        }
                     }
                 });
             };

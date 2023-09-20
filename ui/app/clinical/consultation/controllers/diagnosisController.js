@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('DiagnosisController', ['$scope', '$rootScope', 'diagnosisService', 'messagingService', 'contextChangeHandler', 'spinner', 'appService', '$translate', 'retrospectiveEntryService',
-        function ($scope, $rootScope, diagnosisService, messagingService, contextChangeHandler, spinner, appService, $translate, retrospectiveEntryService) {
+    .controller('DiagnosisController', ['$scope', '$rootScope', 'diagnosisService', 'messagingService', 'contextChangeHandler', 'spinner', 'appService', '$translate', 'retrospectiveEntryService', '$state',
+        function ($scope, $rootScope, diagnosisService, messagingService, contextChangeHandler, spinner, appService, $translate, retrospectiveEntryService, $state) {
             var DateUtil = Bahmni.Common.Util.DateUtil;
             $scope.todayWithoutTime = DateUtil.getDateWithoutTime(DateUtil.today());
             $scope.toggles = {
@@ -31,9 +31,19 @@ angular.module('bahmni.clinical')
                 'CLINICAL_DIAGNOSIS_CERTAINTY_CONFIRMED': 'CONFIRMED',
                 'CLINICAL_DIAGNOSIS_CERTAINTY_PRESUMED': 'PRESUMED'
             };
+            $scope.translateDiagnosisLabels = function (key, type) {
+                if (key) {
+                    var translationKey = "CLINICAL_DIAGNOSIS_" + type + "_" + key.toUpperCase();
+                    var translation = $translate.instant(translationKey);
+                    if (translation != translationKey) {
+                        return translation;
+                    }
+                }
+                return key;
+            };
 
             $scope.getDiagnosis = function (params) {
-                return diagnosisService.getAllFor(params.term).then(mapConcept);
+                return diagnosisService.getAllFor(params.term, $rootScope.currentUser.userProperties.defaultLocale).then(mapConcept);
             };
 
             var _canAdd = function (diagnosis) {
@@ -45,6 +55,16 @@ angular.module('bahmni.clinical')
                 });
                 return canAdd;
             };
+
+            $scope.$on('$stateChangeStart', function () {
+                if ($scope.diagnosisForm.$dirty) {
+                    $state.dirtyConsultationForm = true;
+                }
+            });
+
+            $scope.$on("event:changes-saved", function () {
+                $scope.diagnosisForm.$dirty = false;
+            });
 
             $scope.getAddNewDiagnosisMethod = function (diagnosisAtIndex) {
                 return function (item) {
@@ -129,35 +149,34 @@ angular.module('bahmni.clinical')
 
             var mapConcept = function (result) {
                 return _.map(result.data, function (concept) {
-                    if (concept.conceptName === concept.matchedName) {
-                        return {
-                            value: concept.matchedName,
-                            concept: {
-                                name: concept.conceptName,
-                                uuid: concept.conceptUuid
-                            },
-                            lookup: {
-                                name: concept.conceptName,
-                                uuid: concept.conceptUuid
-                            }
-                        };
-                    }
-                    return {
-                        value: concept.matchedName + "=>" + concept.conceptName,
+                    var response = {
+                        value: concept.matchedName || concept.conceptName,
                         concept: {
                             name: concept.conceptName,
-                            uuid: concept.conceptUuid
+                            uuid: concept.conceptUuid,
+                            conceptSystem: concept.conceptSystem
                         },
                         lookup: {
-                            name: concept.matchedName,
-                            uuid: concept.conceptUuid
+                            name: concept.matchedName || concept.conceptName,
+                            uuid: concept.conceptUuid,
+                            conceptSystem: concept.conceptSystem
                         }
                     };
+
+                    if (concept.matchedName && concept.matchedName !== concept.conceptName) {
+                        response.value = response.value + " => " + concept.conceptName;
+                    }
+                    if (concept.code) {
+                        response.value = response.value + " (" + concept.code + ")";
+                    }
+                    return response;
                 });
             };
 
             $scope.getAddConditionMethod = function () {
                 return function (item) {
+                    var conceptSystem = item.lookup.conceptSystem ? item.lookup.conceptSystem + "/" : "";
+                    item.lookup.uuid = conceptSystem + item.lookup.uuid;
                     $scope.consultation.condition.concept.uuid = item.lookup.uuid;
                     item.value = $scope.consultation.condition.concept.name = item.lookup.name;
                 };
@@ -265,9 +284,9 @@ angular.module('bahmni.clinical')
             };
 
             $scope.cleanOutDiagnosisList = function (allDiagnoses) {
-                return allDiagnoses.filter(function (diagnosis) {
+                return allDiagnoses ? allDiagnoses.filter(function (diagnosis) {
                     return !alreadyAddedToDiagnosis(diagnosis);
-                });
+                }) : [];
             };
 
             var alreadyAddedToDiagnosis = function (diagnosis) {
@@ -303,7 +322,7 @@ angular.module('bahmni.clinical')
 
                 spinner.forPromise(
                     diagnosisService.deleteDiagnosis(obsUUid).then(function () {
-                        messagingService.showMessage('info', 'Deleted');
+                        messagingService.showMessage('info', 'DELETED_MESSAGE');
                         var currentUuid = $scope.consultation.savedDiagnosesFromCurrentEncounter.length > 0 ?
                                           $scope.consultation.savedDiagnosesFromCurrentEncounter[0].encounterUuid : "";
                         return reloadDiagnosesSection(currentUuid);

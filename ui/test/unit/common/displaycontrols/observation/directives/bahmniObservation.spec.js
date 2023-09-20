@@ -1,7 +1,7 @@
 'use strict';
 
 describe("BahmniObservation", function () {
-    var appService, scope, $compile, mockBackend, observationsService, q, spinner, formHierarchyService;
+    var appService, scope, $compile, mockBackend, observationsService, q, spinner, formHierarchyService, encounterService, providerInfoService;
     var simpleHtml = '<bahmni-observation section="section" patient="patient" is-on-dashboard="true" config="config" enrollment="enrollment" observations="observations"></bahmni-observation>';
 
     beforeEach(module('ngHtml2JsPreprocessor'));
@@ -9,7 +9,7 @@ describe("BahmniObservation", function () {
     beforeEach(module('bahmni.common.uiHelper'));
     beforeEach(module('bahmni.common.i18n'));
     beforeEach(module('bahmni.common.displaycontrol.observation', function ($provide) {
-        observationsService = jasmine.createSpyObj('observationsService', ['fetch', 'fetchForEncounter', 'getByUuid', 'fetchForPatientProgram']);
+        observationsService = jasmine.createSpyObj('observationsService', ['fetch', 'fetchForEncounter', 'getByUuid', 'fetchForPatientProgram', 'encounterService']);
         appService = jasmine.createSpyObj('appService', ['getAppDescriptor']);
         appService.getAppDescriptor.and.returnValue({
             getConfigValue: function () {
@@ -26,6 +26,8 @@ describe("BahmniObservation", function () {
             }
         });
         formHierarchyService = jasmine.createSpyObj('formHierarchyService',['build']);
+        encounterService = jasmine.createSpyObj('encounterService',['findByEncounterUuid']);
+        providerInfoService = jasmine.createSpyObj('providerInfoService', ['setProvider']);
         formHierarchyService.build.and.returnValue(null);
 
         spinner = jasmine.createSpyObj('spinner', ['forPromise']);
@@ -42,6 +44,8 @@ describe("BahmniObservation", function () {
         $provide.value('appService', appService);
         $provide.value('spinner', spinner);
         $provide.value('formHierarchyService',formHierarchyService);
+        $provide.value('encounterService',encounterService);
+        $provide.value('providerInfoService',providerInfoService);
     }));
 
     beforeEach(inject(function (_$compile_, $rootScope, $httpBackend, $q) {
@@ -52,7 +56,7 @@ describe("BahmniObservation", function () {
     }));
 
     describe("Initialization", function () {
-        it("should fetch observations for encounter if the encounterUuid is provided", function () {
+        it("should fetch observations for encounter if the encounterUuid is provided but formType is not formsV2", function () {
             scope.patient = {uuid: '123'};
             scope.config = {showGroupDateTime: false, encounterUuid: "encounterUuid", conceptNames: ["Concept Name"]};
             scope.section = {};
@@ -71,6 +75,28 @@ describe("BahmniObservation", function () {
             expect(observationsService.fetchForEncounter.calls.count()).toEqual(1);
             expect(observationsService.fetch.calls.count()).toEqual(0);
             expect(observationsService.fetchForPatientProgram.calls.count()).toEqual(0);
+        });
+
+        it("should fetch observations for encounter if formType is formsV2", function () {
+            scope.patient = {uuid: '123'};
+            scope.config = {showGroupDateTime: false, encounterUuid: "encounterUuid", formType: "formsV2"};
+            scope.section = {};
+            encounterService.findByEncounterUuid.and.returnValue(specUtil.respondWithPromise(q, {data: {observations: ["abc"]}}));
+
+            mockBackend.expectGET('../common/displaycontrols/observation/views/observationDisplayControl.html').respond("<div>dummy</div>");
+
+            var element = $compile(simpleHtml)(scope);
+            scope.$digest();
+            var compiledElementScope = element.isolateScope();
+            scope.$digest();
+
+            expect(compiledElementScope).not.toBeUndefined();
+            expect(compiledElementScope.config).not.toBeUndefined();
+            expect(encounterService.findByEncounterUuid).toHaveBeenCalledWith(scope.config.encounterUuid, { includeAll : false });
+            expect(encounterService.findByEncounterUuid.calls.count()).toEqual(1);
+            expect(observationsService.fetch.calls.count()).toEqual(0);
+            expect(observationsService.fetchForPatientProgram.calls.count()).toEqual(0);
+            expect(observationsService.fetchForEncounter.calls.count()).toEqual(0);
         });
 
         it("should fetch observations for patient if the encounterUuid is not provided", function () {
@@ -150,7 +176,7 @@ describe("BahmniObservation", function () {
         });
 
         it("should fetch observations for patient if the patientProgramUuid is provided", function () {
-            scope.config = {conceptNames: ["Concept Name"], scope: "latest"};
+            scope.config = {conceptNames: ["Concept Name"], scope: "latest", obsIgnoreList: ["obsIgnoreList"]};
             scope.section = {};
             scope.enrollment = 'patientProgramUuid';
             observationsService.fetchForPatientProgram.and.returnValue(specUtil.respondWithPromise(q, {data: {}}));
@@ -165,7 +191,7 @@ describe("BahmniObservation", function () {
             expect(compiledElementScope).not.toBeUndefined();
             expect(compiledElementScope.config).not.toBeUndefined();
 
-            expect(observationsService.fetchForPatientProgram).toHaveBeenCalledWith(scope.enrollment, scope.config.conceptNames, scope.config.scope);
+            expect(observationsService.fetchForPatientProgram).toHaveBeenCalledWith(scope.enrollment, scope.config.conceptNames, scope.config.scope, scope.config.obsIgnoreList);
             expect(observationsService.fetchForPatientProgram.calls.count()).toEqual(1);
             expect(observationsService.fetch.calls.count()).toEqual(0);
             expect(observationsService.fetchForEncounter.calls.count()).toEqual(0);

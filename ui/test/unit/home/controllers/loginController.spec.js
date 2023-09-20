@@ -7,7 +7,7 @@ describe('loginController', function () {
 
     beforeEach(function () {
         localeService = jasmine.createSpyObj('localeService', ['getLoginText', 'allowedLocalesList', 'serverDateTime', 'getLocalesLangs']);
-        sessionService = jasmine.createSpyObj('sessionService', ['loginUser', 'loadCredentials']);
+        sessionService = jasmine.createSpyObj('sessionService', ['loginUser', 'loadCredentials', 'updateSession']);
         auditLogService = jasmine.createSpyObj('auditLogService', ['log']);
         currentUser = jasmine.createSpyObj('currentUser', ['addDefaultLocale', 'toContract']);
         _spinner = jasmine.createSpyObj('spinner', ['forPromise']);
@@ -15,10 +15,11 @@ describe('loginController', function () {
         sessionService.loginUser();
         sessionService.loginUser.and.returnValue(specUtil.simplePromise());
         sessionService.loadCredentials.and.returnValue(specUtil.simplePromise());
+        sessionService.updateSession.and.returnValue(specUtil.simplePromise());
         currentUser.addDefaultLocale.and.returnValue(specUtil.simplePromise({data: ""}));
         currentUser.toContract.and.returnValue(specUtil.simplePromise({data: ""}));
         localeService.allowedLocalesList.and.returnValue(specUtil.simplePromise({data: ""}));
-        localeService.serverDateTime.and.returnValue(specUtil.simplePromise({data: { date: "today" }}));
+        localeService.serverDateTime.and.returnValue(specUtil.simplePromise({data: { date: "Wed Aug 16 15:31:55 NZST 2017", offset: "+1200"  }}));
         localeService.getLoginText.and.returnValue(specUtil.simplePromise({data: {homePage: {logo: "bahmni logo"}, loginPage: {showHeaderText: "bahmni emr", logo: "bahmni logo"}, helpLink: {url: "192.168.33.10/homepage"}}}));
         localeService.getLocalesLangs.and.returnValue(specUtil.createFakePromise(
             {locales: [{code: "en", nativeName: "English"}, {code: "es", nativeName: "Español"}]
@@ -103,7 +104,7 @@ describe('loginController', function () {
             expect(sessionService.loginUser.calls.count()).toBe(2);
             expect(sessionService.loadCredentials.calls.count()).toBe(1);
             expect(auditLogService.log.calls.count()).toBe(1);
-            expect(auditLogService.log).toHaveBeenCalledWith(undefined, 'USER_LOGIN_SUCCESS', undefined, 'login');
+            expect(auditLogService.log).toHaveBeenCalledWith(undefined, 'USER_LOGIN_SUCCESS', undefined, 'MODULE_LABEL_LOGIN_KEY');
         });
 
         it('audit log the failed login attempt with username', function () {
@@ -118,7 +119,7 @@ describe('loginController', function () {
             sessionService.loginUser.and.returnValue(fakeHttpGetPromise);
             scopeMock.login();
             expect(auditLogService.log.calls.count()).toBe(1);
-            expect(auditLogService.log).toHaveBeenCalledWith(undefined, 'USER_LOGIN_FAILED', messageParams, 'login');
+            expect(auditLogService.log).toHaveBeenCalledWith(undefined, 'USER_LOGIN_FAILED', messageParams, 'MODULE_LABEL_LOGIN_KEY');
         });
 
         it('should not audit log the login attempt if logging is disabled', function () {

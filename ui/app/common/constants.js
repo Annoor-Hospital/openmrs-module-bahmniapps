@@ -5,19 +5,17 @@ Bahmni.Common = Bahmni.Common || {};
 
 (function () {
     var hostUrl = localStorage.getItem('host') ? ("https://" + localStorage.getItem('host')) : "";
-    var offlineRootDir = localStorage.getItem('offlineRootDir') || "";
+    var rootDir = localStorage.getItem('rootDir') || "";
     var RESTWS = hostUrl + "/openmrs/ws/rest";
     var RESTWS_V1 = hostUrl + "/openmrs/ws/rest/v1";
     var BAHMNI_CORE = RESTWS_V1 + "/bahmnicore";
+    var BAHMNI_COMMONS = RESTWS_V1 + "/bahmni";
     var EMRAPI = RESTWS + "/emrapi";
     var BACTERIOLOGY = RESTWS_V1;
     var BASE_URL = hostUrl + "/bahmni_config/openmrs/apps/";
     var CUSTOM_URL = hostUrl + "/implementation_config/openmrs/apps/";
-    var CUSTOM_LOCALE_URL = hostUrl + "/bahmni_config/openmrs/i18n/";
-    var syncButtonConfiguration = {
-        delay: 1000,
-        repeat: 1
-    };
+    var IE_APPS_API = RESTWS_V1 + "/bahmniie";
+    var FHIR_BASE_URL = hostUrl + "/openmrs/ws/fhir2/R4";
 
     var serverErrorMessages = [
         {
@@ -29,19 +27,6 @@ Bahmni.Common = Bahmni.Common || {};
             clientMessage: "One or more drugs you are trying to order are already active. Please change the start date of the conflicting drug or remove them from the new prescription."
         }
     ];
-
-    var offlineErrorMessages = {
-        networkError: "The network connectivity is bad and not able to connect to the server. Please ensure minimum network condition to sync the device",
-        openmrsServerError: "OpenMRS is down and the device not able to communicate to the server. Please make sure the server is up before Syncing the device",
-        openmrsServerDownError: "OpenMRS is down and the device not able to communicate to the server. Please ensure the server is up for the first time login and setup.",
-        networkErrorForFirstTimeLogin: "The device is not connected to the internet. Please ensure minimal connectivity for the first time login and setup."
-    };
-
-    var syncStatusMessages = {
-        syncFailed: "Sync Failed, Press sync button to try again",
-        syncSuccess: "Data Synced Successfully",
-        syncPending: "Sync Pending, Press Sync button to Sync"
-    };
 
     var representation = "custom:(uuid,name,names,conceptClass," +
         "setMembers:(uuid,name,names,conceptClass," +
@@ -86,23 +71,28 @@ Bahmni.Common = Bahmni.Common || {};
         timeDisplayFormat: "hh:mm",
         emrapiDiagnosisUrl: EMRAPI + "/diagnosis",
         bahmniDiagnosisUrl: BAHMNI_CORE + "/diagnosis/search",
+        emrapiDiagnosisLimit: Bahmni.Common.Constants && Bahmni.Common.Constants.emrapiDiagnosisLimit || 20,
         bahmniDeleteDiagnosisUrl: BAHMNI_CORE + "/diagnosis/delete",
         diseaseTemplateUrl: BAHMNI_CORE + "/diseaseTemplates",
         AllDiseaseTemplateUrl: BAHMNI_CORE + "/diseaseTemplate",
         emrapiConceptUrl: EMRAPI + "/concept",
+        bahmniapiConceptUrl: BAHMNI_COMMONS + "/terminologies/concepts",
         encounterConfigurationUrl: BAHMNI_CORE + "/config/bahmniencounter",
         patientConfigurationUrl: BAHMNI_CORE + "/config/patient",
         drugOrderConfigurationUrl: BAHMNI_CORE + "/config/drugOrders",
         emrEncounterUrl: EMRAPI + "/encounter",
         encounterUrl: RESTWS_V1 + "/encounter",
+        cdssUrl: RESTWS_V1 + "/cdss",
+        fhirMedicationsUrl: FHIR_BASE_URL + "/Medication",
         locationUrl: RESTWS_V1 + "/location",
         bahmniVisitLocationUrl: BAHMNI_CORE + "/visitLocation",
+        bahmniFacilityLocationUrl: BAHMNI_CORE + "/facilityLocation",
         bahmniOrderUrl: BAHMNI_CORE + "/orders",
-        pacsUrl: hostUrl + "/openmrs/module/pacsquery/query.form",
         bahmniDrugOrderUrl: BAHMNI_CORE + "/drugOrders",
-        bahmniDispositionByVisitUrl: BAHMNI_CORE + "/disposition/visit",
-        bahmniDispositionByPatientUrl: BAHMNI_CORE + "/disposition/patient",
+        bahmniDispositionByVisitUrl: BAHMNI_CORE + "/disposition/visitWithLocale",
+        bahmniDispositionByPatientUrl: BAHMNI_CORE + "/disposition/patientWithLocale",
         bahmniSearchUrl: BAHMNI_CORE + "/search",
+        bahmniCommonsSearchUrl: BAHMNI_COMMONS + "/search",
         bahmniLabOrderResultsUrl: BAHMNI_CORE + "/labOrderResults",
         bahmniEncounterUrl: BAHMNI_CORE + "/bahmniencounter",
         conceptUrl: RESTWS_V1 + "/concept",
@@ -123,12 +113,14 @@ Bahmni.Common = Bahmni.Common || {};
         observationsUrl: BAHMNI_CORE + "/observations",
         obsRelationshipUrl: BAHMNI_CORE + "/obsrelationships",
         encounterImportUrl: BAHMNI_CORE + "/admin/upload/encounter",
+        form2encounterImportUrl: BAHMNI_CORE + "/admin/upload/form2encounter",
         programImportUrl: BAHMNI_CORE + "/admin/upload/program",
         conceptImportUrl: BAHMNI_CORE + "/admin/upload/concept",
         conceptSetImportUrl: BAHMNI_CORE + "/admin/upload/conceptset",
         drugImportUrl: BAHMNI_CORE + "/admin/upload/drug",
         labResultsImportUrl: BAHMNI_CORE + "/admin/upload/labResults",
         referenceTermsImportUrl: BAHMNI_CORE + "/admin/upload/referenceterms",
+        updateReferenceTermsImportUrl: BAHMNI_CORE + "/admin/upload/referenceterms/new",
         relationshipImportUrl: BAHMNI_CORE + "/admin/upload/relationship",
         conceptSetExportUrl: BAHMNI_CORE + "/admin/export/conceptset?conceptName=:conceptName",
         patientImportUrl: BAHMNI_CORE + "/admin/upload/patient",
@@ -196,9 +188,9 @@ Bahmni.Common = Bahmni.Common || {};
         locationPickerPrivilege: 'app:clinical:locationpicker',
         onBehalfOfPrivilege: 'app:clinical:onbehalf',
         nutritionalConceptName: 'Nutritional Values',
-        messageForNoObservation: "No observations captured for this visit.",
+        messageForNoObservation: "NO_OBSERVATIONS_CAPTURED",
         messageForNoDisposition: "NO_DISPOSTIONS_AVAILABLE_MESSAGE_KEY",
-        messageForNoFulfillment: "No observations captured for this order.",
+        messageForNoFulfillment: "NO_FULFILMENT_MESSAGE",
         reportsUrl: "/bahmnireports",
         uploadReportTemplateUrl: "/bahmnireports/upload",
         ruledOutdiagnosisStatus: "Ruled Out Diagnosis",
@@ -211,12 +203,12 @@ Bahmni.Common = Bahmni.Common || {};
         addVisitsPrivilege: 'Add Visits',
         deleteVisitsPrivilege: 'Delete Visits',
         grantProviderAccess: "app:clinical:grantProviderAccess",
-        grantProviderAccessDataCookieName: "app:clinical:grantProviderAccessData",
+        grantProviderAccessDataCookieName: "app.clinical.grantProviderAccessData",
         globalPropertyUrl: BAHMNI_CORE + "/sql/globalproperty",
         passwordPolicyUrl: BAHMNI_CORE + "/globalProperty/passwordPolicyProperties",
         fulfillmentConfiguration: "fulfillment",
         fulfillmentFormSuffix: " Fulfillment Form",
-        noNavigationLinksMessage: "No navigation links available.",
+        noNavigationLinksMessage: "NO_NAVIGATION_LINKS_AVAILABLE_MESSAGE",
         conceptSetRepresentationForOrderFulfillmentConfig: representation,
         entityMappingUrl: RESTWS_V1 + "/entitymapping",
         encounterTypeUrl: RESTWS_V1 + "/encountertype",
@@ -226,6 +218,7 @@ Bahmni.Common = Bahmni.Common || {};
         primaryOrderSetMemberAttributeTypeName: "Primary",
         bahmniBacteriologyResultsUrl: BACTERIOLOGY + "/specimen",
         bedFromVisit: RESTWS_V1 + "/beds",
+        sendViaEmailUrl: RESTWS_V1 + "/patient/{{patientUuid}}/send/email",
         ordersUrl: RESTWS_V1 + "/order",
         formDataUrl: RESTWS_V1 + "/obs",
         providerUrl: RESTWS_V1 + "/provider",
@@ -236,22 +229,15 @@ Bahmni.Common = Bahmni.Common || {};
         formUrl: RESTWS_V1 + "/form",
         allFormsUrl: RESTWS_V1 + "/bahmniie/form/allForms",
         latestPublishedForms: RESTWS_V1 + "/bahmniie/form/latestPublishedForms",
+        formTranslationsUrl: RESTWS_V1 + "/bahmniie/form/translations",
         sqlUrl: BAHMNI_CORE + "/sql",
         patientAttributeDateFieldFormat: "org.openmrs.util.AttributableDate",
         platform: "user.platform",
         RESTWS_V1: RESTWS_V1,
         baseUrl: BASE_URL,
         customUrl: CUSTOM_URL,
-        customLocaleUrl: CUSTOM_LOCALE_URL,
-        addressEventLogServiceUrl: hostUrl + "/event-log-service/rest/eventlog/getAddressHierarchyEvents",
-        eventLogServiceUrl: hostUrl + "/event-log-service/rest/eventlog/events",
-        eventLogServiceConceptUrl: hostUrl + "/event-log-service/rest/eventlog/concepts",
-        offlineMetadataUrl: hostUrl + "/offlineMetadata.json",
         faviconUrl: hostUrl + "/bahmni/favicon.ico",
         platformType: {
-            chrome: 'other',
-            android: 'other',
-            chromeApp: 'other',
             other: 'other'
         },
         numericDataType: "Numeric",
@@ -264,14 +250,9 @@ Bahmni.Common = Bahmni.Common || {};
         calculateDose: BAHMNI_CORE + "/calculateDose",
         unAuthenticatedReferenceDataMap: unAuthenticatedReferenceDataMap,
         authenticatedReferenceDataMap: authenticatedReferenceDataMap,
-        offlineRootDir: offlineRootDir,
+        rootDir: rootDir,
         dischargeUrl: BAHMNI_CORE + "/discharge",
-        newOfflineVisitUuid: "newOfflineVisitUuid",
-        offlineErrorMessages: offlineErrorMessages,
-        syncButtonConfiguration: syncButtonConfiguration,
-        syncStatusMessages: syncStatusMessages,
         uuidRegex: "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
-        offlineBahmniEncounterUrl: "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter/",
         eventlogFilterUrl: hostUrl + "/openmrs/ws/rest/v1/eventlog/filter",
         bahmniConnectMetaDataDb: "metaData",
         serverDateTimeUrl: "/cgi-bin/systemdate",
@@ -282,7 +263,27 @@ Bahmni.Common = Bahmni.Common || {};
         conditionHistoryUrl: EMRAPI + '/conditionhistory',
         followUpConditionConcept: 'Follow-up Condition',
         localeLangs: "/bahmni_config/openmrs/apps/home/locale_languages.json",
-        privilegeRequiredErrorMessage: "User is logged in but doesn't have the relevant privilege"
+        privilegeRequiredErrorMessage: "PRIVILEGE_REQUIRED",
+        patientFormsUrl: BAHMNI_CORE + "/patient/{patientUuid}/forms",
+        defaultPossibleRelativeSearchLimit: 10,
+        formBuilderDisplayControlType: "formsV2",
+        formBuilderType: "v2",
+        formBuilderTranslationApi: IE_APPS_API + '/form/translate',
+        disposition: "DISPOSITION",
+        registration: "REGISTRATION",
+        clinical: "CLINICAL",
+        diagnosis: "DIAGNOSIS",
+        ot: "OT",
+        patientAttribute: "PATIENT_ATTRIBUTE",
+        program: "PROGRAM",
+        visitType: "VISIT_TYPE",
+        bedmanagement: "BEDMANAGEMENT",
+        bedmanagementDisposition: "BEDMANAGEMENT_DISPOSITION",
+        loginConfig: "/bahmni_config/openmrs/apps/home/login_config.json",
+        visit: "VISIT",
+        defaultImageUploadSize: 500000, // Default patient profile photo size
+        maxImageUploadSize: 9000000, // to ensure, extreme max size and prevent choking up server capacity (max size is 9MB)
+        adhocTeleconsultationLinkServiceUrl: RESTWS_V1 + "/adhocTeleconsultation/generateAdhocTeleconsultationLink"
     };
 })();
 

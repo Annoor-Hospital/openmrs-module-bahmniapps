@@ -1,5 +1,3 @@
-*.tar.gz
-*.sh
 .DS_Store
 nbproject
 manifest.mf
@@ -14,8 +12,6 @@ output
 .sass-cache
 ui/.css/
 .tmp
-ui/app.tar.gz
-ui/howtoput.txt
 ui/node_modules
 ui/app/components
 ui/dist
@@ -32,4 +28,3 @@ node_modules
 *.tern-port
 **/.idea/*
 ui/common.background.min.js
-ui/common.offline.min.js

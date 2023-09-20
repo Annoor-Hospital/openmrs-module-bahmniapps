@@ -292,7 +292,6 @@ u, .add-drug-btninput[value]:first-letter {
   position: relative;
   @media (max-width : 768px){
     margin: 20px 0;
-    float: left;
     width: 100%;
   }
   &:before{
@@ -346,7 +345,7 @@ u, .add-drug-btninput[value]:first-letter {
   background-color: #ffffff;
 }
 
-.video{
+.video, .video-dialog{
   width:280px;
   height: 190px;
   display: table;
@@ -376,3 +375,6 @@ u, .add-drug-btninput[value]:first-letter {
   position: relative;
   min-height: 2em;
 }
+.ngdialog.ngdialog-theme-default .ngdialog-close {
+      z-index: 999;
+    }

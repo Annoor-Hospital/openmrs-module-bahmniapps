@@ -3,10 +3,20 @@
 angular.module('bahmni.common.displaycontrol.bacteriologyresults')
     .directive('bacteriologyResultsControl', ['bacteriologyResultsService', 'appService', '$q', 'spinner', '$filter', 'ngDialog',
         'bacteriologyTabInitialization', '$controller', 'consultationInitialization', 'messagingService', '$rootScope', '$translate',
+        'encounterService', 'observationsService', 'auditLogService', '$state',
         function (bacteriologyResultsService, appService, $q, spinner, $filter, ngDialog, bacteriologyTabInitialization, $controller,
-                  consultationInitialization, messagingService, $rootScope, $translate) {
+                  consultationInitialization, messagingService, $rootScope, $translate, encounterService, observationsService, auditLogService, $state) {
             var controller = function ($scope) {
                 var shouldPromptBeforeClose = true;
+
+                var expandAllSpecimensIfDashboardIsBeingPrinted = function () {
+                    if ($rootScope.isBeingPrinted) {
+                        _.each($scope.specimens, function (specimen) {
+                            specimen.isOpen = true;
+                        });
+                    }
+                };
+
                 var init = function () {
                     $scope.title = "bacteriology results";
                     var params = {
@@ -17,6 +27,7 @@ angular.module('bahmni.common.displaycontrol.bacteriologyresults')
                         $scope.bacteriologyTabData = data;
                         bacteriologyResultsService.getBacteriologyResults(params).then(function (response) {
                             handleResponse(response);
+                            expandAllSpecimensIfDashboardIsBeingPrinted();
                         });
                     });
                     return $scope.initializationPromise;
@@ -38,10 +49,12 @@ angular.module('bahmni.common.displaycontrol.bacteriologyresults')
                         _.forEach($scope.observations, function (observation) {
                             $scope.specimens.push(specimenMapper.mapObservationToSpecimen(observation, $scope.allSamples, conceptsConfig, dontSortByObsDateTime));
                         });
+                    } else {
+                        $scope.specimens = [];
                     }
 
                     $scope.isDataPresent = function () {
-                        if (!$scope.specimens) {
+                        if (!$scope.specimens || !$scope.specimens.length) {
                             return $scope.$emit("no-data-present-event") && false;
                         }
                         return true;
@@ -88,22 +101,34 @@ angular.module('bahmni.common.displaycontrol.bacteriologyresults')
                     specimen.hasIllegalDateCollected = !specimen.dateCollected;
                     specimen.hasIllegalType = !specimen.type;
                     specimen.hasIllegalTypeFreeText = !specimen.typeFreeText;
-
                     if (specimen.isDirty()) {
                         messagingService.showMessage('error', "{{'CLINICAL_FORM_ERRORS_MESSAGE_KEY' | translate }}");
                     } else {
                         shouldPromptBeforeClose = false;
                         var specimenMapper = new Bahmni.Clinical.SpecimenMapper();
                         specimen.voidIfEmpty();
-                        $scope.saveBacteriologyResultsPromise = bacteriologyResultsService.saveBacteriologyResults(specimenMapper.mapSpecimenToObservation(specimen));
 
-                        $scope.saveBacteriologyResultsPromise.then(function () {
-                            if (!$rootScope.hasVisitedConsultation) {
-                                window.onbeforeunload = null;
-                            }
-                            $rootScope.hasVisitedConsultation = false;
-                            ngDialog.close();
-                            messagingService.showMessage('info', "{{'CLINICAL_SAVE_SUCCESS_MESSAGE_KEY' | translate}}");
+                        observationsService.getByUuid(specimen.existingObs).then(function (response) {
+                            encounterService.findByEncounterUuid(response.data.encounterUuid).then(function (response) {
+                                $scope.encounter = response.data;
+                                $scope.encounter.observations = [];
+                                $scope.encounter.extensions = {mdrtbSpecimen: [specimenMapper.mapSpecimenToObservation(specimen)]};
+                                var createPromise = encounterService.create($scope.encounter);
+                                spinner.forPromise(createPromise).then(function (savedResponse) {
+                                    var messageParams = {
+                                        encounterUuid: savedResponse.data.encounterUuid,
+                                        encounterType: savedResponse.data.encounterType
+                                    };
+                                    auditLogService.log($scope.patient.uuid, "EDIT_ENCOUNTER", messageParams, "MODULE_LABEL_CLINICAL_KEY");
+                                    if (!$rootScope.hasVisitedConsultation) {
+                                        window.onbeforeunload = null;
+                                    }
+                                    $rootScope.hasVisitedConsultation = false;
+                                    $state.go($state.current, {}, {reload: true});
+                                    ngDialog.close();
+                                    messagingService.showMessage('info', "{{'CLINICAL_SAVE_SUCCESS_MESSAGE_KEY' | translate}}");
+                                });
+                            });
                         });
                     }
                 };

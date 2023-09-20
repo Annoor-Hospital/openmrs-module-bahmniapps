@@ -82,36 +82,69 @@ describe('DateUtil', function () {
         });
 
         describe('when fromDate is february', function () {
+            it("should calculate difference between dates when fromDate and toDate is leap year", function () {
+                var fromDate = new Date();
+                fromDate.setDate(28);
+                fromDate.setMonth(1);
+                fromDate.setFullYear(2000);
+                var toDate = new Date();
+                toDate.setDate(2);
+                toDate.setMonth(1);
+                toDate.setFullYear(2020);
+                var period = dateUtil.diffInYearsMonthsDays(fromDate, toDate);
+
+                expect(period.years).toBe(19);
+                expect(period.months).toBe(11);
+                expect(period.days).toBe(3);
+            });
+
+            it("should calculate difference between dates when fromDate and toDate is non-leap year", function () {
+                var fromDate = new Date();
+                fromDate.setDate(26);
+                fromDate.setMonth(1);
+                fromDate.setFullYear(2011);
+                var toDate = new Date();
+                toDate.setDate(2);
+                toDate.setMonth(1);
+                toDate.setFullYear(2023);
+                var period = dateUtil.diffInYearsMonthsDays(fromDate, toDate);
+
+                expect(period.years).toBe(11);
+                expect(period.months).toBe(11);
+                expect(period.days).toBe(4);
+            });
+
             it("should calculate difference between dates when fromDate is non-leap year", function () {
                 var fromDate = new Date();
                 fromDate.setDate(26);
                 fromDate.setMonth(1);
                 fromDate.setFullYear(2011);
                 var toDate = new Date();
-                toDate.setDate(15);
-                toDate.setMonth(2);
-                toDate.setFullYear(2011);
+                toDate.setDate(29);
+                toDate.setMonth(1);
+                toDate.setFullYear(2020);
                 var period = dateUtil.diffInYearsMonthsDays(fromDate, toDate);
 
-                expect(period.years).toBe(0);
+                expect(period.years).toBe(9);
                 expect(period.months).toBe(0);
-                expect(period.days).toBe(17);
+                expect(period.days).toBe(3);
             });
 
             it("should calculate difference between dates when fromDate is leap year", function () {
                 var fromDate = new Date();
-                fromDate.setDate(26);
+                fromDate.setDate(25);
                 fromDate.setMonth(1);
-                fromDate.setFullYear(2012);
+                fromDate.setFullYear(2000);
                 var toDate = new Date();
-                toDate.setDate(15);
+                toDate.setDate(2);
                 toDate.setMonth(2);
-                toDate.setFullYear(2012);
+                toDate.setFullYear(2023);
+
                 var period = dateUtil.diffInYearsMonthsDays(fromDate, toDate);
 
-                expect(period.years).toBe(0);
+                expect(period.years).toBe(23);
                 expect(period.months).toBe(0);
-                expect(period.days).toBe(18);
+                expect(period.days).toBe(6);
             });
         });
 
@@ -341,5 +374,27 @@ describe('DateUtil', function () {
             expect(dateUtil.getDateTimeInSpecifiedFormat(undefined, "dddd, MMMM Do YYYY, HH:mm:ss")).toBe(null);
         })
 
+    });
+
+    describe("subtractISOWeekdays", function () {
+        it("should return weekday 1(Monday) when given weekday(Tuesday) subtracted to 1 weekday", function () {
+            expect(dateUtil.subtractISOWeekDays('2020-03-10T10:36:21.310', 1)).toBe(1);
+        });
+        it("should return weekday 3(Wednesday) when given weekday(Tuesday) subtracted to 6 weekdays", function () {
+            expect(dateUtil.subtractISOWeekDays('2020-03-10T10:36:21.310', 6)).toBe(3);
+        });
+        it("should return same weekday when number of days to subtract is undefined", function () {
+            expect(dateUtil.subtractISOWeekDays('2020-03-10T10:36:21.310', undefined)).toBe(2);
+        });
+    });
+    describe("getWeekStartDate", function () {
+        it("should return day code as 1 when start of week is passed as 1 (Monday) for given date 2020-03-10 (Tuesday)", function () {
+            expect(dateUtil.getWeekStartDate('2020-03-10T10:36:21.310', 1).getDay()).toBe(1);
+        })
+    });
+    describe("getWeekEndDate", function () {
+        it("should return the week end date for the given week start date", function () {
+            expect(dateUtil.getWeekEndDate('2020-03-10T10:36:21.310').getDate()).toBe(16);
+        });
     });
 });

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('bahmni.common.conceptSet')
-    .directive('imageUpload', ['visitDocumentService', 'messagingService', 'spinner', function (visitDocumentService, messagingService, spinner) {
+    .directive('imageUpload', ['visitDocumentService', 'messagingService', 'spinner', '$translate', function (visitDocumentService, messagingService, spinner, $translate) {
         var link = function (scope, element) {
             element.bind("change", function () {
                 var file = element[0].files[0];
@@ -14,11 +14,12 @@ angular.module('bahmni.common.conceptSet')
                             scope.url = response.data.url;
                             element.val(null);
                             if (fileType !== "video") {
+                                scope.observation.conceptUIConfig.required = false;
                                 cloneNew(scope.observation, scope.rootObservation);
                             }
                         }));
                     } else {
-                        messagingService.showMessage("error", "File type is not supported");
+                        messagingService.showMessage("error", $translate.instant("FILE_TYPE_NOT_SUPPORTED_MESSAGE"));
                         if (!scope.$$phase) {
                             scope.$apply();
                         }
@@ -32,7 +33,7 @@ angular.module('bahmni.common.conceptSet')
                 newObs.scrollToElement = true;
                 var index = parentObservation.groupMembers.indexOf(observation);
                 parentObservation.groupMembers.splice(index + 1, 0, newObs);
-                messagingService.showMessage("info", "A new " + observation.label + " section has been added");
+                messagingService.showMessage("info", $translate.instant("NEW_KEY") + " " + observation.label + " " + $translate.instant("SECTION_ADDED_KEY"));
                 scope.$root.$broadcast("event:addMore", newObs);
             };
         };

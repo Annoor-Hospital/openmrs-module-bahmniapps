@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.displaycontrol.programs')
-    .directive('programs', ['programService', '$state', 'spinner',
-        function (programService, $state, spinner) {
+    .directive('programs', ['programService', '$state', 'spinner', '$translate',
+        function (programService, $state, spinner, $translate) {
             var controller = function ($scope) {
                 $scope.initialization = programService.getPatientPrograms($scope.patient.uuid, true, $state.params.enrollment).then(function (patientPrograms) {
                     if (_.isEmpty(patientPrograms.activePrograms) && _.isEmpty(patientPrograms.endedPrograms)) {
@@ -46,11 +46,23 @@ angular.module('bahmni.common.displaycontrol.programs')
                         return attribute.value;
                     }
                 };
+                $scope.isIncluded = function (attributeType, program) {
+                    return !(program.program && _.includes(attributeType.excludeFrom, program.program.name));
+                };
                 var isDateFormat = function (format) {
                     return format == "org.openmrs.customdatatype.datatype.DateDatatype";
                 };
                 var isCodedConceptFormat = function (format) {
                     return format == "org.bahmni.module.bahmnicore.customdatatype.datatype.CodedConceptDatatype";
+                };
+                $scope.translateProgram = function (program) {
+                    var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(program, Bahmni.Common.Constants.program, $translate);
+                    return translatedName;
+                };
+
+                $scope.translateProgramAttributes = function (program) {
+                    var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(program.description, Bahmni.Common.Constants.program, $translate);
+                    return translatedName;
                 };
             };
 

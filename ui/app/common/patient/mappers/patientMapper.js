@@ -12,10 +12,9 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
     this.mapBasic = function (openmrsPatient) {
         var patient = {};
         patient.uuid = openmrsPatient.uuid;
-        patient.givenName  = openmrsPatient.person.preferredName.givenName;
-        patient.middleName = openmrsPatient.person.preferredName.middleName;
-        patient.familyName = openmrsPatient.person.preferredName.familyName;
-        patient.name = [patient.givenName, patient.middleName, patient.familyName].filter(x=>x!==null).join(' ');
+        patient.givenName = openmrsPatient.person.preferredName.givenName;
+        patient.familyName = openmrsPatient.person.preferredName.familyName === null ? '' : openmrsPatient.person.preferredName.familyName;
+        patient.name = patient.givenName + ' ' + patient.familyName;
         patient.age = openmrsPatient.person.age;
         patient.ageText = calculateAge(Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthdate));
         patient.gender = openmrsPatient.person.gender;
@@ -24,20 +23,14 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
         patient.birthdateEstimated = openmrsPatient.person.birthdateEstimated;
         patient.birthtime = Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthtime);
         patient.bloodGroupText = getPatientBloodGroupText(openmrsPatient);
-        patient.localName = getPatientLocalName(openmrsPatient);
 
         if (openmrsPatient.identifiers) {
             var primaryIdentifier = openmrsPatient.identifiers[0].primaryIdentifier;
             patient.identifier = primaryIdentifier ? primaryIdentifier : openmrsPatient.identifiers[0].identifier;
-            patient.extraIdentifiers = [];
-            for (var i = 0; i < openmrsPatient.identifiers.length; i++) {
-                if (openmrsPatient.identifiers[i].identifier != patient.identifier) {
-                    patient.extraIdentifiers.push({
-                        "type": openmrsPatient.identifiers[i].identifierType.display,
-                        "value": openmrsPatient.identifiers[i].identifier
-                    });
-                }
-            }
+        }
+
+        if (openmrsPatient.identifiers && openmrsPatient.identifiers.length > 1) {
+            patient.additionalIdentifiers = parseIdentifiers(openmrsPatient.identifiers.slice(1));
         }
 
         if (openmrsPatient.person.birthdate) {
@@ -94,8 +87,8 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
             "address3": preferredAddress.address3,
             "cityVillage": preferredAddress.cityVillage,
             "countyDistrict": preferredAddress.countyDistrict === null ? '' : preferredAddress.countyDistrict,
-            "country": preferredAddress.country === null ? '' : preferredAddress.country,
-            "stateProvince": preferredAddress.stateProvince
+            "stateProvince": preferredAddress.stateProvince,
+            "postalCode": preferredAddress.postalCode ? preferredAddress.postalCode : ""
         } : {};
     };
 
@@ -104,6 +97,17 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
             return Bahmni.Common.Util.DateUtil.parse(dateStr.substr(0, 10));
         }
         return dateStr;
+    };
+
+    var parseIdentifiers = function (identifiers) {
+        var parseIdentifiers = {};
+        identifiers.forEach(function (identifier) {
+            if (identifier.identifierType) {
+                var label = identifier.identifierType.display;
+                parseIdentifiers[label] = {"label": label, "value": identifier.identifier};
+            }
+        });
+        return parseIdentifiers;
     };
 
     var mapGenderText = function (genderChar) {
@@ -126,33 +130,6 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
             });
             if (bloodGroup) {
                 return "<span>" + bloodGroup + "</span>";
-            }
-        }
-    };
-
-    var getPatientLocalName = function (openmrsPatient) {
-        if (openmrsPatient.person.localName) {
-            return openmrsPatient.person.localName;
-        }
-        if (openmrsPatient.person.attributes && openmrsPatient.person.attributes.length > 0) {
-            var n1, n2, n3, n4;
-            _.forEach(openmrsPatient.person.attributes, function (attribute) {
-                if (attribute.attributeType.display == "givenNameLocal") {
-                    n1 = attribute.value;
-                }
-                if (attribute.attributeType.display == "middleNameLocal") {
-                    n2 = attribute.value;
-                }
-                if (attribute.attributeType.display == "grandfatherNameLocal") {
-                    n3 = attribute.value;
-                }
-                if (attribute.attributeType.display == "familyNameLocal") {
-                    n4 = attribute.value;
-                }
-            });
-            var localName = [n1, n2, n3, n4].filter(function (n) { return n != undefined; }).join(' ');
-            if (localName) {
-                return localName;
             }
         }
     };

@@ -3,10 +3,10 @@
 angular.module('bahmni.registration')
     .directive('patientAction', ['$window', '$location', '$state', 'spinner', '$rootScope', '$stateParams',
         '$bahmniCookieStore', 'appService', 'visitService', 'sessionService', 'encounterService',
-        'messagingService', '$translate', 'offlineService', 'auditLogService',
+        'messagingService', '$translate', 'auditLogService',
         function ($window, $location, $state, spinner, $rootScope, $stateParams,
-                  $bahmniCookieStore, appService, visitService, sessionService, encounterService,
-                  messagingService, $translate, offlineService, auditLogService) {
+            $bahmniCookieStore, appService, visitService, sessionService, encounterService,
+            messagingService, $translate, auditLogService) {
             var controller = function ($scope) {
                 var self = this;
                 var uuid = $stateParams.patientUuid;
@@ -17,8 +17,7 @@ angular.module('bahmni.registration')
                 defaultVisitType = defaultVisitType || appService.getAppDescriptor().getConfigValue('defaultVisitType');
                 var showStartVisitButton = appService.getAppDescriptor().getConfigValue("showStartVisitButton");
                 var forwardUrlsForVisitTypes = appService.getAppDescriptor().getConfigValue("forwardUrlsForVisitTypes");
-                showStartVisitButton = showStartVisitButton || true;
-                var isOfflineApp = offlineService.isOfflineApp();
+                showStartVisitButton = (_.isUndefined(showStartVisitButton) || _.isNull(showStartVisitButton)) ? true : showStartVisitButton;
                 var visitLocationUuid = $rootScope.visitLocation;
                 var forwardUrls = forwardUrlsForVisitTypes || false;
 
@@ -45,9 +44,7 @@ angular.module('bahmni.registration')
                 };
 
                 function setForwardActionKey () {
-                    if (editActionsConfig.length === 0 && isOfflineApp) {
-                        $scope.forwardActionKey = conceptSetExtensions.length === 0 ? undefined : 'enterVisitDetails';
-                    } else if (editActionsConfig.length === 0) {
+                    if (editActionsConfig.length === 0) {
                         $scope.forwardActionKey = self.hasActiveVisit ? (getForwardUrlEntryForVisitFromTheConfig() ? keyForActiveVisitEntry() : 'enterVisitDetails') : 'startVisit';
                     } else {
                         $scope.actionConfig = editActionsConfig[0];
@@ -75,7 +72,6 @@ angular.module('bahmni.registration')
                             });
                         }
                         self.hasActiveVisit = activeVisitForCurrentLoginLocation && (activeVisitForCurrentLoginLocation.length > 0);
-                        self.hasActiveVisit = self.hasActiveVisit ? self.hasActiveVisit : (isOfflineApp ? true : false);
                         if (self.hasActiveVisit) {
                             self.activeVisit = activeVisitForCurrentLoginLocation[0];
                         }
@@ -142,6 +138,16 @@ angular.module('bahmni.registration')
                     return _.isEmpty($rootScope.visitLocation);
                 };
 
+                var checkIfActiveVisitExists = function (patientProfileData) {
+                    return $scope.visitControl.checkIfActiveVisitExists(patientProfileData.patient.uuid, $rootScope.visitLocation).then(function (response) {
+                        var checkExists = response.data.results.length;
+                        if (checkExists === 0) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    });
+                };
                 var createVisit = function (patientProfileData, forwardUrl) {
                     if (isEmptyVisitLocation()) {
                         $state.go('patient.edit', {patientUuid: $scope.patient.uuid}).then(function () {
@@ -149,17 +155,21 @@ angular.module('bahmni.registration')
                         });
                         return;
                     }
-                    spinner.forPromise($scope.visitControl.createVisitOnly(patientProfileData.patient.uuid, $rootScope.visitLocation).then(function (response) {
-                        auditLogService.log(patientProfileData.patient.uuid, "OPEN_VISIT", {visitUuid: response.data.uuid, visitType: response.data.visitType.display}, 'MODULE_LABEL_REGISTRATION_KEY');
-                        if (forwardUrl) {
-                            var updatedForwardUrl = appService.getAppDescriptor().formatUrl(forwardUrl, {'patientUuid': patientProfileData.patient.uuid});
-                            $window.location.href = updatedForwardUrl;
-                        } else {
-                            goToVisitPage(patientProfileData);
-                        }
-                    }, function () {
-                        $state.go('patient.edit', {patientUuid: $scope.patient.uuid});
-                    }));
+                    checkIfActiveVisitExists(patientProfileData).then(function (exists) {
+                        if (exists) return messagingService.showMessage("error", "VISIT_OF_THIS_PATIENT_AT_SAME_LOCATION_EXISTS");
+
+                        spinner.forPromise($scope.visitControl.createVisitOnly(patientProfileData.patient.uuid, $rootScope.visitLocation).then(function (response) {
+                            auditLogService.log(patientProfileData.patient.uuid, "OPEN_VISIT", { visitUuid: response.data.uuid, visitType: response.data.visitType.display }, 'MODULE_LABEL_REGISTRATION_KEY');
+                            if (forwardUrl) {
+                                var updatedForwardUrl = appService.getAppDescriptor().formatUrl(forwardUrl, { 'patientUuid': patientProfileData.patient.uuid });
+                                $window.location.href = updatedForwardUrl;
+                            } else {
+                                goToVisitPage(patientProfileData);
+                            }
+                        }, function () {
+                            $state.go('patient.edit', { patientUuid: $scope.patient.uuid });
+                        }));
+                    });
                 };
 
                 init();

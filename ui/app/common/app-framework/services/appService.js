@@ -4,13 +4,13 @@ angular.module('bahmni.common.appFramework')
     .config(['$compileProvider', function ($compileProvider) {
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|file):/);
     }])
-    .service('appService', ['$http', '$q', 'sessionService', '$rootScope', 'mergeService', 'loadConfigService', 'messagingService',
-        function ($http, $q, sessionService, $rootScope, mergeService, loadConfigService, messagingService) {
+    .service('appService', ['$http', '$q', 'sessionService', '$rootScope', 'mergeService', 'loadConfigService', 'messagingService', '$translate',
+        function ($http, $q, sessionService, $rootScope, mergeService, loadConfigService, messagingService, $translate) {
             var currentUser = null;
             var baseUrl = Bahmni.Common.Constants.baseUrl;
             var customUrl = Bahmni.Common.Constants.customUrl;
             var appDescriptor = null;
-
+            $rootScope.meetId = null;
             var loadConfig = function (url) {
                 return loadConfigService.loadConfig(url, appDescriptor.contextPath);
             };
@@ -136,7 +136,7 @@ angular.module('bahmni.common.appFramework')
                     }
                 }, function (error) {
                     if (error.status !== 404) {
-                        messagingService.showMessage('error', "Incorrect Configuration:  " + error.message);
+                        messagingService.showMessage('error', $translate.instance("INCORRECT_CONFIGURATION_MESSAGE", {error: error.message}));
                         deferrable.reject(error);
                     } else {
                         deferrable.resolve(appDescriptor);
@@ -187,7 +187,7 @@ angular.module('bahmni.common.appFramework')
                 if (hasPrivilegeOf(privilegeName)) {
                     return $q.when(true);
                 }
-                messagingService.showMessage("error", Bahmni.Common.Constants.privilegeRequiredErrorMessage + " [Privileges required: " + privilegeName + "]");
+                messagingService.showMessage("error", $translate.instant(Bahmni.Common.Constants.privilegeRequiredErrorMessage) + " [Privileges required: " + privilegeName + "]");
                 return $q.reject();
             };
 

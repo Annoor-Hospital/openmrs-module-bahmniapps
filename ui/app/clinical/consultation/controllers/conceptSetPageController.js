@@ -45,7 +45,6 @@ angular.module('bahmni.clinical')
                     }));
                 }
             };
-
             var concatObservationForms = function () {
                 $scope.allTemplates = getSelectedObsTemplate(allConceptSections);
                 $scope.uniqueTemplates = _.uniqBy($scope.allTemplates, 'label');
@@ -208,7 +207,11 @@ angular.module('bahmni.clinical')
                 } else {
                     template.toggle();
                     template.klass = "active";
-                    $scope.consultation.selectedObsTemplate.push(template);
+                    if (index > -1) {
+                        $scope.consultation.selectedObsTemplate[index] = template;
+                    } else {
+                        $scope.consultation.selectedObsTemplate.push(template);
+                    }
                 }
                 $scope.consultation.searchParameter = "";
                 messagingService.showMessage("info", $translate.instant("CLINICAL_TEMPLATE_ADDED_SUCCESS_KEY", {label: template.label}));
@@ -224,13 +227,52 @@ angular.module('bahmni.clinical')
                 var forms = [];
                 var observations = $scope.consultation.observations || [];
                 _.each(observationsForms, function (observationForm) {
+                    var extension = _.find(extensions, function (ext) {
+                        return (ext.extensionParams.formName && (observationForm.formName === ext.extensionParams.formName || observationForm.name === ext.extensionParams.formName));
+                    }) || {};
                     var formUuid = observationForm.formUuid || observationForm.uuid;
                     var formName = observationForm.name || observationForm.formName;
                     var formVersion = observationForm.version || observationForm.formVersion;
-                    forms.push(new Bahmni.ObservationForm(formUuid, $rootScope.currentUser, formName, formVersion, observations));
+                    var privileges = observationForm.privileges;
+                    var labels = observationForm.nameTranslation ? JSON.parse(observationForm.nameTranslation) : [];
+                    var label = formName;
+                    if (labels.length > 0) {
+                        var locale = localStorage.getItem("NG_TRANSLATE_LANG_KEY") || "en";
+                        var currentLabel = labels.find(function (label) {
+                            return label.locale === locale;
+                        });
+                        if (currentLabel) { label = currentLabel.display; }
+                    }
+                    if ($scope.isFormEditableByTheUser(observationForm)) {
+                        var newForm = new Bahmni.ObservationForm(formUuid, $rootScope.currentUser,
+                                                                   formName, formVersion, observations, label, extension);
+                        newForm.privileges = privileges;
+                        forms.push(newForm);
+                    }
                 });
+
                 return forms;
             };
+            $scope.isFormEditableByTheUser = function (form) {
+                var result = false;
+                if ((typeof form.privileges != 'undefined') && (form.privileges != null) && (form.privileges.length != 0)) {
+                    form.privileges.forEach(function (formPrivilege) {
+                        _.find($rootScope.currentUser.privileges, function (privilege) {
+                            if (formPrivilege.privilegeName === privilege.name) {
+                                if (formPrivilege.editable) {
+                                    result = formPrivilege.editable;
+                                } else {
+                                    if (formPrivilege.viewable) {
+                                        result = true;
+                                    }
+                                }
+                            }
+                        });
+                    });
+                } else { result = true; }
+                return result;
+            };
+
             // Form Code :: End
             init();
         }]);

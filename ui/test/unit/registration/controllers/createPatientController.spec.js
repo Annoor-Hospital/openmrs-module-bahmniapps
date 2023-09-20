@@ -2,7 +2,7 @@
 
 describe('CreatePatientController', function() {
     var $aController, q, scopeMock, rootScopeMock, stateMock, patientServiceMock, preferencesMock, spinnerMock,
-        appServiceMock, ngDialogMock, ngDialogLocalScopeMock, httpBackend, http, sections, identifiersMock, messagingService;
+        appServiceMock, ngDialogMock, ngDialogLocalScopeMock, httpBackend, http, sections, identifiersMock, messagingService, smsServiceMock;
 
     beforeEach(module('bahmni.registration'));
     beforeEach(module('bahmni.common.models'));
@@ -44,6 +44,7 @@ describe('CreatePatientController', function() {
         spinnerMock = jasmine.createSpyObj('spinnerMock', ['forPromise']);
         appServiceMock = jasmine.createSpyObj('appServiceMock', ['getAppDescriptor']);
         messagingService = jasmine.createSpyObj('messagingService', ['showMessage']);
+        smsServiceMock = jasmine.createSpyObj('smsService', ['smsAlert']);
 
         ngDialogMock = jasmine.createSpyObj('ngDialogMock', ['open', 'close']);
         ngDialogLocalScopeMock = scopeMock;
@@ -72,7 +73,8 @@ describe('CreatePatientController', function() {
                     if (config == 'patientInformation') {
                         return {
                             "defaults": {
-                                "education": "Uneducated"
+                                "education": "Uneducated",
+                                "date": "today"
                             }
                         };
                     }
@@ -102,7 +104,13 @@ describe('CreatePatientController', function() {
                 description: "5th Pass and Below"
             }]
 
-        }];
+            },
+            {
+                uuid: "date-uuid",
+                name: "date",
+                description: "Date Field",
+                format: "org.openmrs.util.AttributableDate"
+            }];
 
         sections =  {
             "additionalPatientInformation": {
@@ -110,6 +118,8 @@ describe('CreatePatientController', function() {
                     name: "education"
                 }, {
                     foo: "bar"
+                }, {
+                    name: "date"
                 }]
             }
         };
@@ -128,8 +138,8 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {},
-            messagingService: messagingService
+            messagingService: messagingService,
+            smsService: smsServiceMock
     });
 
         scopeMock.actions = {
@@ -147,7 +157,7 @@ describe('CreatePatientController', function() {
         };
     });
 
-    it("should populate default fields in registration form", function() {
+    it("should populate default field education in registration form", function() {
 
         $aController('CreatePatientController', {
             $scope: scopeMock,
@@ -158,12 +168,29 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {}
+            smsService: smsServiceMock
         });
 
         expect(scopeMock.patient["education"].conceptUuid).toBe("c2107f30-3f10-11e4-adec-0800271c1b75");
         expect(scopeMock.patient["education"].value).toBe("Uneducated");
 
+    });
+
+    it("should populate default date as today in registration form", function () {
+
+        $aController('CreatePatientController', {
+            $scope: scopeMock,
+            $rootScope: rootScopeMock,
+            $state: stateMock,
+            patientService: patientServiceMock,
+            preferences: preferencesMock,
+            spinner: spinnerMock,
+            appService: appServiceMock,
+            ngDialog: ngDialogMock,
+            smsService: smsServiceMock
+        });
+
+        expect(scopeMock.patient["date"].toLocaleDateString()).toBe(new Date().toLocaleDateString());
     });
 
     it("should expand the section if configured true via config", function() {
@@ -191,7 +218,7 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {}
+            smsService: smsServiceMock
         });
 
         expect(sections["additionalPatientInformation"].expand).toBeTruthy();
@@ -208,7 +235,7 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {}
+            smsService: smsServiceMock
         });
 
         expect(sections["additionalPatientInformation"].expand).toBeTruthy();
@@ -236,7 +263,7 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {}
+            smsService: smsServiceMock
         });
 
         expect(scopeMock.patient["education"]).toBeUndefined();
@@ -264,8 +291,7 @@ describe('CreatePatientController', function() {
                 preferences: preferencesMock,
                 spinner: spinnerMock,
                 appService: appServiceMock,
-                ngDialog: ngDialogMock,
-                offlineService: {}
+                ngDialog: ngDialogMock
             });
 
         expect(scopeMock.patient.address[scopeMock.addressLevels[0].addressField]).toBe("Dhaka");
@@ -489,7 +515,7 @@ describe('CreatePatientController', function() {
             spinner: spinnerMock,
             appService: appServiceMock,
             ngDialog: ngDialogMock,
-            offlineService: {}
+            smsService: smsServiceMock
         });
         expect(scopeMock.disablePhotoCapture).toBeTruthy();
     });

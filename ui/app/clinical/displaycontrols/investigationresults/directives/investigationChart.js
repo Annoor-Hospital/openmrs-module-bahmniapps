@@ -9,7 +9,7 @@ angular.module('bahmni.clinical')
 
             $scope.params = angular.extend(defaultParams, $scope.params);
 
-            $scope.showChart = true;
+            $scope.showChart = false;
 
             $scope.toggleChart = function () {
                 $scope.showChart = !$scope.showChart;

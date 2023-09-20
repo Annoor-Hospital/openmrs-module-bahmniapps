@@ -7,8 +7,8 @@
         <div class="print-header">
             <h1>
                 <img ng-if="tabBeingPrinted.printing.logo" class="logo" ng-src="{{tabBeingPrinted.printing.logo}}" alt="logo">
-                <span ng-bind-html="tabBeingPrinted.printing.title"></span></h1>
-            <h2 ng-bind-html="tabBeingPrinted.printing.header"></h2>
+                {{tabBeingPrinted.printing.title}}</h1>
+            <h2>{{tabBeingPrinted.printing.header}}</h2>
         </div>
         <div ng-include="currentDashboardTemplateUrl"></div>
     </div>

@@ -1,10 +1,9 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('DispositionController', ['$scope', '$q', 'dispositionService', 'retrospectiveEntryService', 'spinner', function ($scope, $q, dispositionService, retrospectiveEntryService, spinner) {
+    .controller('DispositionController', ['$scope', '$state', '$q', 'dispositionService', 'appService', 'retrospectiveEntryService', 'spinner', '$rootScope', '$translate', function ($scope, $state, $q, dispositionService, appService, retrospectiveEntryService, spinner, $rootScope, $translate) {
         var consultation = $scope.consultation;
         var allDispositions = [];
-
         var getPreviousDispositionNote = function () {
             if (consultation.disposition && (!consultation.disposition.voided)) {
                 return _.find(consultation.disposition.additionalObs, function (obs) {
@@ -32,27 +31,34 @@ angular.module('bahmni.clinical')
             });
         };
 
-        var findAction = function (dispositions, action) {
-            var undoDischarge = _.find(dispositions, action);
-            return undoDischarge || {'name': ''};
+        var getDispositionActions = function (finalDispositionActions, dispositions, action) {
+            var copyOfFinalDispositionActions = _.cloneDeep(finalDispositionActions);
+            var dispositionPresent = _.find(dispositions, action);
+            if (dispositionPresent) {
+                copyOfFinalDispositionActions.push(dispositionPresent);
+            }
+            return copyOfFinalDispositionActions;
         };
-
+        $scope.getTranslatedDisposition = function (dispositionName) {
+            var translatedName = Bahmni.Common.Util.TranslationUtil.translateAttribute(dispositionName, Bahmni.Common.Constants.disposition, $translate);
+            return translatedName;
+        };
         var filterDispositionActions = function (dispositions, visitSummary) {
-            var defaultDispositions = ["Undo Discharge", "Admit Patient", "Transfer Patient", "Discharge Patient"];
+            var defaultDispositions = ["UNDO_DISCHARGE", "ADMIT", "TRANSFER", "DISCHARGE"];
+
             var finalDispositionActions = _.filter(dispositions, function (disposition) {
-                return defaultDispositions.indexOf(disposition.name) < 0;
+                return defaultDispositions.indexOf(disposition.code) < 0;
             });
             var isVisitOpen = visitSummary ? _.isEmpty(visitSummary.stopDateTime) : false;
-
             if (visitSummary && visitSummary.isDischarged() && isVisitOpen) {
-                finalDispositionActions.push(findAction(dispositions, {name: "Undo Discharge"}));
+                finalDispositionActions = getDispositionActions(finalDispositionActions, dispositions, { code: defaultDispositions[0]});
             }
             else if (visitSummary && visitSummary.isAdmitted() && isVisitOpen) {
-                finalDispositionActions.push(findAction(dispositions, { name: "Transfer Patient"}));
-                finalDispositionActions.push(findAction(dispositions, { name: "Discharge Patient"}));
+                finalDispositionActions = getDispositionActions(finalDispositionActions, dispositions, { code: defaultDispositions[2]});
+                finalDispositionActions = getDispositionActions(finalDispositionActions, dispositions, { code: defaultDispositions[3]});
             }
             else {
-                finalDispositionActions.push(findAction(dispositions, { name: "Admit Patient"}));
+                finalDispositionActions = getDispositionActions(finalDispositionActions, dispositions, { code: defaultDispositions[1]});
             }
             return finalDispositionActions;
         };
@@ -113,6 +119,16 @@ angular.module('bahmni.clinical')
                 }
             }
         };
+
+        $scope.$on('$stateChangeStart', function () {
+            if ($scope.dispositionForm.$dirty) {
+                $state.dirtyConsultationForm = true;
+            }
+        });
+
+        $scope.$on("event:changes-saved", function () {
+            $scope.dispositionForm.$dirty = false;
+        });
 
         $scope.consultation.preSaveHandler.register("dispositionSaveHandlerKey", saveDispositions);
         $scope.$on('$destroy', saveDispositions);

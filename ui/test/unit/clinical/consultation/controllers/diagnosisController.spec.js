@@ -1,9 +1,8 @@
 describe("Diagnosis Controller", function () {
-    var $scope, rootScope, contextChangeHandler,mockDiagnosisService, spinner, appService, mockAppDescriptor, q, deferred, mockDiagnosisData, translate, retrospectiveEntryService;
+    var $scope, rootScope, contextChangeHandler,mockDiagnosisService, spinner, appService, mockAppDescriptor, q, deferred, mockDiagnosisData, translate, retrospectiveEntryService, $state;
     var DateUtil = Bahmni.Common.Util.DateUtil;
 
     beforeEach(module('bahmni.clinical'));
-    beforeEach(module('bahmni.common.offline'));
 
     beforeEach(inject(function ($controller, $rootScope, $q, diagnosisService) {
         $scope = $rootScope.$new();
@@ -15,6 +14,7 @@ describe("Diagnosis Controller", function () {
             "newlyAddedDiagnoses": [], preSaveHandler: new Bahmni.Clinical.Notifier()
         };
         rootScope.currentUser = {privileges: [{name: "app:clinical:deleteDiagnosis"}, {name: "app:clinical"}]};
+        rootScope.currentUser.userProperties = {defaultLocale: "en"};
 
         spyOn(DateUtil, 'today');
         mockAppDescriptor = jasmine.createSpyObj('appDescriptor', ['getConfig','getConfigValue']);
@@ -26,7 +26,6 @@ describe("Diagnosis Controller", function () {
 
         contextChangeHandler = jasmine.createSpyObj('contextChangeHandler', ['add']);
         spyOn(diagnosisService, 'getDiagnosisConceptSet').and.returnValue(deferred.promise);
-        spyOn(diagnosisService, 'getAllFor').and.returnValue(specUtil.createFakePromise({}));
 
         spinner = jasmine.createSpyObj('spinner', ['forPromise']);
         spinner.forPromise.and.callFake(function (param) {
@@ -36,12 +35,13 @@ describe("Diagnosis Controller", function () {
                 }
             }
         });
-        translate = jasmine.createSpyObj('translate',['']);
+        translate = jasmine.createSpyObj('$translate',['instant']);
 
         retrospectiveEntryService = jasmine.createSpyObj('retrospectiveEntryService', ['isRetrospectiveMode']);
 
         $controller('DiagnosisController', {
             $scope: $scope,
+            $state: $state,
             $rootScope: rootScope,
             contextChangeHandler: contextChangeHandler,
             spinner: spinner,
@@ -86,8 +86,39 @@ describe("Diagnosis Controller", function () {
 
     describe("getDiagnosis()", function () {
         it("should make a call to diagnosis service getAllFor", function () {
-            $scope.getDiagnosis({term:"primary"});
-            expect(mockDiagnosisService.getAllFor).toHaveBeenCalledWith("primary");
+            $scope.getDiagnosis({term:"primary"}).then(function (list) {
+                spyOn(diagnosisService, 'getAllFor').and.returnValue(specUtil.simplePromise({data: [{"conceptName":"Cold, unspec.","conceptUuid":"uuid1","matchedName":null,"code":"T69.9XXA"}]}));
+                expect(mockDiagnosisService.getAllFor).toHaveBeenCalledWith("primary", "en");
+                expect(list.length).toBe(1);
+                expect(list[0].value).toBe("Cold, unspec. (T69.9XXA)");
+                expect(list[0].concept.name).toBe("Cold, unspec.");
+                expect(list[0].concept.uuid).toBe("uuid1");
+                expect(list[0].lookup.name).toBe(undefined);
+            });
+        });
+
+        it("should make a call to diagnosis service getAllFor with synonym", function () {
+            spyOn(mockDiagnosisService, 'getAllFor').and.returnValue(specUtil.simplePromise({data: [{"conceptName":"Cold, unspec.","conceptUuid":"uuid1","matchedName":"Cold xyz","code":"T69.9XXA"}]}));
+            $scope.getDiagnosis({term:"T69.9XXA"}).then(function (list) {
+                expect(mockDiagnosisService.getAllFor).toHaveBeenCalledWith("T69.9XXA", "en");
+                expect(list.length).toBe(1);
+                expect(list[0].value).toBe("Cold xyz => Cold, unspec. (T69.9XXA)");
+                expect(list[0].concept.name).toBe("Cold, unspec.");
+                expect(list[0].concept.uuid).toBe("uuid1");
+                expect(list[0].lookup.name).toBe("Cold xyz");
+            });
+        });
+
+        it("should make a call to diagnosis service getAllFor with concept source code", function () {
+            spyOn(mockDiagnosisService, 'getAllFor').and.returnValue(specUtil.simplePromise({data: [{"conceptName": "Cold, unspec.", "conceptUuid": "uuid1", "matchedName": null, "code": "T69.9XXA", "conceptSystem": "http://snomed.info/sct"}]}));
+            $scope.getDiagnosis({term: "T69.9XXA"}).then(function (list) {
+                expect(mockDiagnosisService.getAllFor).toHaveBeenCalledWith("T69.9XXA", "en");
+                expect(list.length).toBe(1);
+                expect(list[0].value).toBe("Cold, unspec. (T69.9XXA)");
+                expect(list[0].concept.name).toBe("Cold, unspec.");
+                expect(list[0].concept.uuid).toBe("uuid1");
+                expect(list[0].lookup.conceptSystem).toBe("http://snomed.info/sct");
+            });
         });
     });
 
