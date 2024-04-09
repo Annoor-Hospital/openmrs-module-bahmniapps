@@ -168,6 +168,17 @@ angular.module('bahmni.common.domain')
                     withCredentials: true
                 });
             };
+            this.findByOrderUuid = function (orderUuid) {
+                return $http.get(Bahmni.Common.Constants.ordersUrl + '/' + orderUuid, {
+                    params: {},
+                    withCredentials: true
+                }).then(function (order) {
+                    return $http.get(
+                        Bahmni.Common.Constants.bahmniEncounterUrl + '/' + order.data.encounter.uuid,
+                        {params: {includeAll: true}, withCredentials: true}
+                    );
+                });
+            };
 
             this.getEncountersForEncounterType = function (patientUuid, encounterTypeUuid) {
                 return $http.get(Bahmni.Common.Constants.encounterUrl, {
