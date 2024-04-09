@@ -368,6 +368,41 @@
   }
 }
 
+table.pacs {
+  .fa-spin {
+    animation: fa-spin 2s infinite linear;
+  }
+  td.pacs-expand {
+    width:100%;
+  }
+  td.pacs-shrink {
+    white-space: nowrap;
+  }
+  .actions a{
+    color:#000;
+  }
+  tr.notes-open td{
+    padding:0 10px;
+    div {
+      overflow-y:auto;
+      max-height:100px;
+      padding:2px 2px 2px 30px;
+      line-height: normal;
+    }
+  }
+  tr.pacs-note{
+    span.toggle-btn{
+      float:right;
+    }
+    div{
+      margin-right:2em;
+    }
+  }
+  tr.pacs-note-provider td{
+    text-align:right;
+  }
+}
+
 #Pacs {
   .order-sub-heading-container {
     padding-top: 7px;

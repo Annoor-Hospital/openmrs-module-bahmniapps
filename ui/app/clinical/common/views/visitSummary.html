@@ -114,6 +114,16 @@
                     </pacs-orders>
                 </section>
             </div>
+            <div data-ng-switch-when="pacs">
+                <section ng-if="::section.config" class="block dashboard-section">
+                    <pacs patient="patient"
+                          order-type="section.config.orderType"
+                          visit-uuid="::visitUuid"
+                          section="section"
+                          config="::section.config">
+                    </pacs>
+                </section>
+            </div>
             <div data-ng-switch-when="conditionsList">
                 <conditions-list params="section" patient="patient"></conditions-list>
             </div>
