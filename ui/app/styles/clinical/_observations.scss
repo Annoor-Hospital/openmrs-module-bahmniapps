@@ -610,7 +610,7 @@ concept-set {
     display: none;
     @media screen and (max-width: 1024px) {
       display: inline-block;
-      color: #669999;
+      color: $bahmniSecondaryColor;
       border: 1px solid;
       position: fixed;
       left: 10px;
