@@ -60,7 +60,9 @@ Bahmni.Clinical.TabConfig = function (tabs) {
     };
 
     this.getUnOpenedTabs = function () {
-        return _.difference(this.tabs, this.visibleTabs);
+        return _.difference(this.tabs.filter(function (elem) {
+            return !elem.printingOnly;
+        }), this.visibleTabs);
     };
 
     this.isCurrentTab = function (tab) {

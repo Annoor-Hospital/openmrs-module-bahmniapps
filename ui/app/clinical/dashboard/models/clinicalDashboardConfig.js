@@ -19,4 +19,8 @@ Bahmni.Clinical.ClinicalDashboardConfig = function (config) {
     this.getMaxRecentlyViewedPatients = function () {
         return self.currentTab.maxRecentlyViewedPatients || 10;
     };
+
+    this.showPrint = function () {
+        return !_.isEmpty(this.currentTab.printing) || this.quickPrints;
+    };
 };
