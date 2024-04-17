@@ -30,6 +30,10 @@ angular.module('bahmni.clinical')
                     $scope.patientContext.image = Bahmni.Common.Constants.patientImageUrlByPatientUuid + $scope.patientContext.uuid;
                 }
                 $scope.patientContext.gender = $rootScope.genderMap[$scope.patientContext.gender];
+                $scope.patientContext.name = [
+                    $scope.patientContext.givenName,
+                    $scope.patientContext.middleName,
+                    $scope.patientContext.familyName].filter(function (x) { return x !== null; }).join(' ');
             });
         };
 
