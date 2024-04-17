@@ -24,6 +24,7 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
         patient.birthdateEstimated = openmrsPatient.person.birthdateEstimated;
         patient.birthtime = Bahmni.Common.Util.DateUtil.parseServerDateToDate(openmrsPatient.person.birthtime);
         patient.bloodGroupText = getPatientBloodGroupText(openmrsPatient);
+        patient.localName = getPatientLocalName(openmrsPatient);
 
         if (openmrsPatient.identifiers) {
             var primaryIdentifier = openmrsPatient.identifiers[0].primaryIdentifier;
@@ -115,6 +116,33 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
             });
             if (bloodGroup) {
                 return "<span>" + bloodGroup + "</span>";
+            }
+        }
+    };
+
+    var getPatientLocalName = function (openmrsPatient) {
+        if (openmrsPatient.person.localName) {
+            return openmrsPatient.person.localName;
+        }
+        if (openmrsPatient.person.attributes && openmrsPatient.person.attributes.length > 0) {
+            var n1, n2, n3, n4;
+            _.forEach(openmrsPatient.person.attributes, function (attribute) {
+                if (attribute.attributeType.display == "givenNameLocal") {
+                    n1 = attribute.value;
+                }
+                if (attribute.attributeType.display == "middleNameLocal") {
+                    n2 = attribute.value;
+                }
+                if (attribute.attributeType.display == "grandfatherNameLocal") {
+                    n3 = attribute.value;
+                }
+                if (attribute.attributeType.display == "familyNameLocal") {
+                    n4 = attribute.value;
+                }
+            });
+            var localName = [n1, n2, n3, n4].filter(function (n) { return n != undefined; }).join(' ');
+            if (localName) {
+                return localName;
             }
         }
     };

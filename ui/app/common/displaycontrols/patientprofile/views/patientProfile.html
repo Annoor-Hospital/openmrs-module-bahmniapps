@@ -17,6 +17,9 @@
                                  <span>{{ 'TIME_OF_BIRTH_LABEL'|translate }}</span>
                                  <span ng-bind-html="::patient.birthtime | date:'hh:mm a'"></span>
                              </span>
+                             <span class="patient-local-name">
+                                 {{::patient.localName | titleCase}}
+                             </span>
                              <span class="patient-address">
                                  {{::addressLine}}
                              </span>
