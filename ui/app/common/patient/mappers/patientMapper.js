@@ -94,6 +94,7 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
             "address3": preferredAddress.address3,
             "cityVillage": preferredAddress.cityVillage,
             "countyDistrict": preferredAddress.countyDistrict === null ? '' : preferredAddress.countyDistrict,
+            "country": preferredAddress.country === null ? '' : preferredAddress.country,
             "stateProvince": preferredAddress.stateProvince
         } : {};
     };
