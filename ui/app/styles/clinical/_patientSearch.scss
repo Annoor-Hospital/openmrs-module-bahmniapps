@@ -78,6 +78,12 @@
       &.patient-list-table{
         th{
           text-transform: capitalize;
+          &:hover{
+            background: #ccc;
+          }
+          &:active{
+            background: #eee;
+          }
         }
       }
       tr td{
