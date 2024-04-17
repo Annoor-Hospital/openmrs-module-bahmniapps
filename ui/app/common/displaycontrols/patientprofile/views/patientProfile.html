@@ -33,6 +33,14 @@
                         <span ng-if="::patient.birthdateEstimated" class="patient-estimated-text"> (est.)</span>
                     </td>
                 </tr>
+                <tr ng-repeat="identifier in patient.extraIdentifiers | filter: { type: '!Other Identification' }">
+                    <td class="name">{{::identifier.type}}</td>
+                    <td class="value">{{::identifier.value}}</td>
+                </tr>
+                <tr ng-repeat="identifier in patient.extraIdentifiers | filter: { type: 'Other Identification' }">
+                    <td class="name">{{::identifier.type}}</td>
+                    <td class="value">{{::identifier.value}}</td>
+                </tr>
                 <tr ng-repeat="attribute in config.patientAttributes" ng-if="::patient[attribute]"
                     ng-show="::config.patientAttributes.length" ng-class="attribute">
                     <td class="name">{{::patient[attribute].label}}</td>
