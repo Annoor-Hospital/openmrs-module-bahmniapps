@@ -29,6 +29,15 @@ Bahmni.PatientMapper = function (patientConfig, $rootScope, $translate) {
         if (openmrsPatient.identifiers) {
             var primaryIdentifier = openmrsPatient.identifiers[0].primaryIdentifier;
             patient.identifier = primaryIdentifier ? primaryIdentifier : openmrsPatient.identifiers[0].identifier;
+            patient.extraIdentifiers = [];
+            for (var i = 0; i < openmrsPatient.identifiers.length; i++) {
+                if (openmrsPatient.identifiers[i].identifier != patient.identifier) {
+                    patient.extraIdentifiers.push({
+                        "type": openmrsPatient.identifiers[i].identifierType.display,
+                        "value": openmrsPatient.identifiers[i].identifier
+                    });
+                }
+            }
         }
 
         if (openmrsPatient.person.birthdate) {
