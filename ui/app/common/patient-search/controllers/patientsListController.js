@@ -178,7 +178,14 @@ angular.module('bahmni.common.patientSearch')
             }
         };
 
-        $scope.forwardPatient = function (patient, heading) {
+        // MAF: added a function to get forwarding URL, so that the link can behave like a link
+        var hasPatientForwardUrl = function (patient) {
+            return ($stateParams.forwardUrl != null || patient.forwardUrl != null);
+        };
+
+        // MAF: This is not the best solution. The use of 'heading' here isn't clear to me, and may influence the value of 'newTab'
+        // That means forwardPatientTarget may need to check $scope.search.searchType.links for linkColumn: heading
+        $scope.forwardPatientUrl = function (patient, heading) {
             var options = $.extend({}, $stateParams);
             $rootScope.patientAdmitLocationStatus = patient.Status;
             $.extend(options, {
@@ -198,9 +205,24 @@ angular.module('bahmni.common.patientSearch')
                 link = _.find($scope.search.searchType.links, {linkColumn: heading}) || link;
             }
             if (link.url && link.url !== null) {
-                $window.open(appService.getAppDescriptor().formatUrl(link.url, options, true), link.newTab ? "_blank" : "_self");
+                return appService.getAppDescriptor().formatUrl(link.url, options, true);
             }
         };
+
+        $scope.forwardPatientTarget = function (patient) {
+            return hasPatientForwardUrl(patient) ? '_blank' : '_self';
+        };
+
+        $scope.forwardPatient = function (patient) {
+            var url = $scope.forwardPatientUrl(patient);
+
+            if (hasPatientForwardUrl(patient)) {
+                $window.open(url, '_blank');
+            } else {
+                $window.location = url;
+            }
+        };
+
         var getPatientCountSeriallyBySearchIndex = function (index) {
             if (index === $scope.search.searchTypes.length) {
                 return;
