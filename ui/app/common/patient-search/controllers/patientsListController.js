@@ -2,8 +2,8 @@
 
 angular.module('bahmni.common.patientSearch')
 .controller('PatientsListController', ['$scope', '$window', 'patientService', '$rootScope', 'appService', 'spinner',
-    '$stateParams', '$bahmniCookieStore', 'printer', 'configurationService',
-    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, printer, configurationService) {
+    '$stateParams', '$bahmniCookieStore', 'printer', 'configurationService', 'criteriaSearchService', 'messagingService',
+    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, printer, configurationService, criteriaSearchService, messagingService) {
         const DEFAULT_FETCH_DELAY = 2000;
         var patientSearchConfig = appService.getAppDescriptor().getConfigValue("patientSearch");
         var patientListSpinner;
@@ -40,6 +40,24 @@ angular.module('bahmni.common.patientSearch')
                 $scope.search.updateSearchResults(response.data.pageOfResults);
                 if ($scope.search.hasSingleActivePatient()) {
                     $scope.forwardPatient($scope.search.activePatients[0]);
+                }
+            });
+        };
+
+        // MAF search for patients by criteria
+        $scope.criteria_search_submit = function (params) {
+            return spinner.forPromise(criteriaSearchService.search(params)).then(function (response) {
+                if (response.data && response.data.pageOfResults) {
+                    $scope.search.updateSearchResults(response.data.pageOfResults);
+                    if ($scope.search.hasSingleActivePatient()) {
+                        $scope.forwardPatient($scope.search.activePatients[0]);
+                    }
+                } else {
+                    if (response.data && response.data.error) {
+                        messagingService.showMessage("error", "Search failed: " + response.data.error);
+                    } else {
+                        messagingService.showMessage("error", "Search failed");
+                    }
                 }
             });
         };
@@ -119,6 +137,7 @@ angular.module('bahmni.common.patientSearch')
                 name: appExtn.label,
                 display: appExtn.extensionParams.display,
                 handler: appExtn.extensionParams.searchHandler,
+                customSearch: appExtn.extensionParams.customSearch,
                 forwardUrl: appExtn.extensionParams.forwardUrl,
                 id: appExtn.id,
                 params: appExtn.extensionParams.searchParams,
