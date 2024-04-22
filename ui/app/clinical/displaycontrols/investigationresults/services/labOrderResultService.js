@@ -62,6 +62,13 @@ angular.module('bahmni.clinical')
                 latestAccessionCount: latestAccessionCount
             };
 
+            // MAF filter test result dates that are empty
+            // remove empty values from results.tabularResult.values
+            results.tabularResult.values = results.tabularResult.values.filter(function (row) { return row.result; });
+            // get a list of remaining dates from values
+            var dates = results.tabularResult.values.map(function (row) { return row.dateIndex; });
+            results.tabularResult.dates = results.tabularResult.dates.filter(function (daterow) { return dates.indexOf(daterow.index) >= 0; });
+
             var tabularResult = new Bahmni.Clinical.TabularLabOrderResults(results.tabularResult, accessionConfig);
             var accessions = _.groupBy(labOrderResults, function (labOrderResult) {
                 return labOrderResult.accessionUuid;
@@ -77,6 +84,8 @@ angular.module('bahmni.clinical')
                 accessions = _.union(initial, latest);
             }
             accessions.reverse();
+            // MAF show in reverse date order
+            tabularResult.tabularResult.dates.reverse();
             return {
                 accessions: groupByPanel(accessions),
                 tabularResult: tabularResult
@@ -96,6 +105,13 @@ angular.module('bahmni.clinical')
                     paramsToBeSent.numberOfVisits = params.numberOfVisits;
                 }
             }
+
+            // MAF: backend supports limitting quiery by number of lab orders ("accessions")
+            // Adding support to this service module, so that display controller can also support this
+            if (params.numberOfAccessions !== 0) {
+                paramsToBeSent.numberOfAccessions = params.numberOfAccessions;
+            }
+            // END MAF
 
             $http.get(Bahmni.Common.Constants.bahmniLabOrderResultsUrl, {
                 method: "GET",
