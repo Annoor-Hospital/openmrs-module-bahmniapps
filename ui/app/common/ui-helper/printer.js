@@ -8,9 +8,12 @@ angular.module('bahmni.common.uiHelper')
                 //var hiddenFrame = $('<div style="border:thin black;border-style:solid;padding-left:50px;padding-right:50px;padding-top: 50px;background:#fff;position: absolute;top: 50px;left: 0;right: 0;margin-left: auto;margin-right: auto;width: 680px; height:1200px;z-index: 9999;"><iframe width="100%" height="100%" style="border:0;"></iframe></div>').appendTo('body')[0].firstChild;
                 var hiddenFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
                 hiddenFrame.contentWindow.printAndRemove = function () {
+                    // MAF 2024-09-12: Fix printing on new versions of chrome. window.print does not block on chrome.
+                    hiddenFrame.contentWindow.onafterprint = function () {
+                        $(hiddenFrame).remove();
+                        deferred.resolve();
+                    };
                     hiddenFrame.contentWindow.print();
-                    $(hiddenFrame).remove();
-                    deferred.resolve();
                 };
                 var htmlContent = "<!doctype html>" +
                         "<html>" +
