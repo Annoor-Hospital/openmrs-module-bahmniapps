@@ -7,9 +7,12 @@ angular.module('bahmni.common.uiHelper')
                 var deferred = $q.defer();
                 var hiddenFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
                 hiddenFrame.contentWindow.printAndRemove = function () {
+                    // MAF 2024-09-12: Fix printing on new versions of chrome. window.print does not block on chrome.
+                    hiddenFrame.contentWindow.onafterprint = function () {
+                        $(hiddenFrame).remove();
+                        deferred.resolve();
+                    };
                     hiddenFrame.contentWindow.print();
-                    $(hiddenFrame).remove();
-                    deferred.resolve();
                 };
                 var htmlContent = "<!doctype html>" +
                         "<html>" +
