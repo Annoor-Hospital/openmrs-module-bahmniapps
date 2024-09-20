@@ -65,9 +65,14 @@ angular.module('bahmni.common.uiHelper')
                     var printScope = scope;
                     var element = $compile($('<div>' + template + '</div>'))(printScope);
                     var renderAndPrintPromise = $q.defer();
+                    var successCnt = 0;
                     var waitForRenderAndPrint = function () {
                         if (printScope.$$phase || $http.pendingRequests.length) {
+                            successCnt = 0;
                             $timeout(waitForRenderAndPrint);
+                        } else if (successCnt < 3) {
+                            successCnt++;
+                            $timeout(waitForRenderAndPrint, 100);
                         } else {
                             printHtml(element.html()).then(function () {
                                 $rootScope.isBeingPrinted = false;
