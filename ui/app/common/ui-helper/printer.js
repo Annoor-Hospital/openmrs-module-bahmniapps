@@ -46,7 +46,7 @@ angular.module('bahmni.common.uiHelper')
                         if (printScope.$$phase || $http.pendingRequests.length) {
                             $timeout(waitForRenderAndPrint, 1000);
                         } else {
-                        // Replace printHtml with openNewWindow for debugging
+                            // Replace printHtml with openNewWindow for debugging
                             printHtml(element.html()).then(function () {
                                 $rootScope.isBeingPrinted = false;
                                 renderAndPrintPromise.resolve();
@@ -66,10 +66,17 @@ angular.module('bahmni.common.uiHelper')
                     var printScope = scope;
                     var element = $compile($('<div>' + template + '</div>'))(printScope);
                     var renderAndPrintPromise = $q.defer();
+                    var success_cnt = 0;
                     var waitForRenderAndPrint = function () {
+                        //console.log("Check if ready");
                         if (printScope.$$phase || $http.pendingRequests.length) {
-                            $timeout(waitForRenderAndPrint);
-                        } else {
+                            success_cnt = 0;
+                            //console.log(printScope.$$phase + " : " + $http.pendingRequests.length);
+                            $timeout(waitForRenderAndPrint,100);
+                        }else if(success_cnt < 3){
+                            success_cnt++;
+                            $timeout(waitForRenderAndPrint,100);
+                        }else{
                             printHtml(element.html()).then(function () {
                                 $rootScope.isBeingPrinted = false;
                                 if (afterPrint) {
