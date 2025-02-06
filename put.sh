@@ -1,18 +1,22 @@
 #!/bin/bash
 
-remoteip="${BAHMNIPUT_IP:-10.10.10.177}"
+# To use for dev: ./put.sh
+# To use for prod: remoteip=10.10.10.134 ./put.sh dist
+remoteip="${remoteip:-10.10.10.245}"
 
 # Check if route exists to remote host
 if ! nc -w 3 -z $remoteip 22 2>/dev/null; then
 	echo "No route to $remoteip or ssh port not open"
 	exit 1
+else
+	echo "Will put to $remoteip"
 fi
 
 # Verify command argument
 if [ $# -eq 1 ] ; then
 	tgt="${1}"
 else
-	tgt="dist"
+	tgt="app"
 fi
 if ! [[ "$tgt" =~ ^(dist|app|node_modules)$ ]]; then
 	echo "Argument must be dist, app or node_modules"
