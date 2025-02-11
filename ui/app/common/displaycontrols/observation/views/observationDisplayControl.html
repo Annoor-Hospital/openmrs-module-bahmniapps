@@ -14,7 +14,7 @@
     </h2>
     <div class="concept-set-container-view">
         <section class="block hierarchy">
-            <ul class="form-field" ng-if="bahmniObservations.length > 0">
+            <ul class="form-field" ng-if="bahmniObservations.length > 0" show-more>
                 <li ng-repeat="obsGroup in ::bahmniObservations">
                     <span ng-if="showGroupDateTime" class="tree-list-item row-click toggle-container" toggle="obsGroup.isOpen">
                         <i class="fa fa-caret-right"></i>
