@@ -3,7 +3,6 @@ angular.module('bahmni.common.uiHelper')
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        console.log(element);
         var showCount = parseInt(attrs.show, 10) || 6; // Default to 6 if not specified
         var moreCount = parseInt(attrs.more, 10) || null; // Null means show all
         
@@ -23,12 +22,20 @@ angular.module('bahmni.common.uiHelper')
           }
         }
 
+        var observer = new MutationObserver(function(mutations) {
+          updateVisibility();
+        });
+        observer.observe(element[0], { childList: true, subtree: true });
+        scope.$on('$destroy', function() {
+          observer.disconnect();
+        });
+
         // Add "Show More" button
         var showMoreBtn = angular.element('<div>Show More...</div>');
         showMoreBtn.css({
           display: 'block',
           cursor: 'pointer',
-          margin: '5px',
+          padding: '5px',
           fontWeight: 'bold'
         });
 
@@ -46,7 +53,7 @@ angular.module('bahmni.common.uiHelper')
         });
 
         element.after(showMoreBtn);
-        //updateVisibility();
+        
         $timeout(updateVisibility, 0);
       }
     };
