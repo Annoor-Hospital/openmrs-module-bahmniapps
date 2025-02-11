@@ -14,7 +14,7 @@
             </li>
         </ul>
         -->
-        <table class="dashboard-table pacs" ng-hide="!isDataPresent()">
+        <table class="dashboard-table pacs" ng-hide="!isDataPresent()" show-more>
             <tbody ng-repeat="record in records | orderBy:'-imageObservation.observationDateTime'" class="row" bm-gallery patient="patient" access-impression="true">
                  <tr class="view-past">
                     <td class="actions pacs-shrink">
