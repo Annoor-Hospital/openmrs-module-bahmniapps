@@ -4,7 +4,9 @@ angular.module('bahmni.common.uiHelper')
       restrict: 'A',
       link: function(scope, element, attrs) {
         function readConfig(name){
-          if(scope.$parent && scope.$parent.config && scope.$parent.config[name]){
+          if(scope.config && scope.config[name]){
+            return scope.config[name];
+          }else if(scope.$parent && scope.$parent.config && scope.$parent.config[name]){
             return scope.$parent.config[name];
           }else{
             return null;
