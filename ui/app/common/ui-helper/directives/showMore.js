@@ -6,9 +6,14 @@ angular.module('bahmni.common.uiHelper')
         function readConfig(name){
           if(scope.config && scope.config[name]){
             return scope.config[name];
+          }else if(scope.params && scope.params[name]){
+            return scope.params[name];
+          }else if(scope.$parent && scope.$parent.params && scope.$parent.params[name]){
+            return scope.$parent.params[name];
           }else if(scope.$parent && scope.$parent.config && scope.$parent.config[name]){
             return scope.$parent.config[name];
           }else{
+            console.log("Failed to find config for show-more");
             return null;
           }
         }
