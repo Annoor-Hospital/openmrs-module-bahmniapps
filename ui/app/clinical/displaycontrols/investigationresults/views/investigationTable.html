@@ -2,7 +2,7 @@
     <h2 ng-if="params.title" class="section-title">{{::params | titleTranslate}} </h2>
     <div>
         <p class="placeholder-text" ng-if="!hasLabOrders()">{{ ::params.noLabOrdersMessage  | translate }}</p>
-        <ul ng-if="hasLabOrders()">
+        <ul ng-if="hasLabOrders()" show-more>
             <li ng-repeat="labOrderResults in accessions" bindonce="accessions" >
                 <div class="laborder-sub-heading toggle-container" toggle="labOrderResults.isOpen">
                     <i class="fa fa-caret-right"></i>
