@@ -22,14 +22,14 @@ angular.module('bahmni.common.uiHelper')
               var initCount = parseInt(readConfig("showMoreInit"), 10) || threshold;      // how many items to show initially
               var showAll = false;
               function updateVisibility () {
-                  let children = element.children();
-                  var showCount = children.length;
-                  if (children.length > threshold) {
-                      showCount = showAll ? children.length : initCount;
+                  var childList = element.children(); // jquery
+                  var showCount = childList.length;
+                  if (childList.length > threshold) {
+                      showCount = showAll ? childList.length : initCount;
                       showMoreBtn.css('display', showAll ? 'none' : 'block');
                       showLessBtn.css('display', showAll ? 'block' : 'none');
                   }
-                  angular.forEach(children, function (child, index) {
+                  angular.forEach(childList, function (child, index) {
                       angular.element(child).css('display', index < showCount ? '' : 'none');
                   });
               }
@@ -39,12 +39,14 @@ angular.module('bahmni.common.uiHelper')
                   cursor: 'pointer',
                   padding: '5px'
               };
-              setShowAllFn = (val) => function () {
-                  scope.$apply(function () {
-                      showAll = val;
-                      updateVisibility();
-                  });
-              };
+              function setShowAllFn (val) {
+                  return function () {
+                      scope.$apply(function () {
+                          showAll = val;
+                          updateVisibility();
+                      });
+                  };
+              }
 
               var showMoreBtn = angular.element('<div>Show More...</div>');
               showMoreBtn.css(btnCss);
@@ -56,7 +58,7 @@ angular.module('bahmni.common.uiHelper')
               showLessBtn.on('click', setShowAllFn(false));
               element.after(showLessBtn);
 
-        // Connect Observer
+              // Connect Observer
               var observer = new MutationObserver(function (mutations) {
                   updateVisibility();
               });
