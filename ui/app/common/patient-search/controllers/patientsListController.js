@@ -145,6 +145,8 @@ angular.module('bahmni.common.patientSearch')
                 view: appExtn.extensionParams.view || Bahmni.Common.PatientSearch.Constants.searchExtensionTileViewType,
                 showPrint: appExtn.extensionParams.showPrint || false,
                 printHtmlLocation: appExtn.extensionParams.printHtmlLocation || null,
+                sortBy: appExtn.extensionParams.defaultSortBy || "",
+                sortReverse: appExtn.extensionParams.defaultSortReverse || false,
                 additionalParams: appExtn.extensionParams.additionalParams,
                 searchColumns: appExtn.extensionParams.searchColumns,
                 translationKey: appExtn.extensionParams.translationKey,
