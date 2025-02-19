@@ -45,8 +45,23 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         self.searchResults = self.activePatients;
     };
 
+    self.sortSearchResults = function () {
+        if (self.searchType.sortBy) {
+            var sortOrder = 1 - 2 * (self.searchType.sortReverse === true); // -1 or 1
+            self.searchResults = self.searchResults.toSorted(function (p1, p2) {
+                var v1 = p1[self.searchType.sortBy];
+                var v2 = p2[self.searchType.sortBy];
+                if (v2 === v1) return 0;
+                if (v2 === null || v1 > v2) return 1 * sortOrder;
+                if (v1 === null || v2 > v1) return -1 * sortOrder;
+                return 0;
+            });
+        }
+    };
+
     self.updateSearchResults = function (patientList) {
         self.updatePatientList(patientList);
+        self.sortSearchResults();
         if (self.activePatients.length === 0 && self.searchParameter != '') {
             self.noResultsMessage = "NO_RESULTS_FOUND";
         } else {
@@ -61,6 +76,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
             self.searchType.sortBy = heading;
             self.searchType.sortReverse = false;
         }
+        self.sortSearchResults();
     };
 
     self.hasSingleActivePatient = function () {

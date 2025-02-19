@@ -57,7 +57,8 @@
                     </thead>
                     <tbody>
                     <!--<tr ng-repeat="row in search.visiblePatients">-->
-                    <tr ng-repeat="row in search.visiblePatients | orderBy : search.searchType.sortBy : search.searchType.sortReverse ">
+                    <!-- <tr ng-repeat="row in search.visiblePatients | orderBy : search.searchType.sortBy : search.searchType.sortReverse "> -->
+                    <tr ng-repeat="row in search.visiblePatients">
                         <!-- <td>
                             {{$index + 1}}
                         </td> -->
