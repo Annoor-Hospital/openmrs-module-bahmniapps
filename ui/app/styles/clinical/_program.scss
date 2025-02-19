@@ -256,11 +256,6 @@
   }
 }
 
-.expand-investigation-chart .table-scroll{
-  max-height: 700px;
-  overflow: auto;
-}
-
 table.investigation-chart {
     overflow: auto;
     display: table;
@@ -278,7 +273,7 @@ table.investigation-chart {
         th {
             position: -webkit-sticky;
             position: sticky;
-            top: 0px;
+            top: 40px;
             left: -1px;
             z-index: 10;
             border-left: 1px solid #ddd;
@@ -286,7 +281,7 @@ table.investigation-chart {
         td {
             position: -webkit-sticky;
             position: sticky;
-            top: 0px;
+            top: 40px;
             z-index: 8;
             border-left: 1px solid #ddd;
             background: #eee;
@@ -301,7 +296,7 @@ table.investigation-chart {
         th {
             position: -webkit-sticky;
             position: sticky;
-            /*top: 10px;*/
+            top: 10px;
             left: 0px;
             border-left: 1px solid #ddd;
             text-align: left;
@@ -312,7 +307,7 @@ table.investigation-chart {
 }
 
 .expand-investigation-chart {
-    /*display: table;*/
+    display: table;
     width: 100%;
     height: 100%;
     position: relative;
