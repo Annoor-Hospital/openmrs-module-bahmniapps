@@ -51,6 +51,8 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
             self.searchResults = self.searchResults.toSorted(function (p1, p2) {
                 var v1 = p1[self.searchType.sortBy];
                 var v2 = p2[self.searchType.sortBy];
+                if (v1.toLowerCase) v1 = v1.toLowerCase();
+                if (v2.toLowerCase) v2 = v2.toLowerCase();
                 if (v2 === v1) return 0;
                 if (v2 === null || v1 > v2) return 1 * sortOrder;
                 if (v1 === null || v2 > v1) return -1 * sortOrder;
