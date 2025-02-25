@@ -1,0 +1,62 @@
+<div class="form">
+  <h1>X-Ray Study Notes</h1>
+  <table>
+  <tbody>
+    <tr><td class="obs-note-label">Patient Name: </td><td>{{ngDialogData.pacsOrder.patientName}}</td></tr>
+    <tr><td class="obs-note-label">Patient Age / DOB: </td><td>{{ngDialogData.pacsOrder.patientBirthDate | bahmniDate }} ({{getAgeYears(ngDialogData.pacsOrder.patientBirthDate)}} Years)</td></tr>
+    <tr><td class="obs-note-label">Patient id: </td><td>{{ngDialogData.pacsOrder.patientid}}</td></tr>
+    <tr ng-if="ngDialogData.pacsOrder.studyUid">
+      <td class="obs-note-label">Study Accession Number: </td><td>{{ngDialogData.pacsOrder.accessionNumber}}</td>
+    </tr>
+    <tr>
+      <td class="obs-note-label">Order Time: </td>
+      <td>{{ngDialogData.pacsOrder.orderDate | bahmniDateTime}}</td>
+    </tr>
+    <tr><td class="obs-note-label">Provider: </td><td>{{ngDialogData.pacsOrder.provider}}</td></tr>
+    <tr ng-if="ngDialogData.pacsOrder.seriesCount > 1">
+      <td colspan="2" class="obs-note-notice">This study contains {{ngDialogData.pacsOrder.seriesCount}} images.</td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <a ng-if="ngDialogData.pacsOrder.patientUuid" class="obs-note-link" target="PatientDashboardWindow" href="{{ngDialogData.pacsOrder.dashboardUrl}}">Link to patient dashboard</a>
+        <a ng-if="ngDialogData.pacsOrder.studyUid" class="obs-note-link" target="PatientXrayWindow" href="{{ngDialogData.pacsOrder.imageUrl}}">Link to X-Ray</a>
+      </td>
+    </tr>
+  </tbody>
+  </table>
+  <div ng-if="ngDialogData.pacsOrder.patientUuid && ngDialogData.pacsOrder.fulfillerComment">
+    <div class="obs-note-block-label">Provider Note:</div>
+    <div class="obs-note-comment">
+      <pre>{{ngDialogData.pacsOrder.fulfillerComment}}</pre>
+    </div>
+  </div>
+  <div ng-if="ngDialogData.pacsOrder.obs && ngDialogData.pacsOrder.obs.length > 0">
+    <div class="obs-note-block-label">Radiology Notes:</div>
+    <div class="obs-note-group" ng-repeat="obs in dialogGetNotes(ngDialogData) | orderBy:'obsNoteDatetime'">
+      <div class="obs-note-info">{{obs.obsProvider}} – {{obs.obsNoteDatetime | bahmniDateTime}}</div>
+      <div class="obs-note-note">{{obs.obsNote}}</div>
+    </div>
+  </div>
+  <div ng-if="canEditNote && ngDialogData.pacsOrder.patientUuid && ngDialogData.pacsOrder.studyUid">
+    <div class="obs-note-block-label" ng-if="!ngDialogData.editObs">Add Radiologist Note:</div>
+    <div class="obs-note-group">
+      <div class="obs-note-info" ng-if="ngDialogData.editObs">{{ngDialogData.editObs.obsProvider}} – {{ngDialogData.editObs.obsNoteDatetime | bahmniDateTime}}</div>
+      <div class="form-field">
+        <div class="field-value">
+          <textarea id="obs-note" ng-model="ngDialogData.textarea"></textarea>
+        </div>
+        <div class="dialog-button-group">
+          <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="dialogCloseConfirm(ngDialogData)">Close</button>
+          <button ng-disabled="ngDialogData.textarea === ngDialogData.originalText || ngDialogData.textarea === ''" id="obs-note-save" class="secondary-button ng-binding" ng-click="dialogSave(ngDialogData)">{{ngDialogData.editObs ? 'Edit' : 'Save'}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-if="!canEditNote || !ngDialogData.pacsOrder.patientUuid || !ngDialogData.pacsOrder.studyUid">
+    <div ng-if="!ngDialogData.pacsOrder.patientUuid" class="obs-note-warning">Patient is not registered</div>
+    <div ng-if="!ngDialogData.pacsOrder.studyUid" class="obs-note-warning">Order not yet fulfilled</div>
+    <div class="dialog-button-group">
+      <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="dialogClose()">Close</button>
+    </div>
+  </div>
+</div>

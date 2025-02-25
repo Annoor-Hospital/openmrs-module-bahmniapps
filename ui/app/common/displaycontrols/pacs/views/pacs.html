@@ -3,39 +3,39 @@
     <div>
         <section ng-hide="noOrdersMessage">
             <table class="dashboard-table pacs" show-more>
-                <tbody ng-repeat="bahmniOrder in bahmniOrders" class="row">
+                <tbody ng-repeat="pacsOrder in pacsOrders" class="row">
                     <tr class="view-past"
-                        ng-class="::{'test-notes-parent': bahmniOrder.obs && bahmniOrder.obs.length > 0}">
+                        ng-class="::{'test-notes-parent': pacsOrder.obs && pacsOrder.obs.length > 0}">
                         <td class="actions pacs-shrink">
-                            <i class="fa fa-clock-o" aria-hidden="true" ng-if="!bahmniOrder.studyUid"></i>
-                            <a ng-if="! bahmniOrder.studyUid" ng-click="deleteConfirm(bahmniOrder)" class="order-delete"
+                            <i class="fa fa-clock-o" aria-hidden="true" ng-if="!pacsOrder.studyUid"></i>
+                            <a ng-if="! pacsOrder.studyUid" ng-click="deleteConfirm(pacsOrder)" class="order-delete"
                                 target="_blank">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </a>
-                            <span ng-if="bahmniOrder.seriesCount > 1">x{{bahmniOrder.seriesCount}}</span>
-                            <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="bahmniOrder.obsNote"></i>-->
+                            <span ng-if="pacsOrder.seriesCount > 1">x{{pacsOrder.seriesCount}}</span>
+                            <!--<i class="fa fa-file-text-o" aria-hidden="true" ng-if="pacsOrder.obsNote"></i>-->
                             <i class="fa fa-comments" aria-hidden="true"
-                                ng-if="bahmniOrder.obs && bahmniOrder.obs.length > 0"></i>
+                                ng-if="pacsOrder.obs && pacsOrder.obs.length > 0"></i>
                         </td>
-                        <td class="name pacs-expand" ng-if="bahmniOrder.studyUid">
-                            <a target="_blank" href="{{bahmniOrder.imageUrl}}">{{ (bahmniOrder.label.length > 25) ?
-                                (bahmniOrder.label.substring(0,22)) + '...' : (bahmniOrder.label) }}</a>
+                        <td class="name pacs-expand" ng-if="pacsOrder.studyUid">
+                            <a target="_blank" href="{{pacsOrder.imageUrl}}">{{ (pacsOrder.label.length > 25) ?
+                                (pacsOrder.label.substring(0,22)) + '...' : (pacsOrder.label) }}</a>
                         </td>
-                        <td class="name pacs-expand" ng-if="!bahmniOrder.studyUid">
-                            {{bahmniOrder.label}}
+                        <td class="name pacs-expand" ng-if="!pacsOrder.studyUid">
+                            {{pacsOrder.label}}
                         </td>
                         <td class="accession-number pacs-shrink">
-                            {{bahmniOrder.accessionNumber}}
+                            {{pacsOrder.accessionNumber}}
                         </td>
                         <td class="provider-name pacs-shrink">
-                            {{bahmniOrder.provider}}
+                            {{pacsOrder.provider}}
                         </td>
                         <td class="provider-date pacs-shrink">
-                            {{bahmniOrder.orderDate | bahmniDateTime }}
+                            {{pacsOrder.orderDate | bahmniDateTime }}
                         </td>
                     </tr>
                     <tr class="notes-open pacs-note"
-                        ng-repeat-start="obs in bahmniOrder.obs | orderBy:'obsNoteDatetime'">
+                        ng-repeat-start="obs in pacsOrder.obs | orderBy:'obsNoteDatetime'">
                         <td colspan="5">
                             <span class="toggle-btn" toggle="obs.showDetails">
                                 <button class="toggle fr">

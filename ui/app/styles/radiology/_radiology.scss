@@ -41,6 +41,7 @@ table.radiology-review-table tr.link:hover {
   div.obs-note-block-label{
     margin-top:5px;
     margin-left:10px;
+    text-decoration: underline;
   }
   div.obs-note-comment{
       margin-left:20px;
@@ -56,8 +57,12 @@ table.radiology-review-table tr.link:hover {
     font-weight: bold;
   }
   .field-value{
-    padding: 0px 20px 20px 20px;
     width:100%;
+    margin-bottom:5px;
+    padding-left:1em;
+  }
+  .form-field .dialog-button-group{
+    margin-left:1em;
   }
   form .form-field textarea, .form .form-field textarea{
     width:100%;
@@ -75,6 +80,8 @@ table.radiology-review-table tr.link:hover {
   }
   .obs-note-group{
     margin-left:1em;
+    margin-top:2px;
+    margin-bottom:3px;
   }
   .obs-note-info {
     border-radius: 10px;
