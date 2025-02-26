@@ -39,15 +39,16 @@
   </div>
   <div ng-if="canEditNote && ngDialogData.pacsOrder.patientUuid && ngDialogData.pacsOrder.studyUid">
     <div class="obs-note-block-label" ng-if="!ngDialogData.editObs">Add Radiologist Note:</div>
+    <div class="obs-note-block-label" style="text-decoration: none;" ng-if="ngDialogData.editObs"><span style="text-decoration:underline">Edit Radiologist Note:</span> ({{ngDialogData.editObs.obsNoteDatetime | bahmniDateTime}})</div>
     <div class="obs-note-group">
-      <div class="obs-note-info" ng-if="ngDialogData.editObs">{{ngDialogData.editObs.obsProvider}} – {{ngDialogData.editObs.obsNoteDatetime | bahmniDateTime}}</div>
+      <!--<div class="obs-note-info" ng-if="ngDialogData.editObs">{{ngDialogData.editObs.obsProvider}} – {{ngDialogData.editObs.obsNoteDatetime | bahmniDateTime}}</div>-->
       <div class="form-field">
         <div class="field-value">
           <textarea id="obs-note" ng-model="ngDialogData.textarea"></textarea>
         </div>
         <div class="dialog-button-group">
           <button id="obs-note-cancel" class="secondary-button ng-binding" ng-click="dialogCloseConfirm(ngDialogData)">Close</button>
-          <button ng-disabled="ngDialogData.textarea === ngDialogData.originalText || ngDialogData.textarea === ''" id="obs-note-save" class="secondary-button ng-binding" ng-click="dialogSave(ngDialogData)">{{ngDialogData.editObs ? 'Edit' : 'Save'}}</button>
+          <button ng-disabled="ngDialogData.textarea === ngDialogData.originalText || ngDialogData.textarea === ''" id="obs-note-save" class="secondary-button ng-binding" ng-click="dialogSave(ngDialogData)">Save</button>
         </div>
       </div>
     </div>

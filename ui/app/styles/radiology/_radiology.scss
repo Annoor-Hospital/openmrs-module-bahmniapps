@@ -22,6 +22,10 @@ table.radiology-review-table tr.link:hover {
     cursor:pointer;
 }
 
+.ngdialog.ngdialog-theme-default.ng-dialog-radiology-note {
+  padding: 0;
+}
+
 .ngdialog.ngdialog-theme-default.ng-dialog-radiology-note .ngdialog-content{
   width: 80%;
   td.obs-note-label {

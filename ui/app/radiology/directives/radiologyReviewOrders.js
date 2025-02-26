@@ -156,13 +156,14 @@ angular.module('bahmni.radiology')
                     }
                 };
                 $scope.dialogGetNotes = function (ngDialogData) {
-                    if (ngDialogData.editObs) {
-                        return ngDialogData.pacsOrder.obs.filter(function (radiologyNote) {
-                            return radiologyNote.obsNoteUuid !== ngDialogData.editObs.obsNoteUuid;
-                        });
-                    } else {
-                        return ngDialogData.pacsOrder.obs;
-                    }
+                    // if (ngDialogData.editObs) {
+                    //     return ngDialogData.pacsOrder.obs.filter(function (radiologyNote) {
+                    //         return radiologyNote.obsNoteUuid !== ngDialogData.editObs.obsNoteUuid;
+                    //     });
+                    // } else {
+                    //     return ngDialogData.pacsOrder.obs;
+                    // }
+                    return ngDialogData.pacsOrder.obs;
                 };
                 $scope.dialogClose = function () {
                     ngDialog.close();
