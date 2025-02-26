@@ -22,7 +22,7 @@ Bahmni.Common.Orders.CombinedPacsOrderList = function (pacsOrders, pacsStudies, 
         // I will take provider, orderDate and orderNumber from pacsOrder
         var x = ['provider', 'orderDate', 'orderNumber'];
         for (var i = 0; i < x.length; i++) {
-            if (x in pacsOrder) combined[x] = pacsOrder[x];
+            if (x[i] in pacsOrder) combined[x[i]] = pacsOrder[x[i]];
         }
         return combined;
     };
