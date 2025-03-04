@@ -6,6 +6,7 @@ angular.module('bahmni.common.uiHelper')
             var printHtml = function (html) {
                 var deferred = $q.defer();
                 var hiddenFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
+                // var hiddenFrame = $('<iframe style="position:absolute;top:0;left:0;width:100%;height:80%;z-index:1000;background-color:white;"></iframe>').appendTo('body')[0];
                 hiddenFrame.contentWindow.printAndRemove = function () {
                     // MAF 2024-09-12: Fix printing on new versions of chrome. window.print does not block on chrome.
                     hiddenFrame.contentWindow.onafterprint = function () {
