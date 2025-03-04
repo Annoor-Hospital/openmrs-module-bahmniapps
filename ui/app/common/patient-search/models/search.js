@@ -43,6 +43,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.updatePatientList = function (patientList) {
         self.activePatients = patientList.map(mapPatient);
         self.searchResults = self.activePatients;
+        self.sortSearchResults();
     };
 
     self.sortSearchResults = function () {
@@ -63,7 +64,6 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
 
     self.updateSearchResults = function (patientList) {
         self.updatePatientList(patientList);
-        self.sortSearchResults();
         if (self.activePatients.length === 0 && self.searchParameter != '') {
             self.noResultsMessage = "NO_RESULTS_FOUND";
         } else {
