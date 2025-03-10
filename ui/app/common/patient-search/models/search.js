@@ -8,6 +8,7 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
     self.noResultsMessage = null;
     self.searchResults = [];
     self.activePatients = [];
+    self.patientKeys = [];
     self.navigated = false;
     self.links = self.searchType && self.searchType.links ? self.searchType.links : [];
     self.searchColumns = self.searchType && self.searchType.searchColumns ? self.searchType.searchColumns : ["identifier", "name"];
@@ -44,16 +45,23 @@ Bahmni.Common.PatientSearch.Search = function (searchTypes) {
         self.activePatients = patientList.map(mapPatient);
         self.searchResults = self.activePatients;
         self.sortSearchResults();
+        self.findPatientKeys(); // seems to take max 1ms.
+    };
+
+    self.findPatientKeys = function () {
+        self.patientKeys = _.uniq(_.flatten(_.map(self.activePatients, Object.keys)));
     };
 
     self.sortSearchResults = function () {
         if (self.searchType.sortBy) {
             var sortOrder = 1 - 2 * (self.searchType.sortReverse === true); // -1 or 1
             self.searchResults = self.searchResults.toSorted(function (p1, p2) {
+                if (!p1.hasOwnProperty(self.searchType.sortBy)) return -1 * sortOrder;
+                if (!p2.hasOwnProperty(self.searchType.sortBy)) return 1 * sortOrder;
                 var v1 = p1[self.searchType.sortBy];
                 var v2 = p2[self.searchType.sortBy];
-                if (v1.toLowerCase) v1 = v1.toLowerCase();
-                if (v2.toLowerCase) v2 = v2.toLowerCase();
+                if (v1 && v1.toLowerCase) v1 = v1.toLowerCase();
+                if (v2 && v2.toLowerCase) v2 = v2.toLowerCase();
                 if (v2 === v1) return 0;
                 if (v2 === null || v1 > v2) return 1 * sortOrder;
                 if (v1 === null || v2 > v1) return -1 * sortOrder;

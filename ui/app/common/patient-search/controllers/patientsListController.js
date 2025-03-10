@@ -92,16 +92,11 @@ angular.module('bahmni.common.patientSearch')
             $(container).children('patient-list-spinner').hide();
         };
 
-        $scope.getHeadings = function (patients) {
-            if (patients && patients.length > 0) {
-                var headings = _.chain(patients[0])
-                    .keys()
-                    .filter(function (heading) {
-                        return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
-                    })
-                    .value();
-
-                return headings;
+        $scope.getHeadings = function () {
+            if ($scope.search.patientKeys) {
+                return _.chain($scope.search.patientKeys).filter(function (heading) {
+                    return _.indexOf(Bahmni.Common.PatientSearch.Constants.tabularViewIgnoreHeadingsList, heading) === -1;
+                }).value();
             }
             return [];
         };
