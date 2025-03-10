@@ -72,7 +72,7 @@ angular.module('bahmni.common.orders')
             fo.provider = getDcmName(studyData, "00080090", "");
             var sDate = getDcmValue(studyData, "00080020", null);
             var sTime = getDcmValue(studyData, "00080030", null);
-            fo.orderDate = dateFromDicomString(sDate, sTime);
+            fo.studyDate = dateFromDicomString(sDate, sTime);
             fo.studyUid = getDcmValue(studyData, "0020000D", "");
             fo.seriesCount = getDcmValue(studyData, "00201206", "1");
             // the following does not follow dicom spec (see part 5 chapter 9 of Dicom 2013)

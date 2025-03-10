@@ -27,7 +27,7 @@
                 <td>{{pacsOrder.accessionNumber}}</td>
                 <td>{{pacsOrder.label}}</td>
                 <td><span class="provider-name fl">{{pacsOrder.provider}}</span></td>
-                <td><span class="provider-date fr">{{pacsOrder.orderDate | bahmniDateTime }}</span></td>
+                <td><span class="provider-date fr">{{pacsOrder.studyDate || pacsOrder.orderDate | bahmniDateTime }}</span></td>
             </tr>
         </table>
     </div>

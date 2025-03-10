@@ -9,9 +9,11 @@ Bahmni.Common.Orders.CombinedPacsOrderList = function (pacsOrders, pacsStudies, 
     };
 
     var combinedOrderSort = function (o1, o2) {
-        if (o2.orderDate == null) return 1;
-        if (o1.orderDate == null) return -1;
-        return -compare(o1.orderDate, o2.orderDate);
+        var d1 = o1.studyDate || o1.orderDate;
+        var d2 = o2.studyDate || o2.orderDate;
+        if (d2 == null) return 1;
+        if (d1 == null) return -1;
+        return -compare(d1, d2);
     };
 
     var combinePacsOrderStudy = function (pacsOrder, pacsStudy) {
@@ -19,8 +21,8 @@ Bahmni.Common.Orders.CombinedPacsOrderList = function (pacsOrders, pacsStudies, 
         var combined = {};
         angular.extend(combined, pacsOrder);
         angular.extend(combined, pacsStudy); // overwrite all shared fields
-        // I will take provider, orderDate and orderNumber from pacsOrder
-        var x = ['provider', 'orderDate', 'orderNumber'];
+        // I will take provider and orderNumber from pacsOrder
+        var x = ['provider', 'orderNumber'];
         for (var i = 0; i < x.length; i++) {
             if (x[i] in pacsOrder) combined[x[i]] = pacsOrder[x[i]];
         }

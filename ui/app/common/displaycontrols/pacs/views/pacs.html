@@ -31,7 +31,7 @@
                             {{pacsOrder.provider}}
                         </td>
                         <td class="provider-date pacs-shrink">
-                            {{pacsOrder.orderDate | bahmniDateTime }}
+                            {{pacsOrder.studyDate || pacsOrder.orderDate | bahmniDateTime }}
                         </td>
                     </tr>
                     <tr class="notes-open pacs-note"
