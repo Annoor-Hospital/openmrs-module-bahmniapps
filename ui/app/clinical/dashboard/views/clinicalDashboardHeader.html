@@ -89,7 +89,7 @@
                     </button>
                     <ul>
                         <li accesskey="{{::tab.printing.shortcutKey}}" ng-repeat="tab in ::printList" ng-click="::printDashboard(tab)">
-                            <button ng-bind-html="::(tab.printing.label || tab.printing.header)"></button>
+                            <button><i ng-if="tab.printing.icon" class="fa" ng-class="'fa-' + tab.printing.icon" style="width:auto;padding-left:0;"></i>{{::(tab.printing.label || tab.printing.header)}}</button>
                         </li>
                     </ul>
                 </div>
