@@ -66,14 +66,10 @@ angular.module('bahmni.common.displaycontrol.navigationlinks')
             };
 
             $scope.showUrl = function (link) {
-                var params = getParamsToBeReplaced(link.url), isPropertyNotPresentInLinkParams;
-
+                var params = getParamsToBeReplaced(link.url);
                 for (var i in params) {
                     var property = params[i];
-                    isPropertyNotPresentInLinkParams = _.isEmpty($scope.linkParams[property]);
-                    if (isPropertyNotPresentInLinkParams) {
-                        return false;
-                    }
+                    if (_.isEmpty($scope.linkParams[property])) return false;
                 }
                 return true;
             };
