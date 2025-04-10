@@ -91,12 +91,17 @@
                         <li accesskey="{{::tab.printing.shortcutKey}}" ng-repeat="tab in ::printList" ng-click="::printDashboard(tab)">
                             <button ng-bind-html="::(tab.printing.label || tab.printing.header)"></button>
                         </li>
+                        <li ng-repeat="barcode in ::barcodeList" ng-click="::printBarcode(barcode)" accesskey="{{::barcode.shortcutKey}}">
+                            <button>
+                                <i class="fa" ng-class="::barcode.icon" style="padding:0;font-size:small;"></i>
+                                <span>{{::barcode.name}}</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
                 <button ng-if="::!clinicalDashboardConfig.quickPrints" class="dialog-button-group print" ng-click="printDashboard()"
                         accesskey="{{'CLINICAL_PRINT_ACCESS_KEY'| translate}}" ng-bind-html="'CLINICAL_PRINT_TRANSLATION_KEY'|translate">
                     <i class="fa fa-print"></i>
-
                 </button>
                 <div class="dashboard-date-picker" ng-controller="PatientListHeaderController">
                     <div class="retro-date-widget-wrapper fr">

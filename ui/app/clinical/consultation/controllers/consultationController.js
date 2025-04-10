@@ -4,11 +4,11 @@ angular.module('bahmni.clinical').controller('ConsultationController',
     ['$scope', '$rootScope', '$state', '$location', '$translate', 'clinicalAppConfigService', 'diagnosisService', 'urlHelper', 'contextChangeHandler',
         'spinner', 'encounterService', 'messagingService', 'sessionService', 'retrospectiveEntryService', 'patientContext', '$q',
         'patientVisitHistoryService', '$stateParams', '$window', 'visitHistory', 'clinicalDashboardConfig', 'appService',
-        'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService', 'confirmBox',
+        'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService', 'confirmBox', 'printer',
         function ($scope, $rootScope, $state, $location, $translate, clinicalAppConfigService, diagnosisService, urlHelper, contextChangeHandler,
                   spinner, encounterService, messagingService, sessionService, retrospectiveEntryService, patientContext, $q,
                   patientVisitHistoryService, $stateParams, $window, visitHistory, clinicalDashboardConfig, appService,
-                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService, confirmBox) {
+                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService, confirmBox, printer) {
             var DateUtil = Bahmni.Common.Util.DateUtil;
             var getPreviousActiveCondition = Bahmni.Common.Domain.Conditions.getPreviousActiveCondition;
             $scope.togglePrintList = false;
@@ -64,6 +64,9 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 return item.printing != null;
             });
 
+            console.log($scope.printList);
+            $scope.barcodeList = appService.getAppDescriptor().getConfigValue('barcodes');
+
             clinicalDashboardConfig.quickPrints = appService.getAppDescriptor().getConfigValue('quickPrints');
             $scope.printDashboard = function (tab) {
                 if (tab) {
@@ -71,6 +74,10 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 } else {
                     clinicalDashboardConfig.currentTab.print();
                 }
+            };
+
+            $scope.printBarcode = function (barcode) {
+                spinner.forPromise(printer.printPDF(barcode.url.replace(":patientid", $scope.patient.identifier)));
             };
 
             $scope.allowConsultation = function () {
