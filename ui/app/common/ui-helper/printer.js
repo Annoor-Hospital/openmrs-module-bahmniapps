@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.uiHelper')
-    .factory('printer', ['$rootScope', '$compile', '$http', '$timeout', '$q', 'spinner',
-        function ($rootScope, $compile, $http, $timeout, $q, spinner) {
+    .factory('printer', ['$rootScope', '$compile', '$http', '$timeout', '$q', '$window', 'spinner',
+        function ($rootScope, $compile, $http, $timeout, $q, $window, spinner) {
             var printHtml = function (html) {
                 var deferred = $q.defer();
                 var hiddenFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
@@ -32,6 +32,22 @@ angular.module('bahmni.common.uiHelper')
                 newWindow.addEventListener('load', function () {
                     $(newWindow.document.body).html(html);
                 }, false);
+            };
+
+            var hiddenPDFFrame;
+
+            var printPDF = function (url) {
+                if (!hiddenPDFFrame) hiddenPDFFrame = $('<iframe style="visibility: hidden"></iframe>').appendTo('body')[0];
+                return fetch(url).then(function (response) {
+                    return response.blob();
+                }).then(function (blob) {
+                    const url = URL.createObjectURL(blob);
+                    hiddenPDFFrame.type = blob.type;
+                    hiddenPDFFrame.src = url;
+                    hiddenPDFFrame.onload = function () {
+                        hiddenPDFFrame.contentWindow.print();
+                    };
+                });
             };
 
             var print = function (templateUrl, data) {
@@ -90,6 +106,7 @@ angular.module('bahmni.common.uiHelper')
             };
             return {
                 print: print,
+                printPDF: printPDF,
                 printFromScope: printFromScope
             };
         }]);
