@@ -64,9 +64,6 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 return item.printing != null;
             });
 
-            console.log($scope.printList);
-            $scope.barcodeList = appService.getAppDescriptor().getConfigValue('barcodes');
-
             clinicalDashboardConfig.quickPrints = appService.getAppDescriptor().getConfigValue('quickPrints');
             $scope.printDashboard = function (tab) {
                 if (tab) {
@@ -75,6 +72,8 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                     clinicalDashboardConfig.currentTab.print();
                 }
             };
+
+            $scope.barcodeList = appService.getAppDescriptor().getConfigValue('barcodes');
 
             $scope.printBarcode = function (barcode) {
                 spinner.forPromise(printer.printPDF(barcode.url.replace(":patientid", $scope.patient.identifier)));
