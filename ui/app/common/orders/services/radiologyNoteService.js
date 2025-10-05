@@ -49,7 +49,7 @@ angular.module('bahmni.common.orders')
                 }, {
                     concept: context.obsExtConceptId,
                     value: context.studyUid,
-                    obsDatetime: context.orderDate
+                    obsDatetime: context.studyDate
                 }]
             };
 

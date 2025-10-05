@@ -202,7 +202,8 @@ angular.module('bahmni.radiology')
                         obsExtConceptId: $rootScope.concepts["External Radiology Uuid"],
                         studyUid: pacsOrder.studyUid,
                         patientUuid: pacsOrder.patientUuid,
-                        orderDate: pacsOrder.orderDate ? pacsOrder.orderDate.toISOString() : null
+                        orderDate: pacsOrder.orderDate ? pacsOrder.orderDate.toISOString() : null,
+                        studyDate: pacsOrder.studyDate
                     };
                     if (editObs) {
                         // these uuid's cause the save to update previous note
