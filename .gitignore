@@ -30,3 +30,4 @@ node_modules
 ui/common.background.min.js
 *.tar.gz
 TODO.md
+put.sh
