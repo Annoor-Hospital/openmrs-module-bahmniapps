@@ -47,10 +47,10 @@
                     <td class="value" ng-if="::!patient[attribute].isDateField">{{::(patient[attribute].value.display || patient[attribute].value) | booleanFilter}}</td>
                     <td class="value" ng-if="::patient[attribute].isDateField">{{::patient[attribute].value | bahmniDate}}</td>
                 </tr>
-                <tr ng-if="::relationships && relationships.length > 0">
+                <tr ng-if="::showRelationships() && relationships && relationships.length > 0">
                     <td>{{ 'PATIENT_PROFILE_RELATIONSHIPS_LABEL'|translate }}</td>
                 </tr>
-                <tr ng-repeat="relationship in relationships track by relationship.uuid">
+                <tr ng-if="::showRelationships() && relationships && relationships.length > 0" ng-repeat="relationship in relationships track by relationship.uuid">
                     <td class="name relationshipType" ng-if="::relationship.personA.uuid === patient.uuid">{{::relationship.relationshipType.aIsToB}}</td>
                     <td class="value" ng-if="::relationship.personA.uuid === patient.uuid">
                         <a ng-click="::openPatientDashboard(relationship.personB.uuid)"

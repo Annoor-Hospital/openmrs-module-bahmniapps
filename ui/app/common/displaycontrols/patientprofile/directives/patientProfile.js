@@ -41,6 +41,9 @@
                         var configName = $stateParams.configName || Bahmni.Common.Constants.defaultExtensionName;
                         $window.open("../clinical/#/" + configName + "/patient/" + patientUuid + "/dashboard");
                     };
+                    $scope.showRelationships = function () {
+                        return !($scope.config.hideRelationships === true);
+                    };
                     var assignPatientDetails = function () {
                         var patientMapper = new Bahmni.PatientMapper(configurations.patientConfig(), $rootScope, $translate);
                         return patientService.getPatient($scope.patientUuid).then(function (response) {
