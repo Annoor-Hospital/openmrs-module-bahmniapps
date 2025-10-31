@@ -22,7 +22,7 @@ Bahmni.Common.Orders.CombinedPacsOrderList = function (pacsOrders, pacsStudies, 
         angular.extend(combined, pacsOrder);
         angular.extend(combined, pacsStudy); // overwrite all shared fields
         // I will take provider and orderNumber from pacsOrder
-        var x = ['provider', 'orderNumber'];
+        var x = ['provider', 'orderNumber', 'patientName'];
         for (var i = 0; i < x.length; i++) {
             if (x[i] in pacsOrder) combined[x[i]] = pacsOrder[x[i]];
         }
