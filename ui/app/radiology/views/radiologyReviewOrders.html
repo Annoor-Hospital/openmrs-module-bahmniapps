@@ -22,7 +22,7 @@
                         <i class="fa fa-file-text-o" aria-hidden="true" ng-if="pacsOrder.obs && pacsOrder.obs.length > 0"></i>
                     </span>
                 </td>
-                <td>{{pacsOrder.patientName}}</td>
+                <td>{{pacsOrder.patientName | titleCase}}</td>
                 <td>{{pacsOrder.patientid}}</td>
                 <td>{{pacsOrder.accessionNumber}}</td>
                 <td>{{pacsOrder.label}}</td>
