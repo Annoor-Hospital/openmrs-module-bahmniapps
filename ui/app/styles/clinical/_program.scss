@@ -267,6 +267,11 @@ table.investigation-chart {
         position: relative;
         td {
             border-left: 1px solid #ddd;
+            & > span {
+                display: flex;
+                gap: 0px;
+                align-items: center;
+            }
         }
     }
     thead {
