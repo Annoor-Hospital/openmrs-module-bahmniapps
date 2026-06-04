@@ -601,7 +601,7 @@
 .appointmentIcons {
   .fc-content {
     padding-right: 30px;
-    text-overflow: ellipsis;
+    text-overflow: nowrap;
   }
   &:after, &:before {
     font-family: FontAwesome;
