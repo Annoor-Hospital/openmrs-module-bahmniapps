@@ -31,3 +31,4 @@ ui/common.background.min.js
 *.tar.gz
 TODO.md
 put.sh
+fix-email.sh
