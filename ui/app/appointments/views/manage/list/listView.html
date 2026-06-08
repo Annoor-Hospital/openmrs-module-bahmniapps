@@ -24,7 +24,10 @@
             </thead>
             <tbody>
             <tr ng-repeat="appointment in filteredAppointments" ng-click="select(appointment)" ng-style="{'background-color': colorsForListView[appointment.status]}" ng-class="{'selected' : isSelected(appointment)}">
-                <td>{{::appointment.patient.identifier}}</td>
+                <!-- Matthew: add patient link -->
+                <td>
+                    <a target="_blank" ng-href="/bahmni/clinical/index.html#/default/patient/{{appointment.patient.uuid}}/dashboard?currentTab=DASHBOARD_TAB_GENERAL_KEY">{{::appointment.patient.identifier}}</a>
+                </td>
                 <td class="table-mid-width">{{::appointment.patient.name | titleCase}}</td>
                 <td>{{::appointment.startDateTime | bahmniDate}}</td>
                 <td>{{::appointment.startDateTime | bahmniTime}}</td>
